@@ -1,0 +1,35 @@
+/* Page-specific responsive: room-ai */
+@media (max-width: 768px) {
+  #searchForm {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  #searchForm > * {
+    width: 100% !important;
+  }
+
+  #allRoomsGrid,
+  #aiResultsGrid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  #paginationContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  #aiRecommendations {
+    padding: 14px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #aiPrompt {
+    min-height: 96px;
+  }
+}

@@ -1,0 +1,190 @@
+    :root {
+      --dash-bg: #F8F9FA;
+      --dash-card: #FFFFFF;
+      --dash-accent: #007bff;
+      --dash-text: #1A1A1A;
+      --dash-muted: #6C757D;
+      --dash-border: rgba(0,0,0,0.06);
+    }
+
+    body {
+      background-color: var(--dash-bg);
+      color: var(--dash-text);
+      font-family: var(--f-sans);
+      font-size: 14px;
+    }
+    
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    .luxe-sidebar {
+      background-color: #050505;
+      color: white;
+      padding: 32px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      padding: 0 16px;
+      margin: 24px 0 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .sidebar-item:hover {
+      background-color: rgba(255,255,255,0.05);
+      color: white;
+    }
+
+    .sidebar-item.active {
+      background-color: var(--dash-accent);
+      color: white;
+      font-weight: 600;
+    }
+
+    .sidebar-item .material-symbols-outlined {
+      font-size: 20px;
+    }
+
+    .main-content {
+      padding: 60px 80px;
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .settings-section {
+      background: white;
+      border: 1px solid var(--dash-border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+
+    .settings-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .settings-desc {
+      color: var(--dash-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .luxe-input-group {
+      margin-bottom: 20px;
+      max-width: 480px;
+    }
+
+    .luxe-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--dash-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .luxe-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--dash-border);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+      background: var(--dash-bg);
+    }
+
+    .luxe-input:focus {
+      border-color: var(--dash-accent);
+      background: white;
+    }
+
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      max-width: 480px;
+    }
+
+    .password-wrapper .luxe-input {
+      padding-right: 40px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      color: var(--dash-muted);
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      font-size: 18px;
+    }
+
+    .password-toggle:hover {
+      color: var(--dash-text);
+    }
+
+    .btn-save {
+      background-color: var(--dash-accent);
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+      background: #b08d4a;
+      box-shadow: 0 8px 20px rgba(197, 160, 89, 0.3);
+    }
+  
+
+/* Page-specific responsive: settings */
+@media (max-width: 768px) {
+  .settings-section { padding: 16px !important; }
+  .settings-title { font-size: 18px !important; }
+  .luxe-input-group { grid-template-columns: 1fr !important; gap: 10px !important; }
+  #settingsForm .btn-save { width: 100% !important; }
+}
+@media (max-width: 480px) {
+  .luxe-label { font-size: 11px; }
+}

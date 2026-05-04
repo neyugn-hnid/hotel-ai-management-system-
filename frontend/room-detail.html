@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Luxe Concierge | Chi Tiết Tuyệt Tác</title>
+  <link rel="stylesheet" href="css/main.css"/>
+    <link rel="stylesheet" href="css/room-detail.css"/>
+</head>
+<body>
+
+  <nav class="navbar scrolled" id="navbar">
+    <div class="navbar__logo">LUXE CONCIERGE</div>
+    <div class="navbar__links">
+      <a href="index.html" class="navbar__link small-caps">Trang chủ</a>
+      <a href="room-ai.html" class="navbar__link small-caps active">Phòng Nghỉ</a>
+      <a href="index.html#amenities" class="navbar__link small-caps">Tiện Ích</a>
+      <a href="index.html#dining" class="navbar__link small-caps">Ẩm Thực</a>
+    </div>
+    <div class="navbar__actions">
+      <a href="room-ai.html" class="nav-pill">Liên hệ ngay</a>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top: 160px; padding-bottom: 120px;">
+    
+    <div style="margin-bottom: 40px;">
+        <a href="room-ai.html" class="small-caps gold" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span> Trở lại danh sách phòng
+        </a>
+    </div>
+
+    <div class="details-layout" style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 80px;">
+
+      <div>
+        <div class="gallery-main">
+          <button class="gallery-nav-btn prev-btn" onclick="prevImage()">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <img id="mainImage" src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=80" alt="Room Main"/>
+          <button class="gallery-nav-btn next-btn" onclick="nextImage()">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+        
+        <div class="gallery-thumbs" id="galleryThumbs">
+          
+        </div>
+
+        <div style="margin-top: 60px;">
+           <span id="roomTypeBadge" class="small-caps gold">Hạng phòng đặc biệt</span>
+           <h1 id="roomTitle" style="font-size: 4rem; margin: 20px 0 30px;"><span class="serif italic gold" id="roomNameSpan">Đang tải...</span></h1>
+           <p id="roomDescription" class="story__desc">
+              Đang tải thông tin phòng...
+           </p>
+
+           <div style="border-top: 1px solid rgba(0,0,0,0.05); padding-top: 40px; margin-top: 40px;">
+              <h3 style="font-size: 1.75rem; margin-bottom: 25px;">Đặc Quyền Nghỉ Dưỡng</h3>
+              <div class="amenities-grid">
+                 <div class="amenity-item"><span class="material-symbols-outlined gold">wifi</span> Wi-Fi 6 tốc độ ưu tiên</div>
+                 <div class="amenity-item"><span class="material-symbols-outlined gold">tv</span> Smart TV 4K OLED 75"</div>
+                 <div class="amenity-item"><span class="material-symbols-outlined gold">coffee_maker</span> Quầy Bar Nespresso Vertuo</div>
+                 <div class="amenity-item"><span class="material-symbols-outlined gold">shower</span> Bộ sữa tắm di sản Hermès</div>
+                 <div class="amenity-item"><span class="material-symbols-outlined gold">room_service</span> Quản gia cá nhân phục vụ 24/7</div>
+                 <div class="amenity-item"><span class="material-symbols-outlined gold">ac_unit</span> Lọc không khí công nghệ Ionizer</div>
+              </div>
+           </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="booking-sidebar">
+           <div style="border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 30px; margin-bottom: 35px;">
+              <div style="display: flex; align-items: baseline; gap: 10px;">
+                <span id="roomPricePerNight" style="font-size: 2.25rem; font-weight: 700; color: var(--c-luxury-ink); font-family: var(--f-mono);">--- ₫</span>
+                 <span class="small-caps" style="opacity: 0.4;">Mỗi đêm</span>
+              </div>
+              <p style="font-size: 12px; color: rgba(20,20,20,0.4); margin-top: 10px; font-weight: 300;">Đã bao gồm bữa sáng Fine Dining và quyền truy cập Business Lounge.</p>
+           </div>
+
+           <form id="bookingForm" style="display: flex; flex-direction: column; gap: 25px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                 <div>
+                    <label class="label-small">Nhận phòng</label>
+                    <input type="date" class="luxury-input" id="bookCheckIn"/>
+                 </div>
+                 <div>
+                    <label class="label-small">Trả phòng</label>
+                    <input type="date" class="luxury-input" id="bookCheckOut"/>
+                 </div>
+              </div>
+
+              <div>
+                 <label class="label-small">Số lượng khách</label>
+                 <select class="luxury-input" id="bookGuests">
+                    <option>1 Người lớn</option>
+                    <option selected>2 Người lớn</option>
+                    <option>2 Người lớn, 1 Trẻ em</option>
+                 </select>
+              </div>
+
+              <div>
+                 <label class="label-small">Thông tin liên hệ</label>
+                 <input type="text" class="luxury-input" id="bookName" placeholder="Họ và tên của bạn" required style="margin-bottom: 15px;"/>
+                 <input type="tel" class="luxury-input" id="bookPhone" placeholder="Số điện thoại cá nhân" required/>
+              </div>
+
+              <div style="background: var(--c-luxury-paper); padding: 20px; border-radius: 4px;">
+                 <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="font-size: 14px; opacity: 0.6;" id="summaryPriceLabel">--- ₫ x 1 đêm</span>
+                    <span style="font-size: 14px; font-family: var(--f-mono);"><span id="summaryPrice">---</span>₫</span>
+                 </div>
+                 <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px; margin-top: 10px;">
+                    <span style="font-size: 14px; font-weight: 700;">Tổng cộng</span>
+                    <span style="font-size: 16px; font-weight: 700; color: var(--c-gold); font-family: var(--f-mono);"><span id="summaryTotal">---</span>₫</span>
+                 </div>
+              </div>
+
+              <button type="submit" class="btn-find" style="width: 100%; height: 55px; border-radius: 4px; font-size: 12px; border: none; background: var(--c-gold); color: white; cursor: pointer; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; transition: background 0.3s;" onmouseover="this.style.background='var(--c-gold-light)'" onmouseout="this.style.background='var(--c-gold)'">Gửi yêu cầu đặt phòng</button>
+           </form>
+           
+           <p style="text-align: center; font-size: 11px; opacity: 0.4; margin-top: 25px; line-height: 1.6;">
+              Bằng việc nhấn đặt phòng, bạn đồng ý với Chính sách hủy phòng và Quy định lưu trú của Luxe Concierge.
+           </p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="navbar__logo" style="margin-bottom: 30px;">LUXE CONCIERGE</div>
+        <p style="opacity: 0.4; font-size: 14px; line-height: 1.8;">
+          Định nghĩa lại chuẩn mực nghỉ dưỡng cao cấp tại trung tâm thành phố. Mỗi khoảnh khắc tại đây đều được thiết kế để trở nên độc bản.
+        </p>
+      </div>
+      <div>
+        <span class="small-caps footer__heading">Khám phá</span>
+        <a href="#" class="footer__link">Phòng Nghỉ</a>
+        <a href="#" class="footer__link">Tiện Ích</a>
+        <a href="#" class="footer__link">Ẩm Thực</a>
+        <a href="#" class="footer__link">Ưu Đãi</a>
+      </div>
+      <div>
+        <span class="small-caps footer__heading">Liên hệ</span>
+        <p class="footer__link">123 Lê Lợi, Quận 1, TP. HCM</p>
+        <p class="footer__link">+84 (028) 3824 1234</p>
+        <p class="footer__link">hello@luxeconcierge.com</p>
+      </div>
+      <div>
+        <span class="small-caps footer__heading">Bản tin</span>
+        <p style="opacity: 0.4; font-size: 14px; margin-bottom: 20px;">Nhận các cập nhật và ưu đãi mới nhất.</p>
+        <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding: 10px 0; display: flex; justify-content: space-between;">
+          <input type="email" placeholder="Email của bạn" style="background: transparent; border: none; color: white; outline: none; flex: 1;"/>
+          <button class="small-caps gold" style="background: transparent; border: none; cursor: pointer;">Gửi</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="bookingConfirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:white; padding:40px; border-radius:4px; max-width:450px; width:90%; position:relative;">
+      <h3 style="font-size: 1.5rem; margin-bottom: 20px; font-family:var(--f-serif); color:var(--c-gold);">Đã ghi nhận yêu cầu đặt phòng!</h3>
+      <div style="font-size: 14px; line-height: 1.8; color: rgba(20,20,20,0.8); margin-bottom: 30px;">
+        <p>Cảm ơn <strong><span id="cName"></span></strong> đã chọn Luxe Concierge.</p>
+        <p>Yêu cầu của bạn đã được gửi đến lễ tân để xác nhận:</p>
+        <ul style="margin-top:10px; list-style:none; padding:15px; background:rgba(0,0,0,0.03); border-radius:4px;">
+          <li style="margin-bottom: 6px;"><strong>Hạng phòng:</strong> <span id="cRoomName">---</span></li>
+          <li style="margin-bottom: 6px;"><strong>Nhận phòng:</strong> <span id="cIn"></span></li>
+          <li style="margin-bottom: 6px;"><strong>Trả phòng:</strong> <span id="cOut"></span></li>
+          <li style="margin-bottom: 6px;"><strong>Số lượng:</strong> <span id="cGuests"></span></li>
+          <li style="margin-bottom: 6px;"><strong>Số điện thoại:</strong> <span id="cPhone"></span></li>
+          <li><strong>Tổng thanh toán:</strong> <span id="cTotal" style="color:var(--c-gold); font-weight:bold;"></span></li>
+        </ul>
+        <p style="margin-top: 15px; font-size: 13px; opacity: 0.8;">Nhân viên lễ tân sẽ liên hệ qua điện thoại để xác nhận giữ chỗ và hướng dẫn thủ tục nhận phòng tại quầy.</p>
+      </div>
+      <button onclick="document.getElementById('bookingConfirmModal').style.display='none'" style="width: 100%; height: 45px; border-radius: 4px; border: none; background: var(--c-luxury-ink); color: white; cursor: pointer; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; transition: background 0.3s;">Quay lại</button>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script src="js/room-detail.js"></script>
+
+</body>
+</html>
+

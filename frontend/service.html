@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Luxe Concierge | Quản Lý Dịch Vụ</title>
+  <link rel="stylesheet" href="css/main.css"/>
+    <link rel="stylesheet" href="css/service.css"/>
+</head>
+<body class="notion-font">
+
+  <div class="admin-layout">
+    
+    <aside class="luxe-sidebar">
+      <div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 0 16px 40px;">
+          <div style="width: 28px; height: 28px; background: var(--dash-accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 14px;">L</div>
+          <span style="font-weight: 700; font-size: 16px; letter-spacing: -0.02em; color: white;" data-config="logo">Luxe Concierge</span>
+        </div>
+
+        <nav>
+          
+          <a href="dashboard.html" class="sidebar-item"><span class="material-symbols-outlined">grid_view</span><span>Tổng quan</span></a>
+          <a href="room.html" class="sidebar-item"><span class="material-symbols-outlined">bed</span><span>Phòng nghỉ</span></a>
+          <a href="customer.html" class="sidebar-item"><span class="material-symbols-outlined">group</span><span>Khách hàng</span></a>
+
+          <a href="booking.html" class="sidebar-item"><span class="material-symbols-outlined">auto_awesome</span><span>Đặt phòng</span></a>
+          <a href="invoice.html" class="sidebar-item"><span class="material-symbols-outlined">receipt_long</span><span>Hóa đơn</span></a>
+          <a href="service.html" class="sidebar-item active"><span class="material-symbols-outlined">concierge</span><span>Dịch vụ</span></a>
+          <a href="account.html" class="sidebar-item"><span class="material-symbols-outlined">manage_accounts</span><span>Tài khoản</span></a>
+        </nav>
+      </div>
+
+      <div>
+        <a href="setting.html" class="sidebar-item"><span class="material-symbols-outlined">settings</span><span>Cài đặt</span></a>
+        <a href="#" class="sidebar-item" style="color: #FF4444;"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header style="margin-bottom: 48px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0;">Danh mục dịch vụ</h1>
+        </div>
+        <button class="gold-border-btn" id="btnAddService" style="background: var(--c-blue); color: white;">
+          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 6px; vertical-align: middle;">add</span> Thêm dịch vụ
+        </button>
+      </header>
+
+       <div class="stat-bar">
+          <div class="stat-box">
+             <p>Tổng dịch vụ</p>
+             <p id="stat-total">---</p>
+          </div>
+          <div class="stat-box">
+             <p>Đang hoạt động</p>
+             <p style="color: #0d7350;" id="stat-active">---</p>
+          </div>
+          <div class="stat-box">
+             <p>Tạm ngưng</p>
+             <p style="color: #ef4444;" id="stat-inactive">---</p>
+          </div>
+       </div>
+
+      <div class="filter-bar">
+        <div class="notion-search-bar">
+          <span class="material-symbols-outlined" style="color: var(--dash-muted);">search</span>
+          <input type="text" id="searchServiceInput" placeholder="Tìm tên dịch vụ..."/>
+        </div>
+        <select class="notion-filter-item" id="filterCategory" style="outline: none;">
+           <option value="">Tất cả danh mục</option>
+        </select>
+        <select class="notion-filter-item" id="filterServiceStatus" style="outline: none;">
+           <option value="">Tất cả trạng thái</option>
+        </select>
+        <select class="notion-filter-item" id="sortPrice" style="outline: none;">
+           <option value="updatedAt_desc">Mới cập nhật</option>
+           <option value="updatedAt_asc">Cũ nhất</option>
+           <option value="name_asc">Tên A-Z</option>
+           <option value="name_desc">Tên Z-A</option>
+           <option value="asc">Giá: Thấp đến Cao</option>
+           <option value="desc">Giá: Cao đến Thấp</option>
+        </select>
+      </div>
+
+      <div class="luxury-card" style="padding: 0; overflow: hidden;">
+         <table class="notion-table">
+            <thead>
+               <tr style="background: var(--dash-bg);">
+                  <th style="padding-left: 24px;">Dịch vụ</th>
+                  <th>Mô tả chi tiết</th>
+                  <th>Giá niêm yết</th>
+                  <th>Trạng thái</th>
+                  <th style="text-align: right; padding-right: 24px;">Tiện ích</th>
+               </tr>
+            </thead>
+            <tbody id="serviceTableBody">
+               
+            </tbody>
+         </table>
+         
+         <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; background: var(--dash-bg); border-top: 1px solid var(--dash-border); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+            <p style="font-size: 13px; color: var(--dash-muted);">Hiển thị <span id="totalServices">5</span> kết quả dịch vụ</p>
+            <div style="display: flex; gap: 8px;">
+               <button id="btnPrevServices" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang trước</button>
+               <span id="servicePageInfo" style="display:inline-flex; align-items:center; font-size:13px; color:var(--dash-muted); padding:0 4px;">Trang 1/1</span>
+               <button id="btnNextServices" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang sau</button>
+            </div>
+         </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="serviceModal">
+     <div class="notion-modal">
+        <div class="modal-header">
+           <h2 style="font-size: 20px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+             <span id="serviceModalTitle">Thêm dịch vụ</span>
+             <span class="material-symbols-outlined" style="cursor: pointer; opacity: 0.5;" onclick="closeServiceModal()">close</span>
+           </h2>
+        </div>
+        <form id="serviceForm">
+           <div class="form-row">
+              <label>Tên dịch vụ</label>
+              <input type="text" class="notion-input" id="svcName" required placeholder="VD: Breakfast in Bed"/>
+           </div>
+           <div class="form-row">
+              <label>Mô tả dịch vụ</label>
+              <textarea class="notion-input" id="svcDesc" rows="3" style="resize: none;" required placeholder="Mô tả ngắn gọn về dịch vụ..."></textarea>
+           </div>
+           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <div class="form-row">
+                 <label>Giá dịch vụ (VNĐ)</label>
+                 <input type="number" class="notion-input" id="svcPrice" required/>
+              </div>
+              <div class="form-row">
+              <label>Danh mục</label>
+              <select class="notion-input" id="svcCategory">
+                 <option value="Thư giãn & Làm đẹp">Thư giãn & Làm đẹp</option>
+                 <option value="Ẩm thực">Ẩm thực</option>
+                 <option value="Di chuyển">Di chuyển</option>
+                 <option value="Tiện ích & Khác">Tiện ích & Khác</option>
+              </select>
+           </div>
+           </div>
+           
+           <div class="form-row">
+              <label>Trạng thái</label>
+              <select class="notion-input" id="svcStatus">
+              </select>
+           </div>
+           
+           <div style="margin-top: 40px; display: flex; gap: 12px;">
+              <button type="submit" class="gold-border-btn" style="flex: 1; background: var(--dash-accent); color: white; border: none; height: 46px; justify-content: center;">Lưu dịch vụ</button>
+              <button type="button" class="gold-cancel-btn" style="flex: 1; height: 46px; justify-content: center;" onclick="closeServiceModal()">Đóng</button>
+           </div>
+        </form>
+     </div>
+  </div>
+
+  <div class="modal-overlay" id="deleteConfirmModal">
+     <div class="luxury-card" style="max-width: 400px; text-align: center; position: relative;">
+        <span class="material-symbols-outlined" style="font-size: 48px; color: #ef4444; margin-bottom: 20px;">warning</span>
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">Gỡ bỏ dịch vụ?</h3>
+        <p style="color: var(--dash-muted); font-size: 14px; margin-bottom: 30px;">Bạn có chắc chắn muốn ngừng cung cấp dịch vụ này vĩnh viễn không?</p>
+        <div style="display: flex; gap: 12px;">
+           <button class="gold-border-btn" style="background: #ef4444; color: white; border: none; height: 46px; flex: 1; justify-content: center;" onclick="deleteService()">Gỡ bỏ</button>
+           <button class="gold-cancel-btn" style="flex: 1; height: 46px; justify-content: center;" onclick="closeDeleteModal()">Hủy</button>
+        </div>
+     </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script src="js/service.js"></script>
+</body>
+</html>
+

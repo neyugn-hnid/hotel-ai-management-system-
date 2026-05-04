@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Luxe Concierge | Cài Đặt</title>
+  <link rel="stylesheet" href="css/main.css"/>
+    <link rel="stylesheet" href="css/setting.css"/>
+</head>
+<body class="luxe-font">
+
+  <div class="admin-layout">
+    <aside class="luxe-sidebar">
+      <div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 0 16px 40px;">
+          <div style="width: 28px; height: 28px; background: var(--dash-accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 14px;">L</div>
+          <span style="font-weight: 700; font-size: 16px; letter-spacing: -0.02em; color: white;" data-config="logo">LUXE CONCIERGE</span>
+        </div>
+
+        <nav>
+          
+          <a href="dashboard.html" class="sidebar-item"><span class="material-symbols-outlined">grid_view</span><span>Tổng quan</span></a>
+          <a href="room.html" class="sidebar-item"><span class="material-symbols-outlined">bed</span><span>Phòng nghỉ</span></a>
+          <a href="customer.html" class="sidebar-item"><span class="material-symbols-outlined">group</span><span>Khách hàng</span></a>
+
+          <a href="booking.html" class="sidebar-item"><span class="material-symbols-outlined">auto_awesome</span><span>Đặt phòng</span></a>
+          <a href="invoice.html" class="sidebar-item"><span class="material-symbols-outlined">receipt_long</span><span>Hóa đơn</span></a>
+          <a href="service.html" class="sidebar-item"><span class="material-symbols-outlined">concierge</span><span>Dịch vụ</span></a>
+          <a href="account.html" class="sidebar-item"><span class="material-symbols-outlined">manage_accounts</span><span>Tài khoản</span></a>
+        </nav>
+      </div>
+
+      <div>
+        <a href="setting.html" class="sidebar-item active"><span class="material-symbols-outlined">settings</span><span>Cài đặt</span></a>
+        <a href="#" class="sidebar-item" style="color: #FF4444;"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header style="margin-bottom: 48px;">
+        <h1 id="settingsPageTitle" style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em;">Cài đặt</h1>
+        <p id="settingsPageDescription" style="color: var(--dash-muted); font-size: 16px;">Quản lý thông tin cá nhân, bảo mật và các cấu hình vận hành phù hợp với quyền của bạn.</p>
+      </header>
+
+      <section class="settings-section luxury-card" data-admin-only>
+        <h2 class="settings-title">Cấu hình Thanh toán VietQR</h2>
+        <p class="settings-desc">Thông tin này sẽ được sử dụng để tạo mã QR thanh toán tự động trên các hóa đơn.</p>
+        <div id="settingsForm">
+          <div class="luxe-input-group">
+            <label class="luxe-label">Ngân hàng thụ hưởng</label>
+            <select class="luxe-input" id="bankId">
+              <option value="970436">Vietcombank (VCB)</option>
+              <option value="970407">Techcombank (TCB)</option>
+              <option value="970422">MBBank (MB)</option>
+              <option value="970423">VPBank (VPB)</option>
+              <option value="970415">VietinBank (VTB)</option>
+              <option value="970418">BIDV</option>
+              <option value="970405">Agribank</option>
+              <option value="970416">ACB</option>
+              <option value="970421">TPBank</option>
+            </select>
+          </div>
+
+          <div class="luxe-input-group">
+            <label class="luxe-label">Số tài khoản</label>
+            <input type="text" class="luxe-input" id="accountNo" placeholder="VD: 123456789"/>
+          </div>
+
+          <div class="luxe-input-group">
+            <label class="luxe-label">Tên chủ tài khoản (Viết không dấu)</label>
+            <input type="text" class="luxe-input" id="accountName" placeholder="VD: NGUYEN VAN A"/>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section luxury-card">
+        <h2 class="settings-title">Thông tin cá nhân</h2>
+        <p class="settings-desc">Xem nhanh thông tin tài khoản đang đăng nhập.</p>
+
+        <div class="luxe-input-group">
+          <label class="luxe-label">Họ và tên</label>
+          <input type="text" class="luxe-input" id="profileFullName" placeholder="Nhập họ và tên"/>
+        </div>
+
+        <div class="luxe-input-group">
+          <label class="luxe-label">Email</label>
+          <input type="email" class="luxe-input" id="profileEmail" placeholder="Nhập email"/>
+        </div>
+
+        <div class="luxe-input-group">
+          <label class="luxe-label">Số điện thoại</label>
+          <input type="text" class="luxe-input" id="profilePhone" placeholder="Nhập số điện thoại"/>
+        </div>
+
+        <div class="luxe-input-group">
+          <label class="luxe-label">Vai trò hiện tại</label>
+          <div id="profileRole" class="luxe-input" style="display:flex; align-items:center; background:#f8fafc; color:var(--dash-muted); cursor:not-allowed;">Chưa có thông tin</div>
+        </div>
+      </section>
+
+      <section class="settings-section luxury-card">
+        <h2 class="settings-title">Bảo mật & Đổi mật khẩu</h2>
+        <p class="settings-desc">Cập nhật mật khẩu định kỳ để bảo vệ tài khoản của bạn.</p>
+        
+        <div class="luxe-input-group">
+          <label class="luxe-label">Mật khẩu hiện tại</label>
+          <div class="password-wrapper">
+            <input type="password" class="luxe-input" id="currentPassword" placeholder="Nhập mật khẩu hiện tại"/>
+            <span class="material-symbols-outlined password-toggle" onclick="togglePassword('currentPassword', this)">visibility</span>
+          </div>
+        </div>
+
+        <div class="luxe-input-group">
+          <label class="luxe-label">Mật khẩu mới</label>
+          <div class="password-wrapper">
+            <input type="password" class="luxe-input" id="newPassword" placeholder="Nhập mật khẩu mới"/>
+            <span class="material-symbols-outlined password-toggle" onclick="togglePassword('newPassword', this)">visibility</span>
+          </div>
+        </div>
+
+        <div class="luxe-input-group">
+          <label class="luxe-label">Xác nhận mật khẩu mới</label>
+          <div class="password-wrapper">
+            <input type="password" class="luxe-input" id="confirmPassword" placeholder="Nhập lại mật khẩu mới"/>
+            <span class="material-symbols-outlined password-toggle" onclick="togglePassword('confirmPassword', this)">visibility</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section luxury-card" style="border-bottom: 1px solid var(--dash-border);" data-admin-only>
+        <h2 class="settings-title">Thông tin Giao diện & Khách sạn (Global)</h2>
+        <p class="settings-desc">Các thông số này sẽ tự động thay đổi Logo và Footer trên trang chủ.</p>
+        
+        <div class="luxe-input-group">
+          <label class="luxe-label">Logo Text / Tên hiển thị Navbar</label>
+          <input type="text" class="luxe-input" id="globalLogoText" placeholder="VD: LUXE CONCIERGE"/>
+        </div>
+        <div class="luxe-input-group">
+          <label class="luxe-label">Địa chỉ</label>
+          <input type="text" class="luxe-input" id="globalAddress" placeholder="VD: 123 Lê Lợi, Quận 1, TP. HCM"/>
+        </div>
+        <div class="luxe-input-group">
+          <label class="luxe-label">Số điện thoại liên hệ</label>
+          <input type="text" class="luxe-input" id="globalPhone" placeholder="VD: +84 (028) 3824 1234"/>
+        </div>
+        <div class="luxe-input-group">
+          <label class="luxe-label">Email liên hệ</label>
+          <input type="text" class="luxe-input" id="globalEmail" placeholder="VD: hello@luxeconcierge.com"/>
+        </div>
+        
+      </section>
+
+      <div style="margin-top: 32px;">
+        <button type="button" class="btn-save" id="btnSaveAllSettings">
+          <span class="material-symbols-outlined" style="font-size: 18px;">save</span> Lưu thay đổi
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    function togglePassword(inputId, iconEl) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        iconEl.textContent = 'visibility_off';
+      } else {
+        input.type = 'password';
+        iconEl.textContent = 'visibility';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const AUTH_API_URL = 'https://localhost:7082/api/Auth/login';
+      const ACCOUNT_API_URL = 'https://localhost:7082/api/Accounts';
+      const bankIdEl = document.getElementById('bankId');
+      const accountNoEl = document.getElementById('accountNo');
+      const accountNameEl = document.getElementById('accountName');
+      
+      const logoTextEl = document.getElementById('globalLogoText');
+      const addressEl = document.getElementById('globalAddress');
+      const phoneEl = document.getElementById('globalPhone');
+      const emailEl = document.getElementById('globalEmail');
+      const profileFullNameEl = document.getElementById('profileFullName');
+      const profileEmailEl = document.getElementById('profileEmail');
+      const profilePhoneEl = document.getElementById('profilePhone');
+      const profileRoleEl = document.getElementById('profileRole');
+      
+      const btnSave = document.getElementById('btnSaveAllSettings');
+      const pageTitleEl = document.getElementById('settingsPageTitle');
+      const pageDescriptionEl = document.getElementById('settingsPageDescription');
+      const auth = window.AppCore?.getAuthContext?.() || { role: '', fullName: '', email: '' };
+      const isAdmin = window.AppCore?.isAdminRole?.(auth.role);
+      let currentAccount = null;
+
+      profileFullNameEl.value = auth.fullName || '';
+      profileEmailEl.value = auth.email || '';
+      profileRoleEl.textContent = auth.role || 'Chưa có thông tin';
+
+      if (!isAdmin) {
+        document.querySelectorAll('[data-admin-only]').forEach((section) => {
+          section.style.display = 'none';
+        });
+        pageTitleEl.textContent = 'Cài đặt cá nhân';
+        pageDescriptionEl.textContent = 'Quản lý thông tin tài khoản và đổi mật khẩu.';
+        btnSave.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px;">save</span> Lưu thay đổi';
+      }
+
+      async function extractApiError(response, fallbackMessage) {
+        try {
+          const contentType = response.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const data = await response.json();
+            return data.message || data.title || fallbackMessage;
+          }
+
+          const text = await response.text();
+          return text || fallbackMessage;
+        } catch (_) {
+          return fallbackMessage;
+        }
+      }
+
+      async function fetchCurrentAccount() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Bạn chưa đăng nhập.');
+        }
+
+        const response = await fetch(ACCOUNT_API_URL + '/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + token
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(await extractApiError(response, 'Không thể tải thông tin tài khoản.'));
+        }
+
+        return await response.json();
+      }
+
+      async function verifyCurrentPassword(email, password) {
+        const response = await fetch(AUTH_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Mật khẩu hiện tại không đúng.');
+        }
+
+        return response.json();
+      }
+
+      function normalizeAccountProfile(raw) {
+        return {
+          id: raw && raw.id ? String(raw.id) : '',
+          fullName: raw && raw.fullName ? raw.fullName : '',
+          email: raw && raw.email ? raw.email : '',
+          phoneNumber: raw && raw.phoneNumber ? raw.phoneNumber : '',
+          role: raw && raw.role ? raw.role : (auth.role || 'Lễ tân'),
+          status: raw && raw.status ? raw.status : 'Hoạt động'
+        };
+      }
+
+      async function syncCurrentAccountProfile() {
+        currentAccount = normalizeAccountProfile(await fetchCurrentAccount());
+        profileFullNameEl.value = currentAccount.fullName || profileFullNameEl.value;
+        profileEmailEl.value = currentAccount.email || profileEmailEl.value;
+        profilePhoneEl.value = currentAccount.phoneNumber || '';
+        profileRoleEl.textContent = currentAccount.role || profileRoleEl.textContent;
+      }
+
+      // Load existing settings
+      const settings = JSON.parse(localStorage.getItem('luxe_bank_settings') || '{}');
+      if (settings.bankId) bankIdEl.value = settings.bankId;
+      if (settings.accountNo) accountNoEl.value = settings.accountNo;
+      if (settings.accountName) accountNameEl.value = settings.accountName;
+
+      const globalSettings = JSON.parse(localStorage.getItem('luxe_global_settings') || '{}');
+      if (globalSettings.logoText) logoTextEl.value = globalSettings.logoText;
+      if (globalSettings.address) addressEl.value = globalSettings.address;
+      if (globalSettings.phone) phoneEl.value = globalSettings.phone;
+      if (globalSettings.email) emailEl.value = globalSettings.email;
+
+      syncCurrentAccountProfile().catch((error) => {
+        window.AppCore?.toast?.(error.message || 'Không thể tải thông tin tài khoản.', 'error');
+      });
+
+      btnSave.addEventListener('click', async () => {
+        const currentPass = document.getElementById('currentPassword').value;
+        const newPass = document.getElementById('newPassword').value;
+        const confirmPass = document.getElementById('confirmPassword').value;
+        const fullName = profileFullNameEl.value.trim();
+        const nextEmail = profileEmailEl.value.trim();
+        const nextPhone = profilePhoneEl.value.trim();
+        const originalEmail = ((currentAccount && currentAccount.email) || auth.email || '').trim();
+        const wantsPasswordChange = Boolean(newPass || currentPass || confirmPass);
+        const emailChanged = nextEmail && nextEmail.toLowerCase() !== originalEmail.toLowerCase();
+
+        if (!fullName) {
+          window.AppCore?.toast?.('Vui lòng nhập họ và tên.', 'error');
+          return;
+        }
+
+        if (!nextEmail) {
+          window.AppCore?.toast?.('Vui lòng nhập email.', 'error');
+          return;
+        }
+
+        // Validate password change fields before calling the API.
+        if (wantsPasswordChange) {
+          if (!currentPass) {
+            window.AppCore?.toast?.("Vui lòng nhập mật khẩu hiện tại", "error") || alert("Vui lòng nhập mật khẩu hiện tại");
+            return;
+          }
+          if (newPass !== confirmPass) {
+            window.AppCore?.toast?.("Mật khẩu mới không khớp", "error") || alert("Mật khẩu mới không khớp");
+            return;
+          }
+          if (newPass.length < 6) {
+            window.AppCore?.toast?.("Mật khẩu mới phải có ít nhất 6 ký tự", "error") || alert("Mật khẩu mới phải có nhất 6 ký tự");
+            return;
+          }
+        }
+
+        if (emailChanged && !currentPass) {
+          window.AppCore?.toast?.('Vui lòng nhập mật khẩu hiện tại để đổi email.', 'error');
+          return;
+        }
+
+        const previousLabel = btnSave.innerHTML;
+        btnSave.disabled = true;
+        btnSave.style.opacity = '0.7';
+        btnSave.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px;">progress_activity</span> Đang lưu...';
+
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            throw new Error('Bạn chưa đăng nhập.');
+          }
+
+          const payload = {
+            fullName: fullName,
+            email: nextEmail,
+            phoneNumber: nextPhone,
+            currentPassword: currentPass,
+            newPassword: wantsPasswordChange ? newPass : '',
+            confirmPassword: wantsPasswordChange ? confirmPass : ''
+          };
+
+          const profileResponse = await fetch(ACCOUNT_API_URL + '/me', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + token
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!profileResponse.ok) {
+            throw new Error(await extractApiError(profileResponse, 'Không thể cập nhật tài khoản.'));
+          }
+
+          if (isAdmin) {
+            const newBankSettings = {
+              bankId: bankIdEl.value,
+              accountNo: accountNoEl.value,
+              accountName: accountNameEl.value
+            };
+            localStorage.setItem('luxe_bank_settings', JSON.stringify(newBankSettings));
+            
+            const newGlobalSettings = {
+              logoText: logoTextEl.value,
+              address: addressEl.value,
+              phone: phoneEl.value,
+              email: emailEl.value
+            };
+            localStorage.setItem('luxe_global_settings', JSON.stringify(newGlobalSettings));
+          }
+
+          if (emailChanged || wantsPasswordChange) {
+            const relogin = await verifyCurrentPassword(nextEmail, wantsPasswordChange ? newPass : currentPass);
+            if (relogin && relogin.token) {
+              localStorage.setItem('token', relogin.token);
+            }
+          }
+
+          localStorage.setItem('userEmail', nextEmail);
+          currentAccount = normalizeAccountProfile((await profileResponse.json()).account || {
+            id: currentAccount && currentAccount.id,
+            fullName: fullName,
+            email: nextEmail,
+            phoneNumber: nextPhone,
+            role: currentAccount && currentAccount.role,
+            status: currentAccount && currentAccount.status
+          });
+          profileFullNameEl.value = currentAccount.fullName;
+          profileEmailEl.value = currentAccount.email;
+          profilePhoneEl.value = currentAccount.phoneNumber || '';
+          profileRoleEl.textContent = currentAccount.role;
+          document.getElementById('currentPassword').value = '';
+          document.getElementById('newPassword').value = '';
+          document.getElementById('confirmPassword').value = '';
+
+          if (window.AppCore && window.AppCore.toast) {
+            window.AppCore.toast(isAdmin ? "Đã lưu cài đặt và thông tin tài khoản" : "Đã cập nhật thông tin tài khoản", "success");
+          } else {
+              alert("Lưu thành công");
+          }
+
+          setTimeout(() => {
+              window.location.reload();
+          }, 800);
+        } catch (error) {
+          window.AppCore?.toast?.(error.message || 'Không thể lưu thay đổi.', 'error');
+        } finally {
+          btnSave.disabled = false;
+          btnSave.style.opacity = '1';
+          btnSave.innerHTML = previousLabel;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

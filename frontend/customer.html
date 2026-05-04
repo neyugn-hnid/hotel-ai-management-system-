@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Luxe Concierge | Quản Lý Khách Hàng</title>
+  <link rel="stylesheet" href="css/main.css"/>
+    <link rel="stylesheet" href="css/customer.css"/>
+</head>
+<body class="notion-font">
+
+  <div class="admin-layout">
+    
+    <aside class="luxe-sidebar">
+      <div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 0 16px 40px;">
+          <div style="width: 28px; height: 28px; background: var(--dash-accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 14px;">L</div>
+          <span style="font-weight: 700; font-size: 16px; letter-spacing: -0.02em; color: white;" data-config="logo">Luxe Concierge</span>
+        </div>
+
+        <nav>
+          
+          <a href="dashboard.html" class="sidebar-item"><span class="material-symbols-outlined">grid_view</span><span>Tổng quan</span></a>
+          <a href="room.html" class="sidebar-item"><span class="material-symbols-outlined">bed</span><span>Phòng nghỉ</span></a>
+          <a href="customer.html" class="sidebar-item active"><span class="material-symbols-outlined">group</span><span>Khách hàng</span></a>
+
+          <a href="booking.html" class="sidebar-item"><span class="material-symbols-outlined">auto_awesome</span><span>Đặt phòng</span></a>
+          <a href="invoice.html" class="sidebar-item"><span class="material-symbols-outlined">receipt_long</span><span>Hóa đơn</span></a>
+          <a href="service.html" class="sidebar-item"><span class="material-symbols-outlined">concierge</span><span>Dịch vụ</span></a>
+          <a href="account.html" class="sidebar-item"><span class="material-symbols-outlined">manage_accounts</span><span>Tài khoản</span></a>
+        </nav>
+      </div>
+
+      <div>
+        <a href="setting.html" class="sidebar-item"><span class="material-symbols-outlined">settings</span><span>Cài đặt</span></a>
+        <a href="#" class="sidebar-item" style="color: #FF4444;"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header style="margin-bottom: 48px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0;">Quản lý khách hàng</h1>
+        </div>
+        <button class="gold-border-btn" id="btnAddCustomer" style="background: var(--c-blue); color: white;">
+          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 6px; vertical-align: middle;">add</span> Thêm khách hàng
+        </button>
+      </header>
+
+      <div class="filter-bar">
+        <div class="notion-search-bar">
+          <span class="material-symbols-outlined" style="color: var(--dash-muted);">search</span>
+          <input type="text" id="searchCustomers" placeholder="Tìm tên, CCCD, hoặc số điện thoại..."/>
+        </div>
+            <select class="notion-filter-item" id="filterStatus">
+               <option value="">Tất cả trạng thái</option>
+               <option value="Đang lưu trú">Đang lưu trú</option>
+               <option value="Đang trả phòng">Đang trả phòng</option>
+               <option value="Đã rời đi">Đã rời đi</option>
+            </select>
+            <select class="notion-filter-item" id="sortCustomers">
+               <option value="updatedAt_desc">Mới cập nhật</option>
+               <option value="updatedAt_asc">Cũ nhất</option>
+               <option value="name_asc">Tên A-Z</option>
+               <option value="name_desc">Tên Z-A</option>
+               <option value="status_asc">Trạng thái A-Z</option>
+               <option value="status_desc">Trạng thái Z-A</option>
+            </select>
+      </div>
+
+      <div class="luxury-card" style="padding: 0; overflow: hidden;">
+         <table class="notion-table">
+            <thead>
+               <tr style="background: var(--dash-bg);">
+                  <th style="padding-left: 24px;">Khách hàng</th>
+                  <th>Liên hệ</th>
+                  <th>Số lần đặt</th>
+                  <th>Trạng thái</th>
+                  <th style="text-align: right; padding-right: 24px;">Tiện ích</th>
+               </tr>
+            </thead>
+            <tbody id="customerTableBody">
+               
+            </tbody>
+         </table>
+         
+         <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; background: var(--dash-bg); border-top: 1px solid var(--dash-border); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+            <p style="font-size: 13px; color: var(--dash-muted);">Hiển thị <span id="totalCustomers">3</span> kết quả giao dịch</p>
+            <div style="display: flex; gap: 8px;">
+               <button id="btnPrevCustomers" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang trước</button>
+               <span id="customerPageInfo" style="display:inline-flex; align-items:center; font-size:13px; color:var(--dash-muted); padding:0 4px;">Trang 1/1</span>
+               <button id="btnNextCustomers" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang sau</button>
+            </div>
+         </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="customerModal">
+
+     <div class="notion-modal">
+        <div class="modal-header">
+           <h2 style="font-size: 20px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+              <span id="customerModalTitle">Thêm khách hàng</span>
+              <span class="material-symbols-outlined" style="cursor: pointer; opacity: 0.5;" onclick="closeCustomerModal()">close</span>
+           </h2>
+        </div>
+        <form id="customerForm">
+           <div class="form-row">
+              <label>Họ và tên</label>
+              <input type="text" class="notion-input" id="cusName" required/>
+           </div>
+           <div class="form-row">
+              <label>Số CCCD/CMND</label>
+              <input type="text" class="notion-input" id="cusCCCD" required placeholder="Nhập số định danh..."/>
+           </div>
+           <div class="form-row">
+              <label>Số điện thoại</label>
+              <input type="text" class="notion-input" id="cusPhone" required/>
+           </div>
+           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <div class="form-row">
+                 <label>Hạng thành viên</label>
+                 <select class="notion-input" id="cusTier">
+                 </select>
+              </div>
+              <div class="form-row">
+                 <label>Trạng thái</label>
+                 <select class="notion-input" id="cusStatus">
+                 </select>
+              </div>
+           </div>
+           
+           <div style="margin-top: 40px; display: flex; gap: 12px;">
+              <button type="submit" class="gold-border-btn" style="flex: 1; background: var(--dash-accent); color: white; border: none; height: 46px; justify-content: center;">Lưu thông tin</button>
+              <button type="button" class="gold-cancel-btn" style="flex: 1; height: 46px; justify-content: center;" onclick="closeCustomerModal()">Đóng</button>
+           </div>
+        </form>
+     </div>
+  </div>
+
+  <div class="modal-overlay" id="deleteConfirmModal">
+     <div class="luxury-card" style="max-width: 400px; text-align: center; position: relative;">
+        <span class="material-symbols-outlined" style="font-size: 48px; color: #ef4444; margin-bottom: 20px;">warning</span>
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">Xác nhận xóa khách hàng?</h3>
+        <p style="color: var(--dash-muted); font-size: 14px; margin-bottom: 30px;">Hành động này không thể hoàn tác. Mọi lịch sử đặt phòng đi kèm sẽ được lưu trữ riêng.</p>
+        <div style="display: flex; gap: 12px;">
+           <button class="gold-border-btn" style="background: #ef4444; flex: 1; color: white; border: none; height: 46px; justify-content: center;" onclick="deleteCustomer()">Xóa vĩnh viễn</button>
+           <button class="gold-cancel-btn" style="flex: 1; height: 46px; justify-content: center;" onclick="closeDeleteModal()">Hủy</button>
+        </div>
+     </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script src="js/customer.js"></script>
+</body>
+</html>
+

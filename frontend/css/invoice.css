@@ -1,0 +1,275 @@
+    :root {
+      --dash-bg: #F8F9FA;
+      --dash-card: #FFFFFF;
+      --dash-accent: #007bff;
+      --dash-text: #1A1A1A;
+      --dash-muted: #6C757D;
+      --dash-border: rgba(0,0,0,0.06);
+    }
+
+    body {
+      background-color: var(--dash-bg);
+      color: var(--dash-text);
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    .luxe-sidebar {
+      background-color: #050505;
+      color: white;
+      padding: 32px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      z-index: 100;
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      padding: 0 16px;
+      margin: 24px 0 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .sidebar-item:hover {
+      background-color: rgba(255,255,255,0.05);
+      color: white;
+    }
+
+    .sidebar-item.active {
+      background-color: var(--dash-accent);
+      color: white;
+      font-weight: 600;
+    }
+
+    .sidebar-item .material-symbols-outlined {
+      font-size: 20px;
+    }
+
+    .main-content {
+      padding: 40px 60px;
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .luxury-card {
+      background: white;
+      border: 1px solid var(--dash-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    }
+
+    .stat-card {
+      padding: 24px;
+      border-radius: 16px;
+      border: 1px solid var(--dash-border);
+      background: white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    }
+
+    .stat-card p:first-child {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--dash-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .stat-card p:last-child {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--dash-text);
+    }
+
+    .luxe-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .notion-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .notion-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--dash-muted);
+      padding: 16px 12px;
+      border-bottom: 1px solid var(--dash-border);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .notion-table td {
+      padding: 20px 12px;
+      border-bottom: 1px solid var(--dash-border);
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    .notion-table tr:hover { background: var(--dash-bg); }
+
+    .invoice-id {
+      font-family: var(--f-mono);
+      font-weight: 600;
+      padding: 4px 8px;
+      background: var(--dash-bg);
+      border-radius: 4px;
+      color: var(--dash-accent);
+      font-size: 12px;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+
+    .notion-modal {
+      background: white;
+      width: 500px;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+      padding: 40px;
+      animation: modalFadeUp 0.3s ease-out;
+    }
+
+    @keyframes modalFadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .notion-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--dash-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .notion-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--dash-border);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+      background: var(--dash-bg);
+    }
+
+    .notion-input:focus { border-color: var(--dash-accent); background: white; }
+
+    .btn-luxe-primary {
+      background: var(--dash-accent);
+      color: white;
+      border: none;
+      height: 46px;
+      padding: 0 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-luxe-primary:hover {
+      background: #b08d4a;
+      box-shadow: 0 8px 20px rgba(197, 160, 89, 0.3);
+    }
+
+    .btn-luxe-sec {
+      background: white;
+      border: 1px solid var(--dash-border);
+      height: 46px;
+      padding: 0 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--dash-text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-luxe-sec:hover { background: var(--dash-bg); }
+
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .luxe-search-bar {
+      background: white;
+      border: 1px solid var(--dash-border);
+      height: 46px;
+      padding: 0 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+    .luxe-search-bar input {
+      border: none;
+      outline: none;
+      background: transparent;
+      width: 100%;
+      font-size: 14px;
+    }
+  
+
+/* Page-specific responsive: invoice */
+@media (max-width: 768px) {
+  .luxe-stat-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+  #invoiceTableBody td { white-space: nowrap; }
+  #paymentDetailsModal .luxury-card { max-width: 100% !important; }
+  #qrContainer { width: 100%; min-height: 180px; }
+  #paymentDetailsContent { overflow-x: auto; }
+}
+@media (max-width: 480px) {
+  #paymentDetailsModal .luxury-card { padding: 14px !important; }
+}

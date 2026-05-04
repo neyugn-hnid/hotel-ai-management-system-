@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Luxe Concierge | Đặt Phòng & Gợi Ý AI</title>
+  <link rel="stylesheet" href="css/main.css"/>
+    <link rel="stylesheet" href="css/booking.css"/>
+</head>
+<body class="notion-font">
+
+  <div class="admin-layout">
+    
+    <aside class="luxe-sidebar">
+      <div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 0 16px 40px;">
+          <div style="width: 28px; height: 28px; background: var(--dash-accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 14px;">L</div>
+          <span style="font-weight: 700; font-size: 16px; letter-spacing: -0.02em; color: white;" data-config="logo">Luxe Concierge</span>
+        </div>
+
+        <nav>
+          
+          <a href="dashboard.html" class="sidebar-item"><span class="material-symbols-outlined">grid_view</span><span>Tổng quan</span></a>
+          <a href="room.html" class="sidebar-item"><span class="material-symbols-outlined">bed</span><span>Phòng nghỉ</span></a>
+          <a href="customer.html" class="sidebar-item"><span class="material-symbols-outlined">group</span><span>Khách hàng</span></a>
+
+          <a href="booking.html" class="sidebar-item active"><span class="material-symbols-outlined">auto_awesome</span><span>Đặt phòng</span></a>
+          <a href="invoice.html" class="sidebar-item"><span class="material-symbols-outlined">receipt_long</span><span>Hóa đơn</span></a>
+          <a href="service.html" class="sidebar-item"><span class="material-symbols-outlined">concierge</span><span>Dịch vụ</span></a>
+          <a href="account.html" class="sidebar-item"><span class="material-symbols-outlined">manage_accounts</span><span>Tài khoản</span></a>
+        </nav>
+      </div>
+
+      <div>
+        <a href="setting.html" class="sidebar-item"><span class="material-symbols-outlined">settings</span><span>Cài đặt</span></a>
+        <a href="#" class="sidebar-item" style="color: #FF4444;"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header style="margin-bottom: 64px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0;">Đặt phòng thông minh</h1>
+        </div>
+        <button class="gold-border-btn" onclick="openManualBookingModal()" style="background: var(--c-blue); color: white;">
+          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 6px; vertical-align: middle;">edit_document</span> Đặt phòng thủ công
+        </button>
+      </header>
+
+      <div class="luxury-card" style="margin-bottom: 64px;">
+        <form id="bookingSearchForm">
+          <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 20px; align-items: flex-end; margin-bottom: 20px;">
+            <div style="position: relative;">
+              <label class="notion-input-label">Nhập CCCD (Định danh khách hàng)</label>
+              <input type="text" id="customerSearchInput" list="customerList" class="luxury-input" placeholder="Nhập CCCD...">
+              <datalist id="customerList">
+                
+              </datalist>
+            </div>
+            <div>
+              <label class="notion-input-label">Ngân sách (VNĐ/đêm)</label>
+              <input type="number" id="budgetLimit" class="luxury-input" placeholder="VD: 50000000"/>
+            </div>
+            <div>
+              <label class="notion-input-label">Ngày nhận</label>
+              <input type="date" id="checkInDate" class="luxury-input" />
+            </div>
+            <div>
+              <label class="notion-input-label">Ngày trả</label>
+              <input type="date" id="checkOutDate" class="luxury-input" />
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1.5fr 3fr auto; gap: 20px; align-items: flex-end;">
+            <div>
+              <label class="notion-input-label">Số khách</label>
+              <select id="guestCount" class="luxury-input">
+                <option selected>2 Người lớn</option>
+                <option>1 Người lớn</option>
+                <option>Gia đình</option>
+              </select>
+            </div>
+            <div>
+              <label class="notion-input-label">Mục đích / Hạng phòng</label>
+              <select id="roomPurpose" class="luxury-input">
+                <option value="All">Tất cả (AI tự phân tích)</option>
+                <option value="Business">Công tác</option>
+                <option value="Honeymoon">Nghỉ dưỡng & Trăng mật</option>
+                <option value="Family">Kỳ nghỉ gia đình</option>
+              </select>
+            </div>
+             <div>
+                <label class="notion-input-label" style="display: flex; gap: 6px; align-items: center;">
+                  <span class="material-symbols-outlined" style="font-size: 14px; color: var(--dash-accent);">auto_awesome</span>
+                  Yêu cầu đặc biệt do khách đưa (Optional)
+                </label>
+                <input type="text" id="aiAdminPrompt" class="luxury-input" placeholder="VD: Khách báo muốn phòng riêng tư, ngắm vườn..." style="border-color: var(--dash-accent); outline: none; box-shadow: 0 0 0 1px rgba(197,160,89,0.1);">
+             </div>
+             <button type="submit" class="btn-luxe-primary" id="btnSearchAI">Tìm phòng AI</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="luxury-card" style="margin-bottom: 64px; padding: 0; overflow: hidden;">
+         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; padding: 32px 32px 24px;">
+            <div>
+               <h3 style="font-size: 20px; font-weight: 700;">Phiếu đặt phòng mới từ website</h3>
+               <p style="color: var(--dash-muted); font-size: 14px; margin-top: 4px;">Danh sách các yêu cầu do khách hàng tự thực hiện cần xử lý gấp.</p>
+            </div>
+            <div id="pendingBookingCount" class="notion-pill" style="background: #e7f3ef; color: #0d7350;">Đang tải...</div>
+         </div>
+
+         <div style="padding: 0 32px 20px; display: grid; grid-template-columns: 2fr 1fr auto; gap: 12px; align-items: center;">
+            <input id="pendingBookingSearch" class="luxury-input" placeholder="Tìm mã booking, tên khách, email..." style="height: 40px;" />
+            <select id="pendingBookingSort" class="luxury-input" style="height: 40px;">
+               <option value="createdAt_desc" selected>Mới nhất</option>
+               <option value="createdAt_asc">Cũ nhất</option>
+               <option value="checkInDate_asc">Ngày nhận tăng dần</option>
+               <option value="checkInDate_desc">Ngày nhận giảm dần</option>
+               <option value="amount_desc">Giá trị cao nhất</option>
+               <option value="amount_asc">Giá trị thấp nhất</option>
+            </select>
+            <button id="btnRefreshPending" class="btn-luxe-sec" style="height: 40px; padding: 0 14px; border-radius: 8px; border-color: #E2E8F0;">Làm mới</button>
+         </div>
+
+           <table class="notion-table">
+            <thead>
+               <tr style="background: var(--dash-bg);">
+                  <th style="padding-left: 32px;">Mã phiếu</th>
+                  <th>Khách hàng</th>
+                  <th>Loại phòng yêu cầu</th>
+                  <th>Thời gian đặt</th>
+                  <th>Trạng thái</th>
+                  <th style="text-align: right; padding-right: 32px;">Hành động</th>
+               </tr>
+            </thead>
+            <tbody id="bookingRequestsBody">
+               
+            </tbody>
+         </table>
+          <div style="padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; background: var(--dash-bg); border-top: 1px solid var(--dash-border); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
+             <p style="font-size: 13px; color: var(--dash-muted);">Hiển thị <span id="totalPending">0</span> yêu cầu cần xử lý</p>
+             <div style="display: flex; gap: 8px;">
+                <button id="btnPrevPending" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang trước</button>
+                <span id="pendingPageInfo" style="display:inline-flex; align-items:center; font-size:13px; color:var(--dash-muted); padding:0 4px;">Trang 1/1</span>
+                <button id="btnNextPending" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang sau</button>
+             </div>
+         </div>
+      </div>
+
+      <div class="luxury-card" style="margin-bottom: 64px; padding: 0; overflow: hidden;">
+         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; padding: 32px 32px 24px;">
+            <div>
+               <h3 style="font-size: 20px; font-weight: 700;">Giao dịch đã xác nhận</h3>
+               <p style="color: var(--dash-muted); font-size: 14px; margin-top: 4px;">Các booking đã được xử lý và ghi nhận vào hệ thống lưu trú.</p>
+            </div>
+            <div id="confirmedCount" class="notion-pill" style="background: #f2f9ff; color: #097fe8;">0 đã xác nhận</div>
+         </div>
+
+         <div style="padding: 0 32px 20px; display: grid; grid-template-columns: 2fr 1fr auto; gap: 12px; align-items: center;">
+            <input id="confirmedBookingSearch" class="luxury-input" placeholder="Tìm booking đã xác nhận..." style="height: 40px;" />
+            <select id="confirmedBookingSort" class="luxury-input" style="height: 40px;">
+               <option value="updatedAt_desc" selected>Xử lý gần nhất</option>
+               <option value="updatedAt_asc">Xử lý xa nhất</option>
+               <option value="checkInDate_asc">Ngày nhận tăng dần</option>
+               <option value="checkInDate_desc">Ngày nhận giảm dần</option>
+               <option value="amount_desc">Giá trị cao nhất</option>
+               <option value="amount_asc">Giá trị thấp nhất</option>
+            </select>
+            <button id="btnRefreshConfirmed" class="btn-luxe-sec" style="height: 40px; padding: 0 14px; border-radius: 8px; border-color: #E2E8F0;">Làm mới</button>
+         </div>
+
+         <table class="notion-table">
+            <thead>
+               <tr style="background: var(--dash-bg);">
+                  <th style="padding-left: 32px;">Mã phiếu</th>
+                  <th>Khách hàng</th>
+                  <th>Hạng phòng</th>
+                  <th>Thời gian xử lý</th>
+                  <th>Thanh toán</th>
+                  <th>Trạng thái lưu trú</th>
+                  <th style="text-align: right; padding-right: 32px;">Thao tác</th>
+               </tr>
+            </thead>
+            <tbody id="confirmedBookingsBody">
+               <tr>
+                  <td colspan="7" style="text-align: center; color: var(--dash-muted); padding: 48px 0;">Chưa có giao dịch nào được xác nhận trong phiên làm việc này.</td>
+               </tr>
+            </tbody>
+         </table>
+          <div style="padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; background: var(--dash-bg); border-top: 1px solid var(--dash-border); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
+             <p style="font-size: 13px; color: var(--dash-muted);">Hiển thị <span id="totalConfirmed">0</span> kết quả giao dịch</p>
+             <div style="display: flex; gap: 8px;">
+                <button id="btnPrevConfirmed" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang trước</button>
+                <span id="confirmedPageInfo" style="display:inline-flex; align-items:center; font-size:13px; color:var(--dash-muted); padding:0 4px;">Trang 1/1</span>
+                <button id="btnNextConfirmed" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang sau</button>
+             </div>
+         </div>
+      </div>
+
+      <div id="aiGridContainer" style="display: none; grid-template-columns: minmax(320px, 0.95fr) minmax(0, 2.05fr); gap: 32px; align-items: start;">
+
+        <aside style="position: sticky; top: 48px;" id="aiInsightsContainer">
+          <div class="notion-ai-box">
+             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                <span class="material-symbols-outlined" style="color: #0075de;">auto_awesome</span>
+                <span style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">AI Insights</span>
+             </div>
+             <p style="font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.72); margin: 0;">
+               Nhập CCCD hoặc thông tin khách hàng rồi chạy AI để xem hồ sơ nhận diện, tín hiệu ưu tiên và lý do đề xuất phòng.
+             </p>
+          </div>
+        </aside>
+
+        <section id="aiResultsContainer">
+          <div class="luxury-card" style="padding: 28px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <span class="material-symbols-outlined" style="color: var(--dash-accent);">hotel_class</span>
+              <h2 style="font-size: 22px; font-weight: 700; margin: 0;">Kết quả đề xuất AI</h2>
+            </div>
+            <p style="font-size: 14px; color: var(--dash-muted); line-height: 1.7; margin: 0;">
+              Chưa có đề xuất. Hệ thống sẽ hiển thị phương án phù hợp nhất, lý do xếp hạng và các lựa chọn thay thế sau khi bạn chạy AI.
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="bookingSuccessModal" class="modal-overlay">
+     <div class="notion-modal">
+        <div style="width: 64px; height: 64px; background: #e7f3ef; color: #0d7350; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+           <span class="material-symbols-outlined" style="font-size: 32px;">check_circle</span>
+        </div>
+        <h3 id="successTitle" style="font-size: 20px; font-weight: 700; margin-bottom: 12px;">Đặt phòng thành công!</h3>
+        <p id="successMessage" style="color: var(--dash-muted); font-size: 14px; line-height: 1.6; margin-bottom: 32px;">
+           Hồ sơ đã được cập nhật. Hệ thống đã tự động gửi thông tin xác nhận và hóa đơn tạm tính đến email khách hàng.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+           <button class="btn-luxe-primary" onclick="window.location.href='invoice.html'" style="width: 100%; justify-content: center;">Xem hóa đơn chi tiết</button>
+           <button class="btn-luxe-sec" onclick="closeSuccessModal()" style="width: 100%; justify-content: center;">Quay lại danh sách</button>
+        </div>
+     </div>
+  </div>
+
+  <div id="manualBookingModal" class="modal-overlay">
+     <div class="notion-modal" style="max-width: 500px; text-align: left; padding: 40px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+           <h3 style="font-size: 20px; font-weight: 700;">Tạo Phiếu Đặt Phòng Thủ Công</h3>
+           <button onclick="closeManualBookingModal()" style="background: none; border: none; cursor: pointer; color: var(--dash-muted);"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        
+        <form onsubmit="handleManualBooking(event)">
+           <div style="margin-bottom: 20px;">
+              <label class="notion-input-label">CCCD / Tên Khách Hàng</label>
+              <input type="text" id="manualCustomer" required class="luxury-input" placeholder="VD: Nguyễn Văn A..." />
+           </div>
+           
+           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+              <div>
+                 <label class="notion-input-label">Ngày nhận</label>
+                 <input type="date" id="manualCheckIn" required class="luxury-input" />
+              </div>
+              <div>
+                 <label class="notion-input-label">Ngày trả</label>
+                 <input type="date" id="manualCheckOut" required class="luxury-input" />
+              </div>
+           </div>
+
+           <div style="margin-bottom: 32px;">
+              <label class="notion-input-label">Phòng chỉ định</label>
+              <select id="manualRoomType" class="luxury-input">
+              </select>
+           </div>
+           
+           <button type="submit" class="btn-luxe-primary" style="width: 100%; height: 46px; justify-content: center;">
+              <span class="material-symbols-outlined" style="font-size: 18px;">check</span> Xác nhận đặt phòng
+           </button>
+        </form>
+     </div>
+  </div>
+
+  <div class="modal-overlay" id="bookingInvoiceModal">
+     <div class="notion-modal">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+           <h2 id="bookingInvoiceModalTitle" style="font-size: 20px; font-weight: 700;">Tạo hóa đơn từ booking</h2>
+           <span class="material-symbols-outlined" style="cursor: pointer; opacity: 0.5;" onclick="closeBookingInvoiceModal()">close</span>
+        </div>
+
+        <form id="bookingInvoiceForm">
+          <div style="display: flex; gap: 12px; margin-bottom: 24px; background: #f9f9f9; padding: 16px; border-radius: 6px; border-left: 4px solid var(--dash-accent);">
+              <div style="flex: 1;">
+                 <label class="notion-input-label">Truy vấn nhanh theo CCCD</label>
+                 <div style="display: flex; gap: 8px;">
+                    <input type="text" class="luxury-input" id="bookingInvoiceLookup" placeholder="Nhập CCCD khách và nhấn Enter..." list="bookingInvoiceCccdList"/>
+                    <datalist id="bookingInvoiceCccdList"></datalist>
+                 </div>
+              </div>
+           </div>
+
+           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div>
+                 <label class="notion-input-label">Tên khách hàng</label>
+                 <input type="text" class="luxury-input" id="bookingInvoiceCustomer" required />
+              </div>
+              <div>
+                 <label class="notion-input-label">Số CCCD</label>
+                 <input type="text" class="luxury-input" id="bookingInvoiceCccd" required />
+              </div>
+           </div>
+
+           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div>
+                 <label class="notion-input-label">Phòng lưu trú</label>
+                 <input type="text" class="luxury-input" id="bookingInvoiceRoom" required />
+              </div>
+              <div>
+                 <label class="notion-input-label">Ngày lập hóa đơn</label>
+                 <input type="text" class="luxury-input" id="bookingInvoiceDate" required />
+              </div>
+           </div>
+
+           <div style="margin-bottom: 20px;">
+              <label class="notion-input-label">Dịch vụ đã sử dụng</label>
+              <div id="bookingInvoiceServicesList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: var(--dash-bg); padding: 12px; border-radius: 6px; border: 1px solid var(--dash-border);">
+                 <span style="font-size: 13px; color: var(--dash-muted);">Đang tải dịch vụ...</span>
+              </div>
+           </div>
+
+           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px;">
+              <div>
+                 <label class="notion-input-label">Tổng cộng (VNĐ)</label>
+                 <input type="number" class="luxury-input" id="bookingInvoiceAmount" required />
+              </div>
+              <div>
+                 <label class="notion-input-label">Trạng thái xử lý</label>
+                 <select class="luxury-input" id="bookingInvoiceStatus">
+                 </select>
+              </div>
+           </div>
+
+           <div style="display: flex; gap: 12px; margin-top: 40px;">
+              <button type="submit" class="btn-luxe-primary" style="flex: 2; justify-content: center;">Lưu hóa đơn</button>
+              <button type="button" class="btn-luxe-sec" style="flex: 1; justify-content: center;" onclick="closeBookingInvoiceModal()">Hủy</button>
+           </div>
+        </form>
+     </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script src="js/booking.js"></script>
+  <script>
+     function openManualBookingModal() {
+        document.getElementById('manualBookingModal').style.display = 'flex';
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('manualCheckIn').value = today;
+        document.getElementById('manualCheckOut').value = today;
+     }
+
+     function closeManualBookingModal() {
+        document.getElementById('manualBookingModal').style.display = 'none';
+     }
+
+     function handleManualBooking(e) {
+        e.preventDefault();
+        const customer = document.getElementById('manualCustomer').value;
+        const room = document.getElementById('manualRoomType').value;
+        
+        let priceStr = '0';
+        if (room.includes('Standard')) priceStr = '3.500.000';
+        else if (room.includes('Executive')) priceStr = '30.000.000';
+        else if (room.includes('Deluxe')) priceStr = '7.500.000';
+        else if (room.includes('Penthouse')) priceStr = '61.250.000';
+
+        closeManualBookingModal();
+
+        if(typeof window.bookNow === 'function') {
+           window.bookNow(room, priceStr, customer);
+        } else {
+            alert('Trường hợp Book Now không tồn tại!');
+        }
+     }
+  </script>
+</body>
+</html>
