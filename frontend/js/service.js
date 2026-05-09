@@ -21,6 +21,24 @@ const pagingState = {
   hasPreviousPage: false
 };
 
+function canManageServices() {
+  return Boolean(window.AppCore && typeof window.AppCore.isAdminRole === 'function'
+    && window.AppCore.isAdminRole(window.AppCore.getAuthContext().role));
+}
+
+function applyServiceRoleAccess() {
+  const canManage = canManageServices();
+  const addBtn = document.getElementById('btnAddService');
+  const actionsHeader = document.getElementById('serviceActionsHeader');
+  const submitBtn = document.getElementById('serviceSubmitButton');
+  const deleteBtn = document.getElementById('serviceDeleteButton');
+
+  if (addBtn) addBtn.style.display = canManage ? '' : 'none';
+  if (actionsHeader) actionsHeader.style.display = canManage ? '' : 'none';
+  if (submitBtn) submitBtn.style.display = canManage ? '' : 'none';
+  if (deleteBtn) deleteBtn.style.display = canManage ? '' : 'none';
+}
+
 function showToast(message, variant) {
   if (window.AppCore && typeof window.AppCore.toast === 'function') {
     window.AppCore.toast(message, variant);
@@ -157,6 +175,7 @@ function renderServices() {
   const tbody = document.getElementById('serviceTableBody');
   const totalServicesEl = document.getElementById('totalServices');
   if (!tbody) return;
+  const canManage = canManageServices();
 
   if (totalServicesEl) totalServicesEl.innerText = String(pagingState.totalCount);
 
@@ -181,7 +200,7 @@ function renderServices() {
           <span style="font-weight: 600; font-size: 14px;">' + priceFormatted + '</span>\
         </td>\
         <td><span class="notion-pill" style="background:' + statusStyle.bg + '; color:' + statusStyle.color + ';">' + service.status + '</span></td>\
-        <td style="text-align:right; padding-right: 24px;">\
+        ' + (canManage ? '<td style="text-align:right; padding-right: 24px;">\
           <div style="display: flex; justify-content: flex-end; gap: 8px;">\
             <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" onclick="openServiceModal(' + service.id + ')">\
               <span class="material-symbols-outlined" style="font-size:18px;">edit</span>\
@@ -190,7 +209,7 @@ function renderServices() {
               <span class="material-symbols-outlined" style="font-size:18px;">delete</span>\
             </button>\
           </div>\
-        </td>\
+        </td>' : '') + '\
       </tr>';
   }).join('');
 
@@ -206,9 +225,12 @@ function renderServices() {
   if (nextBtn) nextBtn.disabled = !pagingState.hasNextPage;
 
   updateStats();
+  applyServiceRoleAccess();
 }
 
 function openServiceModal(id) {
+  if (!canManageServices()) return;
+
   const modal = document.getElementById('serviceModal');
   const title = document.getElementById('serviceModalTitle');
   const form = document.getElementById('serviceForm');
@@ -241,6 +263,10 @@ function closeServiceModal() {
 
 async function saveService(e) {
   e.preventDefault();
+  if (!canManageServices()) {
+    showToast('Bạn không có quyền tạo hoặc sửa dịch vụ.', 'error');
+    return;
+  }
 
   const name = document.getElementById('svcName').value;
   const description = document.getElementById('svcDesc').value;
@@ -294,6 +320,11 @@ async function saveService(e) {
 }
 
 function confirmDeleteService(id) {
+  if (!canManageServices()) {
+    showToast('Bạn không có quyền xóa dịch vụ.', 'error');
+    return;
+  }
+
   serviceToDelete = id;
   document.getElementById('deleteConfirmModal').style.display = 'flex';
 }
@@ -304,6 +335,11 @@ function closeDeleteModal() {
 }
 
 async function deleteService() {
+  if (!canManageServices()) {
+    showToast('Bạn không có quyền xóa dịch vụ.', 'error');
+    return;
+  }
+
   if (!serviceToDelete) return;
 
   const token = localStorage.getItem('token');
@@ -334,6 +370,7 @@ async function deleteService() {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
+  applyServiceRoleAccess();
   await loadLookups();
 
   const searchEl = document.getElementById('searchServiceInput');

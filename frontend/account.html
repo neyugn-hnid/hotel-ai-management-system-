@@ -13,9 +13,9 @@
     
     <aside class="luxe-sidebar">
       <div>
-        <div style="display: flex; align-items: center; gap: 12px; padding: 0 16px 40px;">
-          <div style="width: 28px; height: 28px; background: var(--dash-accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 14px;">L</div>
-          <span style="font-weight: 700; font-size: 16px; letter-spacing: -0.02em; color: white;" data-config="logo">Luxe Concierge</span>
+        <div class="account-sidebar-brand">
+          <div class="account-sidebar-brand__badge">L</div>
+          <span class="account-sidebar-brand__text" data-config="logo">Luxe Concierge</span>
         </div>
 
         <nav>
@@ -33,17 +33,17 @@
 
       <div>
         <a href="setting.html" class="sidebar-item"><span class="material-symbols-outlined">settings</span><span>Cài đặt</span></a>
-        <a href="#" class="sidebar-item" style="color: #FF4444;"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
+        <a href="#" class="sidebar-item sidebar-item--logout"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
       </div>
     </aside>
 
     <main class="main-content">
-      <header style="margin-bottom: 48px; display: flex; justify-content: space-between; align-items: center;">
+      <header class="account-page-header">
         <div>
-          <h1 style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0;">Quản lý tài khoản</h1>
+          <h1 class="account-page-title">Quản lý tài khoản</h1>
         </div>
-        <button class="gold-border-btn" id="btnAddAccount" style="background: var(--c-blue); color: white;">
-          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 6px; vertical-align: middle;">person_add</span> Thêm mới
+        <button class="gold-border-btn account-add-btn" id="btnAddAccount">
+          <span class="material-symbols-outlined account-add-btn__icon">person_add</span> Thêm mới
         </button>
       </header>
 
@@ -54,26 +54,26 @@
           </div>
           <div class="stat-box">
              <p>Admin</p>
-             <p style="color: #0d7350;" id="stat-admin">0</p>
+             <p class="stat-box__value stat-box__value--admin" id="stat-admin">0</p>
           </div>
           <div class="stat-box">
              <p>Khóa</p>
-             <p style="color: #ef4444;" id="stat-locked">0</p>
+             <p class="stat-box__value stat-box__value--locked" id="stat-locked">0</p>
           </div>
        </div>
 
       <div class="filter-bar">
         <div class="notion-search-bar">
-          <span class="material-symbols-outlined" style="color: var(--dash-muted);">search</span>
+          <span class="material-symbols-outlined account-search-icon">search</span>
           <input type="text" id="searchInput" placeholder="Tìm kiếm tài khoản (Email, Tên)..."/>
         </div>
-        <select class="notion-filter-item" id="filterRole" style="outline: none;">
+        <select class="notion-filter-item account-filter-select" id="filterRole">
            <option value="">Tất cả vai trò</option>
         </select>
-        <select class="notion-filter-item" id="filterStatus" style="outline: none;">
+        <select class="notion-filter-item account-filter-select" id="filterStatus">
            <option value="">Tất cả trạng thái</option>
         </select>
-        <select class="notion-filter-item" id="sortAccounts" style="outline: none;">
+        <select class="notion-filter-item account-filter-select" id="sortAccounts">
            <option value="updatedAt_desc">Mới cập nhật</option>
            <option value="updatedAt_asc">Cũ nhất</option>
            <option value="name_asc">Tên A-Z</option>
@@ -85,27 +85,27 @@
         </select>
       </div>
 
-      <div class="luxury-card" style="padding: 0; overflow: hidden;">
+      <div class="luxury-card account-table-card">
          <table class="notion-table">
             <thead>
-               <tr style="background: var(--dash-bg);">
-                  <th style="padding-left: 24px;">Tài khoản</th>
+               <tr class="account-table-head-row">
+                  <th class="account-table-head-cell account-table-head-cell--left">Tài khoản</th>
                   <th>Vai trò</th>
                   <th>Trạng thái</th>
                   <th>Truy cập cuối</th>
-                  <th style="text-align: right; padding-right: 24px;">Tiện ích</th>
+                  <th class="account-table-head-cell account-table-head-cell--right">Tiện ích</th>
                </tr>
             </thead>
             <tbody id="accountTableBody">
                
             </tbody>
          </table>
-         <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; background: var(--dash-bg); border-top: 1px solid var(--dash-border); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
-            <p style="font-size: 13px; color: var(--dash-muted); margin: 0;">Hiển thị <span id="currentCount">0</span> kết quả tài khoản</p>
-            <div style="display: flex; gap: 8px;">
-               <button id="btnPrevAccounts" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang trước</button>
-               <span id="accountPageInfo" style="display:inline-flex; align-items:center; font-size:13px; color:var(--dash-muted); padding:0 4px;">Trang 1/1</span>
-               <button id="btnNextAccounts" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang sau</button>
+         <div class="account-table-footer">
+            <p class="account-table-footer__summary">Hiển thị <span id="currentCount">0</span> kết quả tài khoản</p>
+            <div class="account-table-footer__actions">
+               <button id="btnPrevAccounts" class="btn-luxe-sec account-table-pager-btn">Trang trước</button>
+               <span id="accountPageInfo" class="account-table-page-info">Trang 1/1</span>
+               <button id="btnNextAccounts" class="btn-luxe-sec account-table-pager-btn">Trang sau</button>
             </div>
          </div>
       </div>
@@ -115,7 +115,7 @@
   <div id="accountModal" class="modal-overlay">
      <div class="notion-modal">
         <div class="modal-header">
-           <h3 style="font-size: 20px; font-weight: 700;" id="modalTitle">Thêm tài khoản</h3>
+           <h3 class="account-modal-title" id="modalTitle">Thêm tài khoản</h3>
         </div>
         <form id="accountForm">
            <input type="hidden" id="accId" value="" />
@@ -128,7 +128,7 @@
               <input type="email" id="accEmail" class="notion-input" placeholder="nva@hotel.com" required />
            </div>
            <div class="form-row">
-              <label>Mật khẩu <span id="passwordHelp" style="font-weight: 400; color: var(--dash-muted); font-style: italic; margin-left: 4px;"></span></label>
+              <label>Mật khẩu <span id="passwordHelp" class="account-password-help"></span></label>
               <input type="password" id="accPassword" class="notion-input" placeholder="Nhập mật khẩu" required />
            </div>
            <div class="form-row">
@@ -142,25 +142,25 @@
               </select>
            </div>
            
-           <div style="display: flex; gap: 12px; margin-top: 32px;">
-              <button type="submit" class="gold-border-btn" style="flex: 1; background: var(--dash-accent); color: white; border: none; height: 46px; justify-content: center;">Lưu tài khoản</button>
-              <button type="button" class="gold-cancel-btn" style="flex: 1; height: 46px; justify-content: center;" onclick="closeModal()">Đóng</button>
+           <div class="account-modal-actions">
+              <button type="submit" class="gold-border-btn account-modal-save-btn">Lưu tài khoản</button>
+              <button type="button" class="gold-cancel-btn account-modal-close-btn" onclick="closeModal()">Đóng</button>
            </div>
         </form>
      </div>
   </div>
 
   <div id="deleteModal" class="modal-overlay">
-     <div class="luxury-card" style="max-width: 400px; text-align: center; position: relative;">
-        <div class="modal-header" style="margin-bottom: 20px;">
-           <h3 style="font-size: 20px; font-weight: 700; color: #ef4444;">Xóa tài khoản</h3>
+     <div class="luxury-card account-delete-card">
+        <div class="modal-header account-delete-header">
+           <h3 class="account-delete-title">Xóa tài khoản</h3>
         </div>
-        <p style="font-size: 14px; color: var(--dash-muted); line-height: 1.6; margin-bottom: 32px;">
+        <p class="account-delete-text">
            Bạn có chắc chắn muốn xóa tài khoản này không? Hành động này không thể hoàn tác.
         </p>
-        <div style="display: flex; gap: 12px;">
-           <button class="gold-border-btn" style="background: #ef4444; color: white; border: none; height: 46px; flex: 1; justify-content: center;" onclick="confirmDelete()">Gỡ bỏ</button>
-           <button class="gold-cancel-btn" style="flex: 1; height: 46px; justify-content: center;" onclick="closeDeleteModal()">Hủy</button>
+        <div class="account-delete-actions">
+           <button class="gold-border-btn account-delete-confirm-btn" onclick="confirmDelete()">Gỡ bỏ</button>
+           <button class="gold-cancel-btn account-delete-cancel-btn" onclick="closeDeleteModal()">Hủy</button>
         </div>
      </div>
   </div>
@@ -169,4 +169,3 @@
      <script src="js/account.js"></script>
 </body>
 </html>
-

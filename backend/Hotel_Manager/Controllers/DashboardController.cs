@@ -22,14 +22,14 @@ namespace Hotel_Manager.Controllers
             _context = context;
         }
 
-        // GET: api/Dashboard/summary
+        
         [HttpGet("summary")]
         public async Task<ActionResult<DashboardSummary>> GetSummary()
         {
             var today = DateTime.UtcNow.Date;
             var sevenDaysAgo = today.AddDays(-6);
 
-            // ── Room stats ──
+            
             var roomStats = await _context.Room
                 .GroupBy(r => 1)
                 .Select(g => new
@@ -54,27 +54,27 @@ namespace Hotel_Manager.Controllers
                 ? Math.Round((double)(occupiedRooms + bookedRooms) / totalRooms * 100, 1)
                 : 0;
 
-            // ── Revenue per room (30-day average) ──
-            //var thirtyDaysAgo = today.AddDays(-30);
-            //var avgRevenue = await _context.Invoice
-            //    .Where(i => i.CreatedAt >= thirtyDaysAgo)
-            //    .AverageAsync(i => (decimal?)i.SubtotalRoom) ?? 0;
+            
+            
+            
+            
+            
 
-            // ── Guests currently staying ──
+            
             var guestsStaying = await _context.Booking
                 .CountAsync(b => b.Status == "Đang ở" || b.Status == "Check-in");
 
-            // ── New bookings today ──
+            
             var newBookingsToday = await _context.Booking
                 .CountAsync(b => b.CreatedAt >= today);
 
-            // ── New bookings trend (vs yesterday) ──
+            
             var yesterday = today.AddDays(-1);
             var yesterdayBookings = await _context.Booking
                 .CountAsync(b => b.CreatedAt >= yesterday && b.CreatedAt < today);
             int bookingTrend = newBookingsToday - yesterdayBookings;
 
-            // ── 7-day chart data ──
+            
             var dailyStats = new List<DailyStats>();
             for (int i = 6; i >= 0; i--)
             {
@@ -88,7 +88,7 @@ namespace Hotel_Manager.Controllers
                 var dayRevenue = dayBookings.Sum(b => b.TotalRoomAmount);
                 var dayBookingCount = dayBookings.Count;
 
-                // Guests staying that day (approximation via check-in/check-out overlap)
+                
                 var dayGuests = await _context.Booking
                     .Where(b => b.CheckInDate <= dayEnd && b.CheckOutDate >= dayStart
                         && (b.Status == "Đang ở" || b.Status == "Check-in" || b.Status == "Check-out"))
@@ -103,7 +103,7 @@ namespace Hotel_Manager.Controllers
                 });
             }
 
-            // Occupancy rate per day (approximation: booked+occupied rooms / total)
+            
             var occupancyTrend = new List<double>();
             for (int i = 6; i >= 0; i--)
             {
@@ -121,7 +121,7 @@ namespace Hotel_Manager.Controllers
                 occupancyTrend.Add(rate);
             }
 
-            // ── Recent activity ──
+            
             var recentBookings = await _context.Booking
                 .Include(b => b.Customer)
                 .Include(b => b.Room)

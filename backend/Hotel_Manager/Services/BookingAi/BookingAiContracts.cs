@@ -17,6 +17,9 @@ public class BookingAiRecommendRequestDto
     [MaxLength(1000)]
     public string? AiPrompt { get; set; }
 
+    [MaxLength(3000)]
+    public string? BookingHistorySummary { get; set; }
+
     public DateTime? CheckInDate { get; set; }
 
     public DateTime? CheckOutDate { get; set; }

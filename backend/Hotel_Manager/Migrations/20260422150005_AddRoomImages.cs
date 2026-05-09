@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Hotel_Manager.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class AddRoomImages : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
@@ -51,7 +51,7 @@ namespace Hotel_Manager.Migrations
                 column: "room_id");
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

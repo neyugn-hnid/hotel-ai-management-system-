@@ -23,14 +23,14 @@ namespace Hotel_Manager.Controllers
             _context = context;
         }
 
-        // GET: api/Invoices
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Invoice>>> GetInvoice()
         {
             return await _context.Invoice.ToListAsync();
         }
 
-        // GET: api/Invoices/5
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<Invoice>> GetInvoice(int id)
         {
@@ -44,8 +44,8 @@ namespace Hotel_Manager.Controllers
             return invoice;
         }
 
-        // PUT: api/Invoices/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> PutInvoice(int id, InvoiceUpsertRequest request)
         {
@@ -97,8 +97,8 @@ namespace Hotel_Manager.Controllers
             return NoContent();
         }
 
-        // POST: api/Invoices
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPost]
         public async Task<ActionResult<Invoice>> PostInvoice(InvoiceUpsertRequest request)
         {
@@ -146,8 +146,9 @@ namespace Hotel_Manager.Controllers
             return CreatedAtAction("GetInvoice", new { id = invoice.Id }, invoice);
         }
 
-        // DELETE: api/Invoices/5
+        
         [HttpDelete("{id}")]
+            [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteInvoice(int id)
         {
             var invoice = await _context.Invoice.FindAsync(id);

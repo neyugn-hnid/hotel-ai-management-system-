@@ -21,13 +21,6 @@ function getQueryParam(name) {
   return params.get(name);
 }
 
-function parseGuestCount(guestLabel) {
-  const normalized = String(guestLabel || '').toLowerCase();
-  if (normalized.includes('trẻ em')) return 3;
-  const match = normalized.match(/\d+/);
-  return match ? Number(match[0]) : 2;
-}
-
 function sanitizePhone(value) {
   return String(value || '').replace(/[^\d+]/g, '').trim();
 }
@@ -75,7 +68,7 @@ function normalizeRoom(raw) {
       return url && typeof url === 'string';
     });
 
-  // Generate fallback gallery images if no real images
+  
   if (imageUrls.length === 0) {
     const fallbackImages = [
       'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=80',
@@ -177,48 +170,14 @@ function updateSummary() {
   document.getElementById('summaryTotal').innerText = total.toLocaleString('vi-VN');
 }
 
-async function findExistingCustomer(phone, name) {
-  const query = sanitizePhone(phone) || String(name || '').trim();
-  if (!query) return null;
-
-  const params = new URLSearchParams({
-    q: query,
-    pageNumber: '1',
-    pageSize: '20',
-    sortBy: 'updatedAt',
-    sortDir: 'desc'
-  });
-
-  const response = await fetch(CUSTOMERS_API_URL + '?' + params.toString(), {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  });
-
-  if (!response.ok) {
-    throw new Error(await extractApiError(response, 'Không thể tìm kiếm khách hàng.'));
-  }
-
-  const data = await response.json();
-  const items = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
-  const phoneNeedle = sanitizePhone(phone);
-  const nameNeedle = String(name || '').trim().toLowerCase();
-
-  return items.find(function (customer) {
-    return (
-      (phoneNeedle && sanitizePhone(customer.phoneNumber) === phoneNeedle) ||
-      (nameNeedle && String(customer.fullName || '').trim().toLowerCase() === nameNeedle)
-    );
-  }) || null;
-}
-
-async function createCustomer(name, phone, guests) {
+async function createCustomer(name, phone) {
   const customerData = {
     fullName: String(name || '').trim(),
     email: null,
     phoneNumber: sanitizePhone(phone),
     identityCard: null,
     status: 'Khách mới',
-    aiPreferences: String(guests || '')
+    aiPreferences: ''
   };
 
   const response = await fetch(CUSTOMERS_API_URL, {
@@ -234,13 +193,39 @@ async function createCustomer(name, phone, guests) {
   return await response.json();
 }
 
-async function findOrCreateCustomer(name, phone, guests) {
-  const existing = await findExistingCustomer(phone, name);
-  if (existing && existing.id) {
-    return existing;
+async function findCustomerByPhone(phone) {
+  const normalizedPhone = sanitizePhone(phone).replace(/[^\d]/g, '');
+  if (!normalizedPhone) {
+    return null;
   }
 
-  return await createCustomer(name, phone, guests);
+  const params = new URLSearchParams({
+    phone: normalizedPhone
+  });
+
+  const response = await fetch(CUSTOMERS_API_URL + '/public/by-phone?' + params.toString(), {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(await extractApiError(response, 'Không thể kiểm tra khách hàng theo số điện thoại'));
+  }
+
+  return await response.json();
+}
+
+async function findOrCreateCustomer(name, phone) {
+  const existingCustomer = await findCustomerByPhone(phone);
+  if (existingCustomer && existingCustomer.id) {
+    return existingCustomer;
+  }
+
+  return await createCustomer(name, phone);
 }
 
 window.onload = async function () {
@@ -272,7 +257,6 @@ window.onload = async function () {
 
     const checkIn = checkInInput.value;
     const checkOut = checkOutInput.value;
-    const guests = document.getElementById('bookGuests').value;
     const name = document.getElementById('bookName').value;
     const phone = document.getElementById('bookPhone').value;
 
@@ -291,13 +275,11 @@ window.onload = async function () {
     document.getElementById('cPhone').innerText = phone;
     document.getElementById('cIn').innerText = checkIn;
     document.getElementById('cOut').innerText = checkOut;
-    document.getElementById('cGuests').innerText = guests;
     document.getElementById('cTotal').innerText = total.toLocaleString('vi-VN') + ' ₫';
 
     try {
-      const customer = await findOrCreateCustomer(name, phone, guests);
+      const customer = await findOrCreateCustomer(name, phone);
       const customerId = customer.id;
-      const guestCount = parseGuestCount(guests);
       const bookingData = {
         bookingCode: 'BKG-WEB' + Date.now(),
         customerId: customerId,
@@ -307,7 +289,7 @@ window.onload = async function () {
         checkOutDate: checkOut + 'T00:00:00',
         status: 'Chờ xác nhận',
         totalRoomAmount: total,
-        notes: 'Yêu cầu đặt qua website - ' + guests + ' - SĐT: ' + sanitizePhone(phone) + ' - So khach: ' + guestCount
+        notes: 'Yêu cầu đặt qua website - SĐT: ' + sanitizePhone(phone)
       };
 
       const bookingResponse = await fetch(BOOKINGS_API_URL, {

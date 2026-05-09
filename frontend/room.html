@@ -13,9 +13,9 @@
     
     <aside class="luxe-sidebar">
       <div>
-        <div style="display: flex; align-items: center; gap: 12px; padding: 0 16px 40px;">
-          <div style="width: 28px; height: 28px; background: var(--dash-accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 14px;">L</div>
-          <span style="font-weight: 700; font-size: 16px; letter-spacing: -0.02em; color: white;" data-config="logo">Luxe Concierge</span>
+        <div class="admin-sidebar-brand">
+          <div class="admin-sidebar-brand__badge">L</div>
+          <span class="admin-sidebar-brand__text" data-config="logo">Luxe Concierge</span>
         </div>
 
         <nav>
@@ -33,17 +33,17 @@
 
       <div>
         <a href="setting.html" class="sidebar-item"><span class="material-symbols-outlined">settings</span><span>Cài đặt</span></a>
-        <a href="#" class="sidebar-item" style="color: #FF4444;"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
+        <a href="#" class="sidebar-item sidebar-item--logout"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
       </div>
     </aside>
 
     <main class="main-content">
-      <header style="margin-bottom: 48px; display: flex; justify-content: space-between; align-items: center;">
+      <header class="admin-page-header">
         <div>
-          <h1 style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0;">Quản lý kho phòng</h1>
+          <h1 class="admin-page-title">Quản lý kho phòng</h1>
         </div>
-        <button class="gold-border-btn" id="btnAddRoom" style="background: var(--c-blue); color: white;">
-          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 6px; vertical-align: middle;">add</span> Thêm phòng mới
+        <button class="gold-border-btn admin-btn-primary" id="btnAddRoom">
+          <span class="material-symbols-outlined admin-btn-icon">add</span> Thêm phòng mới
         </button>
       </header>
 
@@ -54,17 +54,17 @@
          </div>
          <div class="stat-card">
             <p>Đang có khách</p>
-            <p id="stat-inuse" style="color: #2563eb;">0</p>
+            <p id="stat-inuse" class="admin-stat-value--blue">0</p>
          </div>
          <div class="stat-card">
             <p>Phòng trống sẵn sàng</p>
-            <p id="stat-available" style="color: #0d7350;">0</p>
+            <p id="stat-available" class="admin-stat-value--green">0</p>
          </div>
       </div>
 
       <div class="filter-bar">
         <div class="notion-search-bar">
-          <span class="material-symbols-outlined" style="color: var(--dash-muted);">search</span>
+          <span class="material-symbols-outlined admin-search-icon">search</span>
           <input type="text" id="searchInput" placeholder="Tìm theo tên phòng, loại phòng..." onkeyup="handleSearch()"/>
         </div>
         <select class="notion-filter-item" id="filterType" onchange="handleFilter()">
@@ -82,15 +82,15 @@
         </select>
       </div>
 
-      <div class="luxury-card" style="padding: 0; overflow: hidden;">
+      <div class="luxury-card admin-card-reset">
          <table class="notion-table">
             <thead>
-               <tr style="background: var(--dash-bg);">
-                  <th style="padding-left: 24px;">Tên phòng</th>
+               <tr class="admin-table-head-row">
+                  <th class="admin-table-head-cell--left-24">Tên phòng</th>
                   <th>Loại phòng</th>
                   <th>Giá / Đêm</th>
                   <th>Trạng thái</th>
-                  <th style="text-align: right; padding-right: 24px;">Tiện ích</th>
+                  <th id="roomActionsHeader" class="admin-table-head-cell--right-24">Tiện ích</th>
                </tr>
             </thead>
             <tbody id="roomTableBody">
@@ -98,12 +98,12 @@
             </tbody>
          </table>
          
-         <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; background: var(--dash-bg); border-top: 1px solid var(--dash-border); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
-            <p style="font-size: 13px; color: var(--dash-muted);">Hiển thị <span id="totalRooms">0</span> phòng nghỉ</p>
-            <div style="display: flex; gap: 8px;">
-               <button id="btnPrevRooms" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang trước</button>
-               <span id="roomPageInfo" style="display:inline-flex; align-items:center; font-size:13px; color:var(--dash-muted); padding:0 4px;">Trang 1/1</span>
-               <button id="btnNextRooms" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang sau</button>
+         <div class="admin-table-footer admin-table-footer--md">
+            <p class="admin-table-summary">Hiển thị <span id="totalRooms">0</span> phòng nghỉ</p>
+            <div class="admin-table-actions">
+               <button id="btnPrevRooms" class="btn-luxe-sec admin-table-pager-btn">Trang trước</button>
+               <span id="roomPageInfo" class="admin-table-page-info">Trang 1/1</span>
+               <button id="btnNextRooms" class="btn-luxe-sec admin-table-pager-btn">Trang sau</button>
             </div>
          </div>
       </div>
@@ -114,9 +114,9 @@
      <div class="notion-modal">
 
         <div class="modal-header">
-           <h2 style="font-size: 20px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+           <h2 class="admin-modal-title admin-modal-title-row">
               <span id="roomModalTitle">Thêm phòng mới</span>
-              <span class="material-symbols-outlined" style="cursor: pointer; opacity: 0.5;" onclick="closeRoomModal()">close</span>
+              <span class="material-symbols-outlined admin-modal-close" onclick="closeRoomModal()">close</span>
            </h2>
         </div>
         <form id="roomForm">
@@ -128,7 +128,7 @@
               <label>Mô tả </label>
               <textarea class="notion-input" id="roomDescription" required placeholder="Mô tả chi tiết về phòng"></textarea>
            </div>
-           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+           <div class="admin-grid-two-col">
               <div class="form-row">
                  <label>Loại phòng</label>
                  <select class="notion-input" id="roomType">
@@ -142,8 +142,8 @@
             <div class="form-row">
                <label>Hình ảnh phòng (Thêm được nhiều ảnh)</label>
                <input type="file" class="notion-input" id="roomImages" multiple accept="image/*" onchange="previewImages()"/>
-               <div id="imagePreviewContainer" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; min-height: 40px; border: 1px dashed var(--dash-border); padding: 8px; border-radius: 4px;">
-                  <p style="font-size: 11px; color: var(--dash-muted); width: 100%; text-align: center;">Chưa có ảnh nào được chọn</p>
+               <div id="imagePreviewContainer" class="room-image-preview-container">
+                  <p class="room-image-preview-placeholder">Chưa có ảnh nào được chọn</p>
                </div>
             </div>
             <div class="form-row">
@@ -152,24 +152,24 @@
               </select>
            </div>
 
-           <div style="margin-top: 40px; display: flex; gap: 12px;">
-              <button type="submit" class="gold-border-btn" style="flex: 1; background: var(--dash-accent); color: white; border: none; height: 46px;">Xác nhận lưu</button>
-              <button type="button" class="gold-cancel-btn" style="flex: 1; height: 46px;" onclick="closeRoomModal()">Hủy bỏ</button>
+           <div class="admin-form-actions">
+              <button type="submit" id="roomSubmitButton" class="gold-border-btn admin-form-submit">Xác nhận lưu</button>
+              <button type="button" class="gold-cancel-btn admin-form-cancel" onclick="closeRoomModal()">Hủy bỏ</button>
            </div>
         </form>
      </div>
   </div>
 
   <div class="modal-overlay" id="deleteConfirmModal">
-     <div class="luxury-card" style="width: 400px; text-align: center; border-radius: 24px; position: relative;">
-        <div style="width: 48px; height: 48px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-           <span class="material-symbols-outlined" style="font-size: 28px;">warning</span>
+     <div class="luxury-card admin-delete-card admin-delete-card--fixed">
+        <div class="admin-delete-icon-wrap">
+           <span class="material-symbols-outlined admin-delete-icon--sm">warning</span>
         </div>
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Xác nhận xóa phòng?</h3>
-        <p style="color: var(--dash-muted); font-size: 14px; margin-bottom: 32px;">Hành động này không thể hoàn tác. Các dữ liệu liên quan đến phòng này sẽ bị gỡ bỏ khỏi danh sách hiển thị.</p>
-        <div style="display: flex; gap: 12px;">
-           <button class="gold-border-btn" style="flex: 1; background: #ef4444; color: white; border: none; height: 46px;" onclick="deleteRoom()">Xóa vĩnh viễn</button>
-           <button class="gold-cancel-btn" style="flex: 1; height: 46px;" onclick="closeDeleteModal()">Quay lại</button>
+        <h3 class="admin-delete-title">Xác nhận xóa phòng?</h3>
+        <p class="admin-delete-text admin-delete-text--wide">Hành động này không thể hoàn tác. Các dữ liệu liên quan đến phòng này sẽ bị gỡ bỏ khỏi danh sách hiển thị.</p>
+        <div class="admin-delete-actions">
+           <button id="roomDeleteButton" class="gold-border-btn admin-delete-confirm" onclick="deleteRoom()">Xóa vĩnh viễn</button>
+           <button class="gold-cancel-btn admin-delete-cancel" onclick="closeDeleteModal()">Quay lại</button>
         </div>
      </div>
   </div>
@@ -179,4 +179,3 @@
   
 </body>
 </html>
-

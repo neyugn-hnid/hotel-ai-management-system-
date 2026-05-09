@@ -148,7 +148,7 @@
     }
     .btn-luxe-sec:hover { background: var(--dash-bg); }
 
-    /* Modal Styles */
+    
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.4);
@@ -221,15 +221,19 @@
       letter-spacing: 0.1em;
     }
 
-    .stat-box p:last-child {
+.stat-box p:last-child {
       font-size: 28px;
       font-weight: 700;
       letter-spacing: -0.03em;
       color: var(--dash-text);
     }
+
+.service-desc-textarea {
+  resize: none;
+}
   
 
-/* Page-specific responsive: service */
+
 @media (max-width: 768px) {
   .stat-bar { grid-template-columns: 1fr !important; gap: 12px !important; }
   #serviceTableBody td { white-space: nowrap; }

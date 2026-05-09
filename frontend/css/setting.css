@@ -172,13 +172,42 @@
       transition: all 0.2s;
     }
 
-    .btn-save:hover {
+.btn-save:hover {
       background: #b08d4a;
       box-shadow: 0 8px 20px rgba(197, 160, 89, 0.3);
     }
+
+.setting-page-header {
+  margin-bottom: 48px;
+}
+
+.setting-page-description {
+  color: var(--dash-muted);
+  font-size: 16px;
+}
+
+.setting-profile-role {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  color: var(--dash-muted);
+  cursor: not-allowed;
+}
+
+.setting-global-section {
+  border-bottom: 1px solid var(--dash-border);
+}
+
+.setting-save-wrap {
+  margin-top: 32px;
+}
+
+.setting-save-icon {
+  font-size: 18px;
+}
   
 
-/* Page-specific responsive: settings */
+
 @media (max-width: 768px) {
   .settings-section { padding: 16px !important; }
   .settings-title { font-size: 18px !important; }

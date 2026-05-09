@@ -20,6 +20,12 @@ public class BookingAiOptions
     public string OllamaBaseUrl { get; set; } = "http://localhost:11434";
     public string OllamaModel { get; set; } = "gemma3:latest";
     public int LlmTimeoutSeconds { get; set; } = 8;
+    public string LlmProvider { get; set; } = "ollama"; 
+    public string GoogleGeminiApiKey { get; set; } = string.Empty;
+    public string GoogleGeminiModel { get; set; } = "gemini-1.5-flash";
+    public string DeepSeekApiKey { get; set; } = string.Empty;
+    public string DeepSeekModel { get; set; } = "deepseek-chat";
+    public string DeepSeekBaseUrl { get; set; } = "https://api.deepseek.com";
 }
 
 public interface IOllamaReasoningClient
@@ -93,17 +99,23 @@ public class BookingRecommendationService : IBookingRecommendationService
 {
     private readonly Hotel_ManagerContext _context;
     private readonly IOllamaReasoningClient _ollamaReasoningClient;
+    private readonly IGoogleGeminiReasoningClient _googleGeminiReasoningClient;
+    private readonly IDeepSeekReasoningClient _deepSeekReasoningClient;
     private readonly BookingAiOptions _options;
     private readonly ILogger<BookingRecommendationService> _logger;
 
     public BookingRecommendationService(
         Hotel_ManagerContext context,
         IOllamaReasoningClient ollamaReasoningClient,
+        IGoogleGeminiReasoningClient googleGeminiReasoningClient,
+        IDeepSeekReasoningClient deepSeekReasoningClient,
         IOptions<BookingAiOptions> options,
         ILogger<BookingRecommendationService> logger)
     {
         _context = context;
         _ollamaReasoningClient = ollamaReasoningClient;
+        _googleGeminiReasoningClient = googleGeminiReasoningClient;
+        _deepSeekReasoningClient = deepSeekReasoningClient;
         _options = options.Value;
         _logger = logger;
     }
@@ -141,6 +153,11 @@ public class BookingRecommendationService : IBookingRecommendationService
                 cancellationToken);
 
         List<string> promptTokens = Tokenize(request.AiPrompt);
+        List<string> historyTokens = Tokenize(request.BookingHistorySummary);
+        if (historyTokens.Count > 0)
+        {
+            promptTokens = promptTokens.Concat(historyTokens).Distinct().ToList();
+        }
         List<string> preferenceTokens = Tokenize(matchedCustomer?.AiPreferences);
         List<string> purposeTerms = PurposeKeywords(request.RoomPurpose);
         List<string> guestTerms = GuestKeywords(request.GuestCount ?? 2);
@@ -196,7 +213,7 @@ public class BookingRecommendationService : IBookingRecommendationService
         }
 
         var best = ranked.First();
-        string baseReason = BuildRecommendationReason(best.Room, budgetLimit, request.RoomPurpose, promptTokens.Count > 0, preferenceTokens.Count > 0, best.Score);
+        string baseReason = BuildRecommendationReason(best.Room, budgetLimit, request.RoomPurpose, promptTokens.Count > 0, preferenceTokens.Count > 0, historyTokens.Count > 0, best.Score);
 
         string engine = "rule";
         string finalReason = baseReason;
@@ -206,7 +223,24 @@ public class BookingRecommendationService : IBookingRecommendationService
             try
             {
                 string prompt = BuildLlmPrompt(request, matchedCustomer, best.Room, best.Score, baseReason);
-                string? llmReason = await _ollamaReasoningClient.GenerateReasonAsync(prompt, cancellationToken);
+                string? llmReason = null;
+
+                if (string.Equals(_options.LlmProvider, "deepseek", StringComparison.OrdinalIgnoreCase))
+                {
+                    llmReason = await _deepSeekReasoningClient.GenerateReasonAsync(prompt, cancellationToken);
+                    _logger.LogInformation("Using DeepSeek for LLM reasoning");
+                }
+                else if (string.Equals(_options.LlmProvider, "google-gemini", StringComparison.OrdinalIgnoreCase))
+                {
+                    llmReason = await _googleGeminiReasoningClient.GenerateReasonAsync(prompt, cancellationToken);
+                    _logger.LogInformation("Using Google Gemini for LLM reasoning");
+                }
+                else
+                {
+                    llmReason = await _ollamaReasoningClient.GenerateReasonAsync(prompt, cancellationToken);
+                    _logger.LogInformation("Using Ollama for LLM reasoning");
+                }
+
                 if (!string.IsNullOrWhiteSpace(llmReason))
                 {
                     finalReason = llmReason.Trim();
@@ -257,7 +291,7 @@ public class BookingRecommendationService : IBookingRecommendationService
                     PricePerNight = x.Room.PricePerNight,
                     MatchScore = x.Score,
                     Status = x.Room.Status,
-                    Reason = BuildRecommendationReason(x.Room, budgetLimit, request.RoomPurpose, promptTokens.Count > 0, preferenceTokens.Count > 0, x.Score)
+                    Reason = BuildRecommendationReason(x.Room, budgetLimit, request.RoomPurpose, promptTokens.Count > 0, preferenceTokens.Count > 0, historyTokens.Count > 0, x.Score)
                 })
                 .ToList()
         };
@@ -414,6 +448,7 @@ public class BookingRecommendationService : IBookingRecommendationService
         string? roomPurpose,
         bool hasPrompt,
         bool hasPreference,
+        bool hasHistory,
         int score)
     {
         var reasonParts = new List<string>();
@@ -422,52 +457,57 @@ public class BookingRecommendationService : IBookingRecommendationService
         {
             if (room.PricePerNight <= budgetLimit)
             {
-                reasonParts.Add("Phong nam trong ngan sach yeu cau");
+                reasonParts.Add("Phòng nằm trong ngân sách yêu cầu");
             }
             else
             {
-                reasonParts.Add("Phong vuot ngan sach nhung van phu hop theo tien ich va muc dich");
+                reasonParts.Add("Phòng vượt ngân sách nhưng vẫn phù hợp theo tiện ích và mục đích");
             }
         }
 
         string purposeLabel = (roomPurpose ?? string.Empty).Trim().ToLower() switch
         {
-            "business" => "cong tac",
-            "honeymoon" => "nghi duong/trang mat",
-            "family" => "gia dinh",
+            "business" => "công tác",
+            "honeymoon" => "nghỉ dưỡng/trăng mật",
+            "family" => "gia đình",
             _ => string.Empty
         };
 
         if (!string.IsNullOrWhiteSpace(purposeLabel))
         {
-            reasonParts.Add($"Khop nhu cau chuyen di: {purposeLabel}");
+            reasonParts.Add($"Khớp nhu cầu chuyến đi: {purposeLabel}");
         }
 
         if (hasPrompt)
         {
-            reasonParts.Add("Da xet yeu cau dac biet trong prompt cua le tan");
+            reasonParts.Add("Đã xét yêu cầu đặc biệt trong prompt của lễ tân");
         }
 
         if (hasPreference)
         {
-            reasonParts.Add("Da tan dung so thich khach hang tu lich su luu tru");
+            reasonParts.Add("Đã tận dụng sở thích khách hàng từ lịch sử lưu trú");
+        }
+
+        if (hasHistory)
+        {
+            reasonParts.Add("Đã tham chiếu lịch sử đặt phòng gần đây của khách");
         }
 
         if (string.Equals((roomPurpose ?? string.Empty).Trim(), "family", StringComparison.OrdinalIgnoreCase))
         {
-            reasonParts.Add("Uu tien bo cuc phu hop nhom khach gia dinh");
+            reasonParts.Add("Ưu tiên bố cục phù hợp nhóm khách gia đình");
         }
 
         if (string.Equals((roomPurpose ?? string.Empty).Trim(), "business", StringComparison.OrdinalIgnoreCase))
         {
-            reasonParts.Add("Uu tien khong gian thuan tien cho lam viec va nghi ngoi");
+            reasonParts.Add("Ưu tiên không gian thuận tiện cho làm việc và nghỉ ngơi");
         }
 
         string summary = reasonParts.Count > 0
             ? string.Join(", ", reasonParts)
-            : "Phong co diem can bang tot giua gia, loai phong va do san sang";
+            : "Phòng có điểm cân bằng tốt giữa giá, loại phòng và độ sẵn sàng";
 
-        return summary + ". Muc do phu hop tong hop: " + score + "%.";
+        return summary + ". Mức độ phù hợp tổng hợp: " + score + "%.";
     }
 
     private static string BuildLlmPrompt(
@@ -478,15 +518,16 @@ public class BookingRecommendationService : IBookingRecommendationService
         string baseReason)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("Du lieu goi y phong:");
-        sb.AppendLine("- Khach: " + (customer?.FullName ?? request.CustomerQuery));
-        sb.AppendLine("- Ngan sach: " + (request.BudgetLimit?.ToString() ?? "Khong gioi han"));
-        sb.AppendLine("- Muc dich: " + (request.RoomPurpose ?? "Khong xac dinh"));
-        sb.AppendLine("- So khach: " + (request.GuestCount?.ToString() ?? "Khong ro"));
-        sb.AppendLine("- Ngay nhan/tra: " + (request.CheckInDate?.ToString("yyyy-MM-dd") ?? "--") + " -> " + (request.CheckOutDate?.ToString("yyyy-MM-dd") ?? "--"));
-        sb.AppendLine("- Prompt bo sung: " + (request.AiPrompt ?? "Khong co"));
-        sb.AppendLine("- Phong de xuat: " + room.CardName + " / " + room.RoomType);
-        sb.AppendLine("- Gia phong: " + room.PricePerNight);
+        sb.AppendLine("Dữ liệu gợi ý phòng:");
+        sb.AppendLine("- Khách: " + (customer?.FullName ?? request.CustomerQuery));
+        sb.AppendLine("- Ngân sách: " + (request.BudgetLimit?.ToString() ?? "Không giới hạn"));
+        sb.AppendLine("- Mục đích: " + (request.RoomPurpose ?? "Không xác định"));
+        sb.AppendLine("- Số khách: " + (request.GuestCount?.ToString() ?? "Không rõ"));
+        sb.AppendLine("- Ngày nhận/trả: " + (request.CheckInDate?.ToString("yyyy-MM-dd") ?? "--") + " -> " + (request.CheckOutDate?.ToString("yyyy-MM-dd") ?? "--"));
+        sb.AppendLine("- Prompt bổ sung: " + (request.AiPrompt ?? "Không có"));
+        sb.AppendLine("- Lịch sử đặt phòng: " + (request.BookingHistorySummary ?? "Không có"));
+        sb.AppendLine("- Phòng đề xuất: " + room.CardName + " / " + room.RoomType);
+        sb.AppendLine("- Giá phòng: " + room.PricePerNight);
         sb.AppendLine("- Diem match: " + score + "%");
         sb.AppendLine("- Ly do rule-based: " + baseReason);
         sb.AppendLine("Hay viet lai ly do de xuat ngan gon, than thien, toi da 2 cau, bang tieng Viet.");

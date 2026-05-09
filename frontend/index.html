@@ -19,79 +19,22 @@
         <a href="#amenities" class="navbar__link small-caps">Tiện Ích</a>
         <a href="#dining" class="navbar__link small-caps">Ẩm Thực</a>
       </div>
-      <div
-        class="navbar__actions"
-        style="display: flex; gap: 12px; align-items: center"
-      >
-        <button
-          onclick="openLoginModal()"
-          class="small-caps"
-          style="
-            background: var(--c-gold);
-            border: none;
-            color: white;
-            padding: 0 20px;
-            height: 38px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 11px;
-            text-decoration: none;
-            transition: background 0.3s;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-          "
-        >
-          ĐĂNG NHẬP
-        </button>
-        <a
-          href="room-ai.html"
-          class="nav-pill"
-          style="
-            background: var(--c-gold);
-            border: none;
-            color: white;
-            padding: 0 20px;
-            height: 38px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-          "
-          >Đặt phòng ngay</a
-        >
+      <div class="navbar__actions">
+        <button onclick="openLoginModal()" class="nav-pill nav-pill-primary">ĐĂNG NHẬP</button>
+        <a href="room-ai.html" class="nav-pill nav-pill-primary">ĐẶT PHÒNG</a>
       </div>
     </nav>
 
     <section id="home" class="hero">
       <div class="hero__slideshow">
-        <img
-          src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=1920&q=80"
-          class="hero__slide"
-          style="animation-delay: 0s"
-          alt="Luxe 1"
-        />
-        <img
-          src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1920&q=80"
-          class="hero__slide"
-          style="animation-delay: 5s"
-          alt="Luxe 2"
-        />
-        <img
-          src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1920&q=80"
-          class="hero__slide"
-          style="animation-delay: 10s"
-          alt="Luxe 3"
-        />
+        <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=1920&q=80" class="hero__slide slide-delay-0" alt="Luxe 1" />
+        <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1920&q=80" class="hero__slide slide-delay-5" alt="Luxe 2" />
+        <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1920&q=80" class="hero__slide slide-delay-10" alt="Luxe 3" />
       </div>
       <div class="hero__overlay"></div>
 
       <div class="hero__content">
-        <span class="small-caps" style="color: var(--c-gold)"
-          >Trải Nghiệm Đẳng Cấp 5 Sao</span
-        >
+        <span class="small-caps gold">Trải Nghiệm Đẳng Cấp 5 Sao</span>
         <h1 class="hero__title">
           Khởi Nguồn <br />
           <span class="serif italic gold">Của Sự Xa Hoa</span>
@@ -100,90 +43,15 @@
           Nơi kiến trúc đương đại giao hòa cùng tinh thần hiếu khách truyền
           thống, kiến tạo nên những ký ức vô giá.
         </p>
-
-        <div class="booking-bar">
-          <div class="booking-bar__item">
-            <label class="booking-bar__label">Nhận phòng</label>
-            <input type="date" id="indexCheckIn" />
-          </div>
-          <div class="booking-bar__item">
-            <label class="booking-bar__label">Trả phòng</label>
-            <input type="date" id="indexCheckOut" />
-          </div>
-          <div class="booking-bar__item">
-            <label class="booking-bar__label">Phòng & Khách</label>
-            <select>
-              <option>2 Người, 1 Phòng</option>
-              <option>1 Người, 1 Phòng</option>
-              <option>Gia đình</option>
-            </select>
-          </div>
-          <div class="booking-bar__item">
-            <button
-              class="btn-find"
-              style="
-                width: 100%;
-                height: 50px;
-                font-size: 13px;
-                font-weight: 700;
-              "
-              onclick="window.location.href = 'room-ai.html'"
-            >
-              Kiểm tra phòng
-            </button>
-          </div>
-        </div>
       </div>
     </section>
 
-    <section
-      class="section-padding"
-      style="
-        background-color: var(--c-luxury-black, #050505);
-        color: white;
-        text-align: center;
-      "
-    >
-      <div class="container" style="max-width: 800px; margin: 0 auto">
-        <span
-          class="small-caps gold"
-          style="display: block; margin-bottom: 16px"
-          >The Luxe Club</span
-        >
-        <h2 style="font-size: 3rem; margin-top: 0; line-height: 1.2">
-          Đặc Quyền <span class="serif italic gold">Độc Bản</span> Dành Riêng
-          Cho Bạn
-        </h2>
-        <p
-          style="
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 40px;
-            font-size: 1.1rem;
-            line-height: 1.6;
-          "
-        >
-          Hành trình trải nghiệm xa hoa bắt đầu ngay hôm nay. Trở thành hội viên
-          để tận hưởng điểm thưởng không giới hạn, nâng hạng phòng tự động và
-          dịch vụ cá nhân hóa 24/7.
-        </p>
-        <button
-          class="nav-pill"
-          style="
-            border: none;
-            background: var(--c-gold);
-            color: var(--c-luxury-black, #050505);
-            padding: 16px 40px;
-            font-size: 14px;
-            font-weight: 700;
-            border-radius: 4px;
-            cursor: pointer;
-            display: inline-block;
-            transition: opacity 0.3s;
-          "
-          onclick="openRegisterModal()"
-        >
-          THAM GIA NGAY
-        </button>
+    <section class="section-padding section--dark">
+      <div class="container container--narrow">
+        <span class="small-caps gold">The Luxe Club</span>
+        <h2 class="hero-heading-large">Đặc Quyền <span class="serif italic gold">Độc Bản</span> Dành Riêng Cho Bạn</h2>
+        <p class="lead-text">Hành trình trải nghiệm xa hoa bắt đầu ngay hôm nay. Trở thành hội viên để tận hưởng điểm thưởng không giới hạn, nâng hạng phòng tự động và dịch vụ cá nhân hóa 24/7.</p>
+        <button class="nav-pill nav-pill-join" onclick="openRegisterModal()">THAM GIA NGAY</button>
       </div>
     </section>
 
@@ -196,17 +64,13 @@
             alt="Main"
           />
           <img
-            src="https://images.unsplash.com/photo-1551882547-ff40c0d129df?w=500&q=80"
+            src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&q=80"
             class="story__img-float"
             alt="Float"
           />
         </div>
         <div class="story__content">
-          <span
-            class="gold serif italic"
-            style="font-size: 1.5rem; display: block; margin-bottom: 20px"
-            >Di sản của sự tận tâm</span
-          >
+          <span class="gold serif italic story__lead">Di sản của sự tận tâm</span>
           <h2>
             Mọi Chi Tiết Đều <br />
             <span class="gold italic">Mang Một Linh Hồn</span>
@@ -217,30 +81,14 @@
             cho nghệ thuật hiếu khách, mỗi góc nhỏ tại khách sạn là một câu
             chuyện về sự hoàn mỹ.
           </p>
-          <div style="display: flex; gap: 60px">
+          <div class="stats-row">
             <div class="stat">
-              <span
-                class="gold"
-                style="
-                  font-family: var(--f-display);
-                  font-size: 2.5rem;
-                  display: block;
-                "
-                >5★</span
-              >
-              <span class="small-caps" style="opacity: 0.4">Tiêu chuẩn</span>
+              <span class="gold stat__big">5★</span>
+              <span class="small-caps muted">Tiêu chuẩn</span>
             </div>
             <div class="stat">
-              <span
-                class="gold"
-                style="
-                  font-family: var(--f-display);
-                  font-size: 2.5rem;
-                  display: block;
-                "
-                >24/7</span
-              >
-              <span class="small-caps" style="opacity: 0.4">Quản gia</span>
+              <span class="gold stat__big">24/7</span>
+              <span class="small-caps muted">Quản gia</span>
             </div>
           </div>
         </div>
@@ -249,34 +97,18 @@
 
     <section id="rooms" class="section-padding rooms-section">
       <div class="container">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-          "
-        >
+        <div class="section-header-row">
           <div>
             <span class="small-caps gold">Phòng & Suite Đặc Tuyển</span>
             <h2
-              style="
-                font-size: 3.5rem;
-                margin-top: 20px;
-                margin-bottom: 0;
-                line-height: 1;
-              "
+              class="rooms__title-large"
             >
               Kiến Trúc <span class="serif italic">Nâng Tầm Trải Nghiệm</span>
             </h2>
           </div>
           <a
             href="room-ai.html"
-            class="nav-pill"
-            style="
-              border-color: rgba(255, 255, 255, 0.2);
-              color: white;
-              margin-bottom: 8px;
-            "
+            class="nav-pill nav-pill-outline"
             >Xem tất cả phòng</a
           >
         </div>
@@ -294,9 +126,8 @@
             <div class="room-card__content">
               <span class="room-card__index" id="roomCard1Type">01 / ---</span>
               <h3 class="room-card__title" id="roomCard1Name">Đang tải...</h3>
-              <div class="room-card__footer" style="justify-content: flex-end">
-                <span style="font-family: var(--f-mono); font-size: 14px" id="roomCard1Price">---</span
-                >
+              <div class="room-card__footer footer--align-end">
+                <span class="room-price" id="roomCard1Price">---</span>
               </div>
             </div>
           </div>
@@ -312,10 +143,9 @@
             />
             <div class="room-card__content">
               <span class="room-card__index" id="roomCard2Type">02 / ---</span>
-              <h3 class="room-card__title" style="white-space: nowrap" id="roomCard2Name">Đang tải...</h3>
-              <div class="room-card__footer" style="justify-content: flex-end">
-                <span style="font-family: var(--f-mono); font-size: 14px" id="roomCard2Price">---</span
-                >
+              <h3 class="room-card__title nowrap" id="roomCard2Name">Đang tải...</h3>
+              <div class="room-card__footer footer--align-end">
+                <span class="room-price" id="roomCard2Price">---</span>
               </div>
             </div>
           </div>
@@ -332,9 +162,8 @@
             <div class="room-card__content">
               <span class="room-card__index" id="roomCard3Type">03 / ---</span>
               <h3 class="room-card__title" id="roomCard3Name">Đang tải...</h3>
-              <div class="room-card__footer" style="justify-content: flex-end">
-                <span style="font-family: var(--f-mono); font-size: 14px" id="roomCard3Price">---</span
-                >
+              <div class="room-card__footer footer--align-end">
+                <span class="room-price" id="roomCard3Price">---</span>
               </div>
             </div>
           </div>
@@ -343,13 +172,13 @@
     </section>
 
     <section id="amenities" class="section-padding amenities-section">
-      <div class="atmosphere-glow" style="top: 0; right: 0"></div>
-      <div class="atmosphere-glow" style="bottom: 0; left: 0"></div>
+      <div class="atmosphere-glow atmosphere-glow--top-right"></div>
+      <div class="atmosphere-glow atmosphere-glow--bottom-left"></div>
 
       <div class="container">
-        <div style="text-align: center; margin-bottom: 100px">
+        <div class="section-intro">
           <span class="small-caps gold">Đặc ân độc bản</span>
-          <h2 style="font-size: 4rem; margin-top: 20px">Dịch Vụ Tinh Hoa</h2>
+          <h2 class="heading-2-xl">Dịch Vụ Tinh Hoa</h2>
         </div>
 
         <div class="amenity-row">
@@ -361,51 +190,31 @@
             />
           </div>
           <div>
-            <h3 style="font-size: 3rem; margin-bottom: 25px">
-              Oasis Spa & Wellness
-            </h3>
+            <h3 class="heading-3-large">Oasis Spa & Wellness</h3>
             <p class="story__desc">
               Thiên đường tĩnh lặng giữa lòng đô thị. Tận hưởng liệu pháp
               massage phục hồi đỉnh cao từ những thảo dược tự nhiên thuần khiết
               nhất.
             </p>
-            <a
-              href="#"
-              class="small-caps gold"
-              style="
-                text-decoration: none;
-                border-bottom: 1px solid rgba(197, 160, 89, 0.3);
-                padding-bottom: 5px;
-              "
-              >Khám phá liệu pháp</a
-            >
+            <a href="#" class="small-caps gold underline-muted">Khám phá liệu pháp</a>
           </div>
         </div>
 
-        <div class="amenity-row" style="direction: rtl">
-          <div class="amenity__img-wrap" style="direction: ltr">
+        <div class="amenity-row amenity-row--rtl">
+          <div class="amenity__img-wrap amenity__img-wrap--ltr">
             <img
               src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=2070"
               class="amenity__img"
               alt="Pool"
             />
           </div>
-          <div style="direction: ltr; padding-left: 20px">
-            <h3 style="font-size: 3rem; margin-bottom: 25px">Hồ Bơi Vô Cực</h3>
+          <div class="amenity__content--ltr">
+            <h3 class="heading-3-large">Hồ Bơi Vô Cực</h3>
             <p class="story__desc">
               Hòa mình vào làn nước mát rượi trong khi chiêm ngưỡng toàn cảnh
               thành phố lung linh. Một trải nghiệm thị giác không thể bỏ lỡ.
             </p>
-            <a
-              href="#"
-              class="small-caps gold"
-              style="
-                text-decoration: none;
-                border-bottom: 1px solid rgba(197, 160, 89, 0.3);
-                padding-bottom: 5px;
-              "
-              >Xem thư viện ảnh</a
-            >
+            <a href="#" class="small-caps gold underline-muted">Xem thư viện ảnh</a>
           </div>
         </div>
       </div>
@@ -414,16 +223,11 @@
     <section id="dining" class="section-padding dining-section">
       <div class="container dining-grid">
         <div>
-          <span
-            class="small-caps"
-            style="opacity: 0.6; display: block; margin-bottom: 20px"
-            >Trải Nghiệm Ẩm Thực</span
-          >
-          <h2 style="font-size: 4rem; line-height: 1.1">
-            Hương Vị <br />
+          <span class="small-caps dining__subtitle">Trải Nghiệm Ẩm Thực</span>
+          <h2 class="heading-2-xl">Hương Vị <br />
             <span class="serif italic">Đánh Thức Giác Quan</span>
           </h2>
-          <div style="margin-top: 60px">
+          <div class="dining__list">
             <div class="dining__list-item">
               <h4>Ciel Restaurant</h4>
               <span class="small-caps">Âu - Á Giao Thoa</span>
@@ -441,7 +245,7 @@
             alt="Fine Dining"
           />
           <img
-            src="https://images.unsplash.com/photo-1550966842-30cae0108ecf?w=800&q=80"
+            src="https://images.unsplash.com/photo-1550966842-30cae0108ecdsef?w=800&q=80"
             class="dining__img"
             alt="Signature Cocktail"
           />
@@ -452,13 +256,8 @@
     <footer class="footer">
       <div class="container footer-grid">
         <div>
-          <div class="navbar__logo logo" style="margin-bottom: 30px">
-            LUXE CONCIERGE
-          </div>
-          <p style="opacity: 0.4; font-size: 14px; line-height: 1.8">
-            Định nghĩa lại chuẩn mực nghỉ dưỡng cao cấp tại trung tâm thành phố.
-            Mỗi khoảnh khắc tại đây đều được thiết kế để trở nên độc bản.
-          </p>
+          <div class="navbar__logo logo logo--footer">LUXE CONCIERGE</div>
+          <p class="footer__desc">Định nghĩa lại chuẩn mực nghỉ dưỡng cao cấp tại trung tâm thành phố. Mỗi khoảnh khắc tại đây đều được thiết kế để trở nên độc bản.</p>
         </div>
         <div>
           <span class="small-caps footer__heading">Khám phá</span>
@@ -479,629 +278,96 @@
         </div>
         <div>
           <span class="small-caps footer__heading">Bản tin</span>
-          <p style="opacity: 0.4; font-size: 14px; margin-bottom: 20px">
-            Nhận các cập nhật và ưu đãi mới nhất.
-          </p>
-          <div
-            style="
-              border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-              padding: 10px 0;
-              display: flex;
-              justify-content: space-between;
-            "
-          >
-            <input
-              type="email"
-              placeholder="Email của bạn"
-              style="
-                background: transparent;
-                border: none;
-                color: white;
-                outline: none;
-                flex: 1;
-              "
-            />
-            <button
-              class="small-caps gold"
-              style="background: transparent; border: none; cursor: pointer"
-            >
-              Gửi
-            </button>
+          <p class="footer__desc">Nhận các cập nhật và ưu đãi mới nhất.</p>
+          <div class="newsletter-row">
+            <input type="email" placeholder="Email của bạn" class="newsletter-input" />
+            <button class="small-caps gold btn-transparent">Gửi</button>
           </div>
         </div>
       </div>
       <div class="container footer__bottom">
         <span>&copy; <span id="copyrightYear">---</span> Luxe Concierge Hotels. All rights reserved.</span>
-        <div style="display: flex; gap: 30px">
-          <a href="#" style="color: inherit; text-decoration: none"
-            >Privacy Policy</a
-          >
-          <a href="#" style="color: inherit; text-decoration: none"
-            >Terms of Service</a
-          >
+        <div class="footer__links-row">
+          <a href="#" class="footer__link-inline">Privacy Policy</a>
+          <a href="#" class="footer__link-inline">Terms of Service</a>
         </div>
       </div>
     </footer>
 
-    <div
-      id="registerModal"
-      style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(5px);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-      "
-    >
-      <div
-        style="
-          background: var(--c-light, #fafafa);
-          width: 100%;
-          max-width: 450px;
-          padding: 40px;
-          border-radius: 8px;
-          position: relative;
-          color: #1a1a1a;
-        "
-      >
-        <button
-          onclick="closeRegisterModal()"
-          style="
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-          "
-        >
-          &times;
-        </button>
+    <div id="registerModal" class="modal-overlay">
+      <div class="modal__box">
+        <button onclick="closeRegisterModal()" class="modal__close-btn">&times;</button>
 
-        <div style="text-align: center; margin-bottom: 30px">
-          <h3 class="serif italic gold" style="font-size: 2rem; margin: 0">
-            Luxe Concierge
-          </h3>
-          <p style="color: #666; margin-top: 5px; font-size: 14px">
-            Đăng ký để tận hưởng đặc quyền
-          </p>
+        <div class="modal__header">
+          <h3 class="serif italic gold modal__title">Luxe Concierge</h3>
+          <p class="modal__subtitle">Đăng ký để tận hưởng đặc quyền</p>
         </div>
 
         <form onsubmit="handleRegister(event)">
-          <div style="margin-bottom: 16px; text-align: left">
-            <label
-              style="
-                display: block;
-                font-size: 13px;
-                font-weight: 600;
-                color: #666;
-                margin-bottom: 8px;
-              "
-              >Họ và tên</label
-            >
-            <input
-              type="text"
-              id="regName"
-              placeholder="Nguyễn Văn A"
-              required
-              style="
-                width: 100%;
-                padding: 12px 16px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                box-sizing: border-box;
-                font-family: &quot;Inter&quot;, sans-serif;
-              "
-            />
+          <div class="form-row">
+            <label class="form-label">Họ và tên</label>
+            <input type="text" id="regName" placeholder="Nguyễn Văn A" required class="form-input" />
           </div>
-          <div style="margin-bottom: 16px; text-align: left">
-            <label
-              style="
-                display: block;
-                font-size: 13px;
-                font-weight: 600;
-                color: #666;
-                margin-bottom: 8px;
-              "
-              >Địa chỉ Email</label
-            >
-            <input
-              type="email"
-              id="regEmail"
-              placeholder="email@example.com"
-              required
-              style="
-                width: 100%;
-                padding: 12px 16px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                box-sizing: border-box;
-                font-family: &quot;Inter&quot;, sans-serif;
-              "
-            />
+          <div class="form-row">
+            <label class="form-label">Địa chỉ Email</label>
+            <input type="email" id="regEmail" placeholder="email@example.com" required class="form-input" />
           </div>
-          <div style="margin-bottom: 16px; text-align: left">
-            <label
-              style="
-                display: block;
-                font-size: 13px;
-                font-weight: 600;
-                color: #666;
-                margin-bottom: 8px;
-              "
-              >Số điện thoại</label
-            >
-            <input
-              type="tel"
-              id="regPhone"
-              placeholder="0912345678"
-              required
-              style="
-                width: 100%;
-                padding: 12px 16px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                box-sizing: border-box;
-                font-family: &quot;Inter&quot;, sans-serif;
-              "
-            />
+          <div class="form-row">
+            <label class="form-label">Số điện thoại</label>
+            <input type="tel" id="regPhone" placeholder="0912345678" required class="form-input" />
           </div>
-          <div style="margin-bottom: 24px; text-align: left">
-            <label
-              style="
-                display: block;
-                font-size: 13px;
-                font-weight: 600;
-                color: #666;
-                margin-bottom: 8px;
-              "
-              >Mật khẩu</label
-            >
-            <div style="position: relative">
-              <input
-                type="password"
-                id="regPassword"
-                placeholder="••••••••"
-                required
-                style="
-                  width: 100%;
-                  padding: 12px 16px;
-                  border: 1px solid #ddd;
-                  border-radius: 4px;
-                  box-sizing: border-box;
-                  font-family: &quot;Inter&quot;, sans-serif;
-                "
-              />
-              <button
-                type="button"
-                onclick="togglePassword('regPassword')"
-                style="
-                  position: absolute;
-                  right: 12px;
-                  top: 12px;
-                  background: none;
-                  border: none;
-                  cursor: pointer;
-                  color: #999;
-                  padding: 0;
-                "
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
+          <div class="form-row">
+            <label class="form-label">Mật khẩu</label>
+            <div class="input-with-button">
+              <input type="password" id="regPassword" placeholder="••••••••" required class="form-input" />
+              <button type="button" onclick="togglePassword('regPassword')" class="password-toggle-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </button>
             </div>
           </div>
-          <button
-            type="submit"
-            id="btnRegSubmit"
-            style="
-              width: 100%;
-              background: var(--c-luxury-black, #050505);
-              color: var(--c-gold, #c5a059);
-              padding: 14px;
-              border: none;
-              border-radius: 4px;
-              font-weight: 600;
-              font-size: 14px;
-              cursor: pointer;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-              transition: opacity 0.2s;
-            "
-          >
-            Đăng ký
-          </button>
-          <div
-            id="regErrorMsg"
-            style="
-              color: #ef4444;
-              font-size: 13px;
-              margin-top: 12px;
-              text-align: center;
-              display: none;
-            "
-          >
-            Email hoặc mật khẩu không chính xác.
-          </div>
-          <div
-            style="
-              text-align: center;
-              margin-top: 16px;
-              font-size: 13px;
-              color: #666;
-            "
-          >
-            Đã có tài khoản?
-            <a
-              href="javascript:void(0)"
-              onclick="switchToLogin()"
-              style="
-                color: var(--c-gold, #c5a059);
-                font-weight: 600;
-                text-decoration: none;
-              "
-              >Đăng nhập</a
-            >
-          </div>
+          <button type="submit" id="btnRegSubmit" class="modal-submit-btn">Đăng ký</button>
+          <div id="regErrorMsg" class="error-msg">Email hoặc mật khẩu không chính xác.</div>
+          <div class="modal-note">Đã có tài khoản? <a href="javascript:void(0)" onclick="switchToLogin()" class="link-highlight">Đăng nhập</a></div>
         </form>
       </div>
     </div>
 
-    <div
-      id="loginModal"
-      style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(5px);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-      "
-    >
-      <div
-        style="
-          background: var(--c-light, #fafafa);
-          width: 100%;
-          max-width: 450px;
-          padding: 40px;
-          border-radius: 8px;
-          position: relative;
-          color: #1a1a1a;
-        "
-      >
-        <button
-          onclick="closeLoginModal()"
-          style="
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-          "
-        >
-          &times;
-        </button>
+    <div id="loginModal" class="modal-overlay">
+      <div class="modal__box">
+        <button onclick="closeLoginModal()" class="modal__close-btn">&times;</button>
 
-        <div style="text-align: center; margin-bottom: 30px">
-          <h3 class="serif italic gold" style="font-size: 2rem; margin: 0">
-            Luxe Concierge
-          </h3>
-          <p style="color: #666; margin-top: 5px; font-size: 14px">
-            Đăng nhập không gian làm việc
-          </p>
+        <div class="modal__header">
+          <h3 class="serif italic gold modal__title">Luxe Concierge</h3>
+          <p class="modal__subtitle">Đăng nhập không gian làm việc</p>
         </div>
 
         <form onsubmit="handleLogin(event)">
-          <div style="margin-bottom: 16px; text-align: left">
-            <label
-              style="
-                display: block;
-                font-size: 13px;
-                font-weight: 600;
-                color: #666;
-                margin-bottom: 8px;
-              "
-              >Email đăng nhập</label
-            >
-            <input
-              type="email"
-              id="loginEmail"
-              placeholder="Nhập email"
-              required
-              value=""
-              style="
-                width: 100%;
-                padding: 12px 16px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                box-sizing: border-box;
-                font-family: &quot;Inter&quot;, sans-serif;
-              "
-            />
+          <div class="form-row">
+            <label class="form-label">Email đăng nhập</label>
+            <input type="email" id="loginEmail" placeholder="Nhập email" required value="" class="form-input" />
           </div>
-          <div style="margin-bottom: 24px; text-align: left">
-            <label
-              style="
-                display: block;
-                font-size: 13px;
-                font-weight: 600;
-                color: #666;
-                margin-bottom: 8px;
-              "
-              >Mật khẩu</label
-            >
-            <div style="position: relative">
-              <input
-                type="password"
-                id="loginPassword"
-                placeholder="••••••••"
-                required
-                value=""
-                style="
-                  width: 100%;
-                  padding: 12px 16px;
-                  border: 1px solid #ddd;
-                  border-radius: 4px;
-                  box-sizing: border-box;
-                  font-family: &quot;Inter&quot;, sans-serif;
-                "
-              />
-              <button
-                type="button"
-                onclick="togglePassword('loginPassword')"
-                style="
-                  position: absolute;
-                  right: 12px;
-                  top: 12px;
-                  background: none;
-                  border: none;
-                  cursor: pointer;
-                  color: #999;
-                  padding: 0;
-                "
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
+          <div class="form-row">
+            <label class="form-label">Mật khẩu</label>
+            <div class="input-with-button">
+              <input type="password" id="loginPassword" placeholder="••••••••" required value="" class="form-input" />
+              <button type="button" onclick="togglePassword('loginPassword')" class="password-toggle-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </button>
             </div>
           </div>
-          <button
-            type="submit"
-            id="btnLoginSubmit"
-            style="
-              width: 100%;
-              background: var(--c-luxury-black, #050505);
-              color: var(--c-gold, #c5a059);
-              padding: 14px;
-              border: none;
-              border-radius: 4px;
-              font-weight: 600;
-              font-size: 14px;
-              cursor: pointer;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-              transition: opacity 0.2s;
-            "
-          >
-            Đăng nhập
-          </button>
-          <div
-            id="loginErrorMsg"
-            style="
-              color: #ef4444;
-              font-size: 13px;
-              margin-top: 12px;
-              text-align: center;
-              display: none;
-            "
-          >
-            Email hoặc mật khẩu không chính xác.
-          </div>
-          <div
-            style="
-              text-align: center;
-              margin-top: 16px;
-              font-size: 13px;
-              color: #666;
-            "
-          >
-            Chưa là hội viên?
-            <a
-              href="javascript:void(0)"
-              onclick="switchToRegister()"
-              style="
-                color: var(--c-gold, #c5a059);
-                font-weight: 600;
-                text-decoration: none;
-              "
-              >Đăng ký</a
-            >
-          </div>
+          <button type="submit" id="btnLoginSubmit" class="modal-submit-btn">Đăng nhập</button>
+          <div id="loginErrorMsg" class="error-msg">Email hoặc mật khẩu không chính xác.</div>
+          <div class="modal-note">Chưa là hội viên? <a href="javascript:void(0)" onclick="switchToRegister()" class="link-highlight">Đăng ký</a></div>
         </form>
       </div>
     </div>
-    <script>
-      function togglePassword(inputId) {
-        const input = document.getElementById(inputId);
-        if (input.type === "password") {
-          input.type = "text";
-        } else {
-          input.type = "password";
-        }
-      }
-
-      function switchToLogin() {
-        closeRegisterModal();
-        openLoginModal();
-      }
-
-      function switchToRegister() {
-        closeLoginModal();
-        openRegisterModal();
-      }
-
-      function openRegisterModal() {
-        document.getElementById("registerModal").style.display = "flex";
-      }
-      function closeRegisterModal() {
-        document.getElementById("registerModal").style.display = "none";
-      }
-      async function handleRegister(e) {
-        e.preventDefault();
-        const name = document.getElementById("regName").value;
-        const email = document.getElementById("regEmail").value;
-        const phone = document.getElementById("regPhone").value;
-        const pass = document.getElementById("regPassword").value;
-
-        const errorMsg = document.getElementById("regErrorMsg");
-        const btn = document.getElementById("btnRegSubmit");
-
-        btn.innerText = "Đang đăng ký...";
-        btn.style.opacity = "0.7";
-
-        try {
-          const response = await fetch(
-            "https://localhost:7082/api/Auth/register",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                fullName: name,
-                email: email,
-                phone: phone,
-                password: pass,
-              }),
-            },
-          );
-          const data = await response.json();
-          if (!response.ok) {
-            throw new Error(data.message || "Đăng ký thất bại. Vui lòng thử lại.");
-          }
-      
-          if (window.AppCore && typeof window.AppCore.toast === "function") {
-            window.AppCore.toast("Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.");
-          }
-
-          setTimeout(() => {
-            closeRegisterModal();
-            openLoginModal();
-          }, 700);
-
-        } catch (error) {
-          errorMsg.innerText = error.message;
-          errorMsg.style.display = "block";
-        } finally {
-          btn.innerText = "Đăng ký";
-          btn.style.opacity = "1";
-        }
-      }
-
-      function openLoginModal() {
-        document.getElementById("loginModal").style.display = "flex";
-        document.getElementById("loginErrorMsg").style.display = "none";
-      }
-      function closeLoginModal() {
-        document.getElementById("loginModal").style.display = "none";
-      }
-
-      async function handleLogin(e) {
-        e.preventDefault();
-
-        const email = document.getElementById("loginEmail").value;
-        const pass = document.getElementById("loginPassword").value;
-        const errorMsg = document.getElementById("loginErrorMsg");
-        const btn = document.getElementById("btnLoginSubmit");
-
-        errorMsg.style.display = "none";
-        btn.innerText = "Đang đăng nhập...";
-        btn.style.opacity = "0.7";
-        btn.disabled = true;
-
-        try {
-          const response = await fetch(
-            "https://localhost:7082/api/Auth/login",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email: email,
-                password: pass,
-              }),
-            },
-          );
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
-          }
-          if (window.AppCore && typeof window.AppCore.toast === "function") {
-            window.AppCore.toast("Đăng nhập thành công!");
-          }
-
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("userEmail", email);
-          window.location.replace("dashboard.html");
-        } catch (error) {
-          errorMsg.innerText = error.message;
-          errorMsg.style.display = "block";
-        } finally {
-          btn.innerText = "Đăng nhập";
-          btn.style.opacity = "1";
-          btn.disabled = false;
-        }
-      }
-
-      window.addEventListener("scroll", () => {
-        const nav = document.getElementById("navbar");
-        if (window.scrollY > 50) {
-          nav.classList.add("scrolled");
-        } else {
-          nav.classList.remove("scrolled");
-        }
-      });
-    </script>
+    <script src="js/auth.js"></script>
+    <script src="js/home.js"></script>
   </body>
 </html>

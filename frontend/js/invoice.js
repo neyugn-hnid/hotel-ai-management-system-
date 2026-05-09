@@ -13,6 +13,27 @@ let customersData = [];
 let bookingsData = [];
 let servicesCatalog = [];
 
+function canEditInvoices() {
+  return Boolean(localStorage.getItem('token'));
+}
+
+function canDeleteInvoices() {
+  return Boolean(window.AppCore && typeof window.AppCore.isAdminRole === 'function'
+    && window.AppCore.isAdminRole(window.AppCore.getAuthContext().role));
+}
+
+function applyInvoiceRoleAccess() {
+  const canEdit = canEditInvoices();
+  const canDelete = canDeleteInvoices();
+  const addBtn = document.getElementById('btnAddInvoice');
+  const submitBtn = document.getElementById('invoiceSubmitButton');
+  const deleteBtn = document.getElementById('invoiceDeleteButton');
+
+  if (addBtn) addBtn.style.display = canEdit ? '' : 'none';
+  if (submitBtn) submitBtn.style.display = canEdit ? '' : 'none';
+  if (deleteBtn) deleteBtn.style.display = canDelete ? '' : 'none';
+}
+
 const fallbackInvoices = [
   { id: 'INV-8821', customer: 'Trần Hoàn', cccd: '001122334411', room: 'Suite 402', date: '12/06/2024', amount: 12500000, status: 'Đã thanh toán', services: [], bookingId: null, customerId: null, sourceInvoiceId: null },
   { id: 'INV-8822', customer: 'An Lê', cccd: '001122334422', room: 'Deluxe 205', date: '14/06/2024', amount: 4200000, status: 'Chưa thanh toán', services: [], bookingId: null, customerId: null, sourceInvoiceId: null },
@@ -359,6 +380,8 @@ function updateStats(filteredData = null) {
 function renderInvoices(filters = {}) {
   const tbody = document.getElementById('invoiceTableBody');
   if (!tbody) return;
+  const canEdit = canEditInvoices();
+  const canDelete = canDeleteInvoices();
   
   let filteredData = invoicesData;
   if (filters.search) {
@@ -394,12 +417,12 @@ function renderInvoices(filters = {}) {
             <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: var(--notion-blue);" onclick="openPaymentModal('${inv.id}')" title="Chi tiết & QR">
               <span class="material-symbols-outlined" style="font-size:18px;">qr_code_2</span>
             </button>
-            <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" onclick="openInvoiceModal('${inv.id}')">
+            ${canEdit ? `<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" onclick="openInvoiceModal('${inv.id}')">
               <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
-            </button>
-            <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" onclick="confirmDeleteInvoice('${inv.id}')">
+            </button>` : ''}
+            ${canDelete ? `<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" onclick="confirmDeleteInvoice('${inv.id}')">
               <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
-            </button>
+            </button>` : ''}
           </div>
         </td>
       </tr>
@@ -411,9 +434,12 @@ function renderInvoices(filters = {}) {
   }
   
   updateStats(filteredData);
+  applyInvoiceRoleAccess();
 }
 
 function openInvoiceModal(id = null) {
+  if (!canEditInvoices()) return;
+
   const modal = document.getElementById('invoiceModal');
   const title = document.getElementById('invoiceModalTitle');
   const form = document.getElementById('invoiceForm');
@@ -449,7 +475,7 @@ function openInvoiceModal(id = null) {
     renderServiceOptions([]);
     document.querySelectorAll('.service-checkbox').forEach(cb => cb.checked = false);
     checkoutBasePrice = 0;
-    // Auto-generate ID
+    
     const newIdNum = invoicesData.length > 0 ? Math.max(...invoicesData.map(function (i) {
       const n = parseInt(String(i.id).split('-')[1], 10);
       return Number.isNaN(n) ? 0 : n;
@@ -460,7 +486,7 @@ function openInvoiceModal(id = null) {
   
   modal.style.display = 'flex';
 
-  // Support lookup
+  
   const cccdList = document.getElementById('cccdList');
   if (cccdList) {
     cccdList.innerHTML = customersData.map(c => `<option value="${c.cccd}">${c.name}</option>`).join('');
@@ -575,6 +601,10 @@ function calculateTotal() {
 
 async function saveInvoice(e) {
   e.preventDefault();
+  if (!canEditInvoices()) {
+    showToast('Bạn không có quyền tạo hoặc sửa hóa đơn.', 'error');
+    return;
+  }
   
   const customer = document.getElementById('invCustomer').value;
   const cccd = document.getElementById('invCccd').value;
@@ -689,7 +719,7 @@ function openPaymentModal(id) {
   const qrImg = document.getElementById('qrImage');
   const modal = document.getElementById('paymentDetailsModal');
 
-  // Generate dynamic details
+  
   content.innerHTML = `
     <div style="background: var(--notion-warm-white); border-radius: 8px; padding: 20px; border: var(--notion-whisper);">
        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
@@ -716,7 +746,7 @@ function openPaymentModal(id) {
     </div>
   `;
 
-  // Generate Real VietQR Code
+  
   const bankSettings = JSON.parse(localStorage.getItem('luxe_bank_settings') || '{"bankId":"970436","accountNo":"123456789","accountName":"LUXE CONCIERGE"}');
   
   const bankId = bankSettings.bankId || '970436';
@@ -725,25 +755,25 @@ function openPaymentModal(id) {
   const amount = inv.amount;
   const info = encodeURIComponent(`THANH TOAN ${inv.id}`);
   
-  // Update UI and Show Modal
+  
   modal.style.display = 'flex';
   
-  // Clear old image and show loading state
+  
   qrImg.src = ''; 
   qrImg.style.opacity = '0.5';
 
-  // Use high-reliability template 'compact'
-  // VietQR API: https://img.vietqr.io/image/<BANK_ID>-<ACCOUNT_NO>-<TEMPLATE>.png
+  
+  
   const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact.png?amount=${amount}&addInfo=${info}&accountName=${accountName}`;
   
-  // Set source
+  
   qrImg.src = qrUrl;
 
   qrImg.onload = function() {
     this.style.opacity = '1';
   };
 
-  // Add error handling locally
+  
   qrImg.onerror = function() {
     this.style.opacity = '1';
     this.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('STK: ' + accountNo + ' - NH: ' + bankId + ' - Tien: ' + amount)}`;
@@ -752,6 +782,11 @@ function openPaymentModal(id) {
 }
 
 function confirmDeleteInvoice(id) {
+  if (!canDeleteInvoices()) {
+    showToast('Bạn không có quyền xóa hóa đơn.', 'error');
+    return;
+  }
+
   invoiceToDelete = id;
   document.getElementById('deleteConfirmModal').style.display = 'flex';
 }
@@ -762,6 +797,11 @@ function closeDeleteModal() {
 }
 
 function deleteInvoice() {
+  if (!canDeleteInvoices()) {
+    showToast('Bạn không có quyền xóa hóa đơn.', 'error');
+    return;
+  }
+
   if (invoiceToDelete) {
     const target = invoicesData.find(function (i) { return i.id === invoiceToDelete; });
     if (!target || !target.sourceInvoiceId) {
@@ -792,6 +832,7 @@ function deleteInvoice() {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
+  applyInvoiceRoleAccess();
   try {
     await loadApiData();
   } catch (error) {
@@ -841,7 +882,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   const amountInput = document.getElementById('invAmount');
   if (amountInput) {
       amountInput.addEventListener('input', (e) => {
-          // If user manually changes base amount while no checkboxes are checked
+          
           const hasChecked = Array.from(document.querySelectorAll('.service-checkbox')).some(function (cb) { return cb.checked; });
           if (!hasChecked) {
               checkoutBasePrice = parseFloat(e.target.value) || 0;

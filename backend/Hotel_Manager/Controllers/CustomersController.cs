@@ -23,9 +23,9 @@ namespace Hotel_Manager.Controllers
             _context = context;
         }
 
-        // GET: api/Customers
+        
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin,Lễ tân")]
         public ActionResult<object> GetCustomer(
             [FromQuery] string? q,
             [FromQuery] string? status,
@@ -93,8 +93,9 @@ namespace Hotel_Manager.Controllers
             });
         }
 
-        // GET: api/Customers/5
+        
         [HttpGet("{id}")]
+            [Authorize(Roles = "Admin,Lễ tân")]
         [Authorize(Roles = "Admin,Lễ tân")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
@@ -108,8 +109,31 @@ namespace Hotel_Manager.Controllers
             return customer;
         }
 
-        // PUT: api/Customers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpGet("public/by-phone")]
+        [AllowAnonymous]
+        public async Task<ActionResult<Customer>> GetCustomerByPhone([FromQuery] string? phone)
+        {
+            var normalizedPhone = NormalizePhone(phone);
+            if (string.IsNullOrWhiteSpace(normalizedPhone))
+            {
+                return BadRequest(new { message = "Số điện thoại không hợp lệ" });
+            }
+
+            var customer = (await _context.Customer
+                .AsNoTracking()
+                .ToListAsync())
+                .FirstOrDefault(c => NormalizePhone(c.PhoneNumber) == normalizedPhone);
+
+            if (customer == null)
+            {
+                return NotFound(new { message = "Không tìm thấy khách hàng" });
+            }
+
+            return Ok(customer);
+        }
+
+        
+        
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Lễ tân")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
@@ -140,20 +164,35 @@ namespace Hotel_Manager.Controllers
             return NoContent();
         }
 
-        // POST: api/Customers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPost]
         [AllowAnonymous]
         public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
+            var normalizedPhone = NormalizePhone(customer.PhoneNumber);
+            if (!string.IsNullOrWhiteSpace(normalizedPhone))
+            {
+                var existingCustomer = (await _context.Customer
+                    .AsNoTracking()
+                    .ToListAsync())
+                    .FirstOrDefault(c => NormalizePhone(c.PhoneNumber) == normalizedPhone);
+
+                if (existingCustomer != null)
+                {
+                    return Ok(existingCustomer);
+                }
+            }
+
             _context.Customer.Add(customer);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetCustomer", new { id = customer.Id }, customer);
         }
 
-        // DELETE: api/Customers/5
+        
         [HttpDelete("{id}")]
+            [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
@@ -172,6 +211,16 @@ namespace Hotel_Manager.Controllers
         private bool CustomerExists(int id)
         {
             return _context.Customer.Any(e => e.Id == id);
+        }
+
+        private static string NormalizePhone(string? phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+            {
+                return string.Empty;
+            }
+
+            return new string(phone.Where(char.IsDigit).ToArray());
         }
     }
 }

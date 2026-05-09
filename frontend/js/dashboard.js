@@ -3,7 +3,7 @@
 
   const DASHBOARD_API = "https://localhost:7082/api/Dashboard/summary";
 
-  // ── Helpers ──
+  
   function formatCurrency(amount) {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -39,7 +39,7 @@
     return headers;
   }
 
-  // ── Status helpers ──
+  
   function getStatusTag(status) {
     const s = (status || "").toLowerCase();
     if (s.includes("check-in") || s.includes("đang ở"))
@@ -69,7 +69,7 @@
     return colors[Math.abs(hash) % colors.length];
   }
 
-  // ── API call ──
+  
   async function fetchDashboardData() {
     try {
       const res = await fetch(DASHBOARD_API, {
@@ -93,7 +93,7 @@
     }
   }
 
-  // ── Render stat cards ──
+  
   function renderStatCards(data) {
     if (!data) return;
 
@@ -102,7 +102,7 @@
     const trendDown =
       '<span class="material-symbols-outlined" style="font-size:14px;">trending_down</span>';
 
-    // Card 1: Occupancy rate
+    
     const occEl = document.querySelector(".bento-card:nth-child(1) .stat-value");
     const occTrendEl = document.querySelector(".bento-card:nth-child(1) .stat-trend");
     if (occEl) occEl.textContent = data.occupancyRate + "%";
@@ -117,7 +117,7 @@
         " phòng";
     }
 
-    // Card 2: Revenue per room
+    
     const revEl = document.querySelector(".bento-card:nth-child(2) .stat-value");
     const revTrendEl = document.querySelector(".bento-card:nth-child(2) .stat-trend");
     if (revEl) revEl.textContent = formatCompactCurrency(data.avgRevenuePerRoom);
@@ -126,7 +126,7 @@
       revTrendEl.innerHTML = trendUp + " TB 30 ngày";
     }
 
-    // Card 3: Guests staying
+    
     const guestEl = document.querySelector(".bento-card:nth-child(3) .stat-value");
     const guestTrendEl = document.querySelector(".bento-card:nth-child(3) .stat-trend");
     if (guestEl) guestEl.textContent = formatNumber(data.guestsStaying);
@@ -135,7 +135,7 @@
       guestTrendEl.innerHTML = trendUp + " " + formatNumber(data.guestsStaying) + " khách";
     }
 
-    // Card 4: New bookings
+    
     const bookingEl = document.querySelector(".bento-card:nth-child(4) .stat-value");
     const bookingTrendEl = document.querySelector(".bento-card:nth-child(4) .stat-trend");
     if (bookingEl) bookingEl.textContent = formatNumber(data.newBookingsToday);
@@ -151,7 +151,7 @@
     }
   }
 
-  // ── Render recent activity ──
+  
   function renderRecentActivity(data) {
     if (!data || !data.recentActivities) return;
 
@@ -205,11 +205,11 @@
     });
   }
 
-  // ── Render room status breakdown ──
+  
   function renderRoomStatusBreakdown(data) {
     if (!data) return;
 
-    // Use direct ID selectors (reliable)
+    
     var occEl = document.getElementById("roomStatOccupied");
     var bookEl = document.getElementById("roomStatBooked");
     var availEl = document.getElementById("roomStatAvailable");
@@ -235,7 +235,7 @@
     }
   }
 
-  // ── Charts ──
+  
   let mainChartInstance = null;
   let customerChartInstance = null;
   let roomStatusChartInstance = null;
@@ -264,7 +264,7 @@
     });
     const occupancyData = data.occupancyTrend || [];
 
-    // ── Main Chart: Revenue (Bar) & Occupancy (Line) ──
+    
     const ctxMain = document.getElementById("mainChart");
     if (ctxMain) {
       mainChartInstance = new Chart(ctxMain.getContext("2d"), {
@@ -380,7 +380,7 @@
       });
     }
 
-    // ── Customer Chart: Line chart ──
+    
     const ctxCustomer = document.getElementById("customerChart");
     if (ctxCustomer) {
       customerChartInstance = new Chart(ctxCustomer.getContext("2d"), {
@@ -465,7 +465,7 @@
       });
     }
 
-    // ── Room Status Doughnut Chart ──
+    
     const ctxRoom = document.getElementById("roomStatusChart");
     if (ctxRoom) {
       roomStatusChartInstance = new Chart(ctxRoom.getContext("2d"), {
@@ -504,7 +504,7 @@
         },
       });
 
-      // Update center text
+      
       var centerTotal = document.getElementById("roomCenterTotal");
       if (centerTotal) {
         centerTotal.textContent = formatNumber(data.totalRooms || 0);
@@ -512,7 +512,7 @@
     }
   }
 
-  // ── Load Chart.js ──
+  
   function loadChartJs() {
     return new Promise(function (resolve, reject) {
       if (typeof Chart !== "undefined") {
@@ -539,9 +539,9 @@
     });
   }
 
-  // ── Init ──
+  
   async function initDashboard() {
-    // Show loading state (optional)
+    
     const data = await fetchDashboardData();
     if (!data) return;
 
@@ -554,7 +554,7 @@
     initCharts(data);
   }
 
-  // ── Boot ──
+  
   document.addEventListener("DOMContentLoaded", function () {
     const init = function () {
       initDashboard().catch(function (err) {

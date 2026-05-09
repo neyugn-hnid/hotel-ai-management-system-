@@ -21,6 +21,70 @@ const pagingState = {
   hasPreviousPage: false
 };
 
+function getCurrentRole() {
+  try {
+    if (window.AppCore && typeof window.AppCore.getAuthContext === 'function') {
+      const auth = window.AppCore.getAuthContext();
+      if (auth && auth.role) {
+        return String(auth.role).trim();
+      }
+    }
+  } catch (_) {  }
+
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return '';
+    const parts = String(token).split('.');
+    if (parts.length < 2) return '';
+    const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const normalized = payload.padEnd(payload.length + ((4 - (payload.length % 4)) % 4), '=');
+    const decoded = JSON.parse(atob(normalized));
+    return String(
+      decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
+      || decoded.role
+      || ''
+    ).trim();
+  } catch (_) {
+    return '';
+  }
+}
+
+function isAdminCustomerRole(role) {
+  return String(role || '').trim().toLowerCase() === 'admin';
+}
+
+function isReceptionistCustomerRole(role) {
+  const normalized = String(role || '').trim().toLowerCase();
+  return normalized === 'lễ tân'
+    || normalized === 'le tan'
+    || normalized === 'letan'
+    || normalized === 'receptionist'
+    || normalized === 'staff'
+    || normalized === 'employee';
+}
+
+function canEditCustomers() {
+  return Boolean(localStorage.getItem('token'));
+}
+
+function canDeleteCustomers() {
+  return isAdminCustomerRole(getCurrentRole());
+}
+
+function applyCustomerRoleAccess() {
+  const canEdit = canEditCustomers();
+  const canDelete = canDeleteCustomers();
+  const addBtn = document.getElementById('btnAddCustomer');
+  const actionsHeader = document.getElementById('customerActionsHeader');
+  const submitBtn = document.getElementById('customerSubmitButton');
+  const deleteBtn = document.getElementById('customerDeleteButton');
+
+  if (addBtn) addBtn.style.display = canEdit ? '' : 'none';
+  if (actionsHeader) actionsHeader.style.display = canEdit ? '' : 'none';
+  if (submitBtn) submitBtn.style.display = canEdit ? '' : 'none';
+  if (deleteBtn) deleteBtn.style.display = canDelete ? '' : 'none';
+}
+
 function showToast(message, variant) {
   if (window.AppCore && typeof window.AppCore.toast === 'function') {
     window.AppCore.toast(message, variant);
@@ -38,10 +102,11 @@ function normalizeTier(tier) {
 
 function normalizeStatus(status) {
   const value = String(status || '').toLowerCase();
+  if (value === 'khách mới' || value === 'khach moi' || value === 'new') return 'Khách mới';
   if (value === 'đang lưu trú') return 'Đang lưu trú';
   if (value === 'đang trả phòng') return 'Đang trả phòng';
   if (value === 'đã rời đi') return 'Đã rời đi';
-  return 'Đã rời đi';
+  return status || 'Khách mới';
 }
 
 function mapCustomer(raw) {
@@ -150,6 +215,7 @@ async function fetchCustomers() {
 
 function getStatusStyle(status) {
   switch (status) {
+    case 'Khách mới': return { bg: '#ecfdf3', color: '#15803d' };
     case 'Đang lưu trú': return { bg: '#f2f9ff', color: '#097fe8' };
     case 'Đang trả phòng': return { bg: '#f6f5f4', color: '#615d59' };
     case 'Đã rời đi': return { bg: '#f1f5f9', color: '#94a3b8' };
@@ -160,6 +226,8 @@ function getStatusStyle(status) {
 function renderCustomers() {
   const tbody = document.getElementById('customerTableBody');
   if (!tbody) return;
+  const canEdit = canEditCustomers();
+  const canDelete = canDeleteCustomers();
 
   tbody.innerHTML = customersData.map(function (customer) {
     const statusStyle = getStatusStyle(customer.status);
@@ -186,16 +254,16 @@ function renderCustomers() {
           </div>\
         </td>\
         <td><span class="notion-pill" style="background:' + statusStyle.bg + '; color:' + statusStyle.color + ';">' + customer.status + '</span></td>\
-        <td style="text-align:right; padding-right: 24px;">\
+        ' + (canEdit ? '<td style="text-align:right; padding-right: 24px;">\
           <div style="display: flex; justify-content: flex-end; gap: 8px;">\
             <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" onclick="openCustomerModal(' + customer.id + ')">\
               <span class="material-symbols-outlined" style="font-size:18px;">edit</span>\
             </button>\
-            <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" onclick="confirmDeleteCustomer(' + customer.id + ')">\
+            ' + (canDelete ? '<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" onclick="confirmDeleteCustomer(' + customer.id + ')">\
               <span class="material-symbols-outlined" style="font-size:18px;">delete</span>\
-            </button>\
+            </button>' : '') + '\
           </div>\
-        </td>\
+        </td>' : '') + '\
       </tr>';
   }).join('');
 
@@ -212,6 +280,8 @@ function renderCustomers() {
 
   const nextBtn = document.getElementById('btnNextCustomers');
   if (nextBtn) nextBtn.disabled = !pagingState.hasNextPage;
+
+  applyCustomerRoleAccess();
 }
 
 async function loadAndRenderCustomers() {
@@ -226,6 +296,8 @@ async function loadAndRenderCustomers() {
 }
 
 function openCustomerModal(id) {
+  if (!canEditCustomers()) return;
+
   const modal = document.getElementById('customerModal');
   const title = document.getElementById('customerModalTitle');
   const form = document.getElementById('customerForm');
@@ -259,6 +331,11 @@ function closeCustomerModal() {
 
 async function saveCustomer(e) {
   e.preventDefault();
+  if (!canEditCustomers()) {
+    showToast('Bạn không có quyền tạo hoặc sửa khách hàng.', 'error');
+    return;
+  }
+
   const token = localStorage.getItem('token');
   const headers = {
     'Content-Type': 'application/json'
@@ -301,6 +378,11 @@ async function saveCustomer(e) {
 }
 
 function confirmDeleteCustomer(id) {
+  if (!canDeleteCustomers()) {
+    showToast('Bạn không có quyền xóa khách hàng.', 'error');
+    return;
+  }
+
   customerToDelete = id;
   document.getElementById('deleteConfirmModal').style.display = 'flex';
 }
@@ -311,6 +393,11 @@ function closeDeleteModal() {
 }
 
 async function deleteCustomer() {
+  if (!canDeleteCustomers()) {
+    showToast('Bạn không có quyền xóa khách hàng.', 'error');
+    return;
+  }
+
   if (!customerToDelete) return;
 
   const token = localStorage.getItem('token');
@@ -341,6 +428,7 @@ async function deleteCustomer() {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
+  applyCustomerRoleAccess();
   await loadLookups();
 
   const addBtn = document.getElementById('btnAddCustomer');
@@ -420,9 +508,13 @@ async function loadLookups() {
     const res = await fetch(LOOKUPS_API, { headers });
     if (!res.ok) return;
     const data = await res.json();
-    _populateSelect('filterStatus', data.customerStatuses, 'Tất cả trạng thái', '');
+    const customerStatuses = Array.isArray(data.customerStatuses) ? data.customerStatuses.slice() : [];
+    if (!customerStatuses.some(function (item) { return normalizeStatus(item) === 'Khách mới'; })) {
+      customerStatuses.unshift('Khách mới');
+    }
+    _populateSelect('filterStatus', customerStatuses, 'Tất cả trạng thái', '');
     _populateSelect('cusTier', ['Khách mới', 'Silver Member', 'Gold Member', 'Elite Suite']);
-    _populateSelect('cusStatus', data.customerStatuses);
+    _populateSelect('cusStatus', customerStatuses);
   } catch (e) { console.warn('Lookup load failed:', e); }
 }
 

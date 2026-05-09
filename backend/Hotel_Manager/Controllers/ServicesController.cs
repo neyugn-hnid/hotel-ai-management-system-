@@ -23,7 +23,7 @@ namespace Hotel_Manager.Controllers
             _context = context;
         }
 
-        // GET: api/Services
+        
         [HttpGet]
         [Authorize(Roles = "Admin,Lễ tân")]
         public ActionResult<object> GetService(
@@ -100,7 +100,7 @@ namespace Hotel_Manager.Controllers
             });
         }
 
-        // GET: api/Services/5
+        
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,Lễ tân")]
         public async Task<ActionResult<Service>> GetService(int id)
@@ -115,8 +115,8 @@ namespace Hotel_Manager.Controllers
             return service;
         }
 
-        // PUT: api/Services/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutService(int id, Service service)
@@ -147,8 +147,8 @@ namespace Hotel_Manager.Controllers
             return NoContent();
         }
 
-        // POST: api/Services
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Service>> PostService(Service service)
@@ -159,7 +159,7 @@ namespace Hotel_Manager.Controllers
             return CreatedAtAction("GetService", new { id = service.Id }, service);
         }
 
-        // DELETE: api/Services/5
+        
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteService(int id)

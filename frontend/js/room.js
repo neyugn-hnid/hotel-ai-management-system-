@@ -23,6 +23,24 @@ const pagingState = {
   hasPreviousPage: false
 };
 
+function canManageRooms() {
+  return Boolean(window.AppCore && typeof window.AppCore.isAdminRole === 'function'
+    && window.AppCore.isAdminRole(window.AppCore.getAuthContext().role));
+}
+
+function applyRoomRoleAccess() {
+  const canManage = canManageRooms();
+  const addBtn = document.getElementById('btnAddRoom');
+  const actionsHeader = document.getElementById('roomActionsHeader');
+  const submitBtn = document.getElementById('roomSubmitButton');
+  const deleteBtn = document.getElementById('roomDeleteButton');
+
+  if (addBtn) addBtn.style.display = canManage ? '' : 'none';
+  if (actionsHeader) actionsHeader.style.display = canManage ? '' : 'none';
+  if (submitBtn) submitBtn.style.display = canManage ? '' : 'none';
+  if (deleteBtn) deleteBtn.style.display = canManage ? '' : 'none';
+}
+
 function showToast(message, variant) {
   if (window.AppCore && typeof window.AppCore.toast === 'function') {
     window.AppCore.toast(message, variant);
@@ -129,11 +147,24 @@ async function fetchRooms() {
 function renderRooms() {
   const tbody = document.getElementById('roomTableBody');
   if (!tbody) return;
+  const canManage = canManageRooms();
   
   tbody.innerHTML = roomsData.map(room => {
     const statusStyle = getStatusStyle(room.status);
     const mainImg = room.imgs && room.imgs.length > 0 ? room.imgs[0] : "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&q=80";
     const imgCount = room.imgs ? room.imgs.length : 0;
+    const actionsCell = canManage ? `
+        <td style="text-align: right; padding-right: 24px;">
+          <div style="display: flex; justify-content: flex-end; gap: 8px;">
+            <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" onclick="openRoomModal(${room.id})">
+              <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+            </button>
+            <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" onclick="confirmDeleteRoom(${room.id})">
+              <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+            </button>
+          </div>
+        </td>
+    ` : '';
     
     return `
       <tr>
@@ -156,20 +187,12 @@ function renderRooms() {
             ${room.status}
           </span>
         </td>
-        <td style="text-align: right; padding-right: 24px;">
-          <div style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" onclick="openRoomModal(${room.id})">
-              <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
-            </button>
-            <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" onclick="confirmDeleteRoom(${room.id})">
-              <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
-            </button>
-          </div>
-        </td>
+        ${actionsCell}
       </tr>
     `;
   }).join('');
   
+  applyRoomRoleAccess();
   updateStats();
 }
 
@@ -200,7 +223,7 @@ function updateStats() {
     if (nextBtn) nextBtn.disabled = !pagingState.hasNextPage;
 }
 
-// SEARCH, FILTER, SORT
+
 function handleSearch() {
     queryState.q = document.getElementById('searchInput').value.trim();
     queryState.pageNumber = 1;
@@ -247,7 +270,7 @@ async function applyAllFilters() {
     renderRooms();
 }
 
-// IMAGE PREVIEW
+
 function previewImages() {
     const fileInput = document.getElementById('roomImages');
     const previewContainer = document.getElementById('imagePreviewContainer');
@@ -273,6 +296,10 @@ function previewImages() {
 }
 
 function openRoomModal(id = null) {
+  if (!canManageRooms()) {
+    return;
+  }
+
   const modal = document.getElementById('roomModal');
   const title = document.getElementById('roomModalTitle');
   const form = document.getElementById('roomForm');
@@ -289,7 +316,7 @@ function openRoomModal(id = null) {
       document.getElementById('roomType').value = room.type;
       document.getElementById('roomStatus').value = room.status;
       
-      // Load current images
+      
       selectedImages = [...(room.imgs || [])];
       previewContainer.innerHTML = selectedImages.map(img => `
         <div style="width: 60px; height: 60px; border-radius: 4px; overflow: hidden; border: 1px solid var(--notion-gray-300);">
@@ -317,6 +344,10 @@ function closeRoomModal() {
 
 async function saveRoom(e) {
   e.preventDefault();
+  if (!canManageRooms()) {
+    showToast('Bạn không có quyền tạo hoặc sửa phòng.', 'error');
+    return;
+  }
   
   const name = document.getElementById('roomName').value;
   const description = document.getElementById('roomDescription').value;
@@ -385,6 +416,11 @@ async function saveRoom(e) {
 }
 
 function confirmDeleteRoom(id) {
+  if (!canManageRooms()) {
+    showToast('Bạn không có quyền xóa phòng.', 'error');
+    return;
+  }
+
   roomToDelete = id;
   document.getElementById('deleteConfirmModal').style.display = 'flex';
 }
@@ -395,6 +431,11 @@ function closeDeleteModal() {
 }
 
 async function deleteRoom() {
+  if (!canManageRooms()) {
+    showToast('Bạn không có quyền xóa phòng.', 'error');
+    return;
+  }
+
   if (roomToDelete) {
     const token = localStorage.getItem('token');
     const headers = {
@@ -425,6 +466,7 @@ async function deleteRoom() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  applyRoomRoleAccess();
   await loadLookups();
 
   const searchInput = document.getElementById('searchInput');

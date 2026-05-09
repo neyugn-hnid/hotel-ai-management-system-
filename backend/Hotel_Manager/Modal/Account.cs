@@ -51,7 +51,7 @@ namespace Hotel_Manager.Modal
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation properties
+        
         public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
     }

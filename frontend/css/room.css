@@ -188,7 +188,7 @@
 
     .btn-luxe-sec:hover { background: var(--dash-bg); }
 
-    /* Modal Styling */
+    
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.4);
@@ -227,10 +227,28 @@
       background: var(--dash-bg);
     }
 
-    .notion-input:focus { border-color: var(--dash-accent); background: white; }
+.notion-input:focus { border-color: var(--dash-accent); background: white; }
+
+.room-image-preview-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  min-height: 40px;
+  border: 1px dashed var(--dash-border);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.room-image-preview-placeholder {
+  font-size: 11px;
+  color: var(--dash-muted);
+  width: 100%;
+  text-align: center;
+}
   
 
-/* Page-specific responsive: room */
+
 @media (max-width: 768px) {
   .luxe-stat-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
   #roomTableBody td { white-space: nowrap; }

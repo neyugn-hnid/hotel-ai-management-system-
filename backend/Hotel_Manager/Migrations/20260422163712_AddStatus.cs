@@ -4,10 +4,10 @@
 
 namespace Hotel_Manager.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class AddStatus : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
@@ -22,7 +22,7 @@ namespace Hotel_Manager.Migrations
                 nullable: true);
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

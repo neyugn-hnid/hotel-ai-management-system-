@@ -3,4 +3,3 @@
 GET {{Hotel_Manager_HostAddress}}/weatherforecast/
 Accept: application/json
 
-###

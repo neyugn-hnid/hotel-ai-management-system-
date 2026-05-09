@@ -1,6 +1,14 @@
 (function initCore(global) {
   "use strict";
 
+  var AUTH_API_BASE_URL = "https://localhost:7082/api/Auth";
+  var API_BASE_URL = "https://localhost:7082/api";
+  var TOKEN_KEY = "token";
+  var REFRESH_TOKEN_KEY = "refreshToken";
+  var USER_EMAIL_KEY = "userEmail";
+  var refreshPromise = null;
+  var originalFetch = global.fetch ? global.fetch.bind(global) : null;
+
   function qs(selector, root) {
     return (root || document).querySelector(selector);
   }
@@ -88,20 +96,20 @@
   }
 
   function initAnimations() {
-    // Page loading spinner/overlay has been removed per request.
+    
   }
 
   function initSettings() {
     try {
       var globalSettings = JSON.parse(localStorage.getItem('luxe_global_settings') || '{}');
       
-      // Update Navbar Logo
+      
       if (globalSettings.logoText) {
         var logoEls = qsa('.logo, [data-config="logo"]');
         logoEls.forEach(function(el) { el.textContent = globalSettings.logoText; });
       }
 
-      // Update Footer Settings
+      
       if (globalSettings.address) {
         var addressEls = qsa('[data-config="address"]');
         addressEls.forEach(function(el) { el.textContent = globalSettings.address; });
@@ -139,7 +147,7 @@
   }
 
   function getAuthContext() {
-    var token = localStorage.getItem("token");
+    var token = localStorage.getItem(TOKEN_KEY);
     if (!token) {
       return {
         token: "",
@@ -147,7 +155,7 @@
         accountId: null,
         role: "",
         fullName: "",
-        email: localStorage.getItem("userEmail") || ""
+        email: localStorage.getItem(USER_EMAIL_KEY) || ""
       };
     }
 
@@ -167,7 +175,7 @@
       accountId: accountId > 0 ? accountId : null,
       role: role,
       fullName: fullName,
-      email: localStorage.getItem("userEmail") || ""
+      email: localStorage.getItem(USER_EMAIL_KEY) || ""
     };
   }
 
@@ -185,14 +193,170 @@
       || normalized === "employee";
   }
 
+  function getResolvedRole() {
+    var auth = getAuthContext();
+    if (auth && auth.role) {
+      return String(auth.role).trim();
+    }
+
+    var token = localStorage.getItem(TOKEN_KEY);
+    var payload = decodeJwtPayload(token);
+    if (!payload) return "";
+
+    return String(
+      payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
+      || payload.role
+      || ""
+    ).trim();
+  }
+
+  function setAuthSession(accessToken, refreshToken, email) {
+    if (accessToken) {
+      localStorage.setItem(TOKEN_KEY, accessToken);
+    }
+    if (refreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    }
+    if (email) {
+      localStorage.setItem(USER_EMAIL_KEY, email);
+    }
+  }
+
+  function clearAuthSession() {
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      localStorage.removeItem(USER_EMAIL_KEY);
+      localStorage.removeItem("pending_invoice_booking");
+    } catch (error) {
+      console.warn("Failed to clear auth session", error);
+    }
+  }
+
+  async function refreshAccessToken() {
+    var refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    var email = localStorage.getItem(USER_EMAIL_KEY) || "";
+
+    if (!refreshToken || !originalFetch) {
+      throw new Error("Không có refresh token.");
+    }
+
+    var response = await originalFetch(AUTH_API_BASE_URL + "/refresh", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        refreshToken: refreshToken
+      })
+    });
+
+    var data = await response.json().catch(function() {
+      return {};
+    });
+
+    if (!response.ok || !data.token || !data.refreshToken) {
+      throw new Error(data.message || "Không thể làm mới phiên đăng nhập.");
+    }
+
+    setAuthSession(data.token, data.refreshToken, email);
+    return data.token;
+  }
+
+  async function ensureFreshAccessToken() {
+    if (!refreshPromise) {
+      refreshPromise = refreshAccessToken().finally(function() {
+        refreshPromise = null;
+      });
+    }
+
+    return refreshPromise;
+  }
+
+  function shouldHandleUnauthorized(url) {
+    var normalizedUrl = String(url || "");
+    return normalizedUrl.indexOf(API_BASE_URL) === 0
+      && normalizedUrl.indexOf("/api/Auth/login") === -1
+      && normalizedUrl.indexOf("/api/Auth/register") === -1
+      && normalizedUrl.indexOf("/api/Auth/refresh") === -1;
+  }
+
+  function buildRetriedInit(init, newToken) {
+    var nextInit = Object.assign({}, init || {});
+    var nextHeaders = new Headers(nextInit.headers || {});
+    nextHeaders.set("Authorization", "Bearer " + newToken);
+    nextInit.headers = nextHeaders;
+    nextInit.__isRetryAfterRefresh = true;
+    return nextInit;
+  }
+
+  function patchGlobalFetch() {
+    if (!originalFetch || global.__appFetchPatched) {
+      return;
+    }
+
+    global.fetch = async function patchedFetch(input, init) {
+      var response = await originalFetch(input, init);
+      var url = typeof input === "string" ? input : (input && input.url) || "";
+      var alreadyRetried = Boolean(init && init.__isRetryAfterRefresh);
+
+      if (response.status !== 401 || alreadyRetried || !shouldHandleUnauthorized(url)) {
+        return response;
+      }
+
+      if (!localStorage.getItem(REFRESH_TOKEN_KEY)) {
+        return response;
+      }
+
+      try {
+        var newToken = await ensureFreshAccessToken();
+        return await originalFetch(input, buildRetriedInit(init, newToken));
+      } catch (error) {
+        clearAuthSession();
+        if ((window.location.pathname || "").toLowerCase().indexOf("index.html") === -1) {
+          window.location.replace("index.html");
+        }
+        return response;
+      }
+    };
+
+    global.__appFetchPatched = true;
+  }
+
+  async function logout() {
+    var token = localStorage.getItem(TOKEN_KEY);
+    var refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+
+    if (token) {
+      try {
+        await fetch(AUTH_API_BASE_URL + "/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          },
+          body: JSON.stringify({
+            refreshToken: refreshToken || ""
+          })
+        });
+      } catch (error) {
+        console.warn("Logout API request failed", error);
+      }
+    }
+
+    clearAuthSession();
+    window.location.replace("index.html");
+  }
+
   function applyRoleAccess() {
     var auth = getAuthContext();
+    var resolvedRole = getResolvedRole();
     var pathname = (window.location.pathname || "").toLowerCase();
     var pageName = pathname.split("/").pop();
-    var adminOnlyPages = ["account.html"];
-    var adminOnlyLinks = ['a.sidebar-item[href="account.html"]'];
+    var adminOnlyPages = ["account.html", "dashboard.html"];
+    var adminOnlyLinks = ['a.sidebar-item[href="account.html"]', 'a.sidebar-item[href="dashboard.html"]'];
 
-    if (!isAdminRole(auth.role)) {
+    if (!isAdminRole(resolvedRole)) {
       adminOnlyLinks.forEach(function(selector) {
         qsa(selector).forEach(function(link) {
           link.style.display = "none";
@@ -200,9 +364,40 @@
       });
 
       if (adminOnlyPages.indexOf(pageName) >= 0) {
-        window.location.replace("dashboard.html");
+        if (isReceptionistRole(resolvedRole)) {
+          window.location.replace("booking.html");
+        } else {
+          window.location.replace("dashboard.html");
+        }
       }
     }
+
+    
+    if (isReceptionistRole(resolvedRole)) {
+      
+      ['#btnAddAccount', '#btnAddRoom', '#btnAddService'].forEach(function(id) {
+        var el = qs(id);
+        if (el) el.style.display = 'none';
+      });
+      qsa('a.sidebar-item[href="account.html"], a.sidebar-item[href="dashboard.html"]').forEach(function(link) { link.style.display = 'none'; });
+    }
+  }
+
+  function initLogoutActions() {
+    qsa("a.sidebar-item").forEach(function(link) {
+      var icon = link.querySelector(".material-symbols-outlined");
+      var label = (link.textContent || "").trim().toLowerCase();
+      var iconName = icon ? String(icon.textContent || "").trim().toLowerCase() : "";
+
+      if (iconName !== "logout" && label.indexOf("đăng xuất") === -1) {
+        return;
+      }
+
+      link.addEventListener("click", function(event) {
+        event.preventDefault();
+        void logout();
+      });
+    });
   }
 
   function initAdminSidebarToggle() {
@@ -307,10 +502,24 @@
 
 
   document.addEventListener("DOMContentLoaded", function() {
+      patchGlobalFetch();
       initAnimations();
       initSettings();
       initAdminSidebarToggle();
+      initLogoutActions();
       applyRoleAccess();
+
+      
+      try {
+        var resolvedRole = getResolvedRole();
+        if (isReceptionistRole(resolvedRole)) {
+          var debouncedApply = debounce(applyRoleAccess, 120);
+          var observer = new MutationObserver(function(muts) {
+            debouncedApply();
+          });
+          observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+        }
+      } catch (e) {  }
   });
 
   global.AppCore = {
@@ -319,10 +528,15 @@
     debounce: debounce,
     throttle: throttle,
     toast: toast,
+    setAuthSession: setAuthSession,
+    ensureFreshAccessToken: ensureFreshAccessToken,
     decodeJwtPayload: decodeJwtPayload,
     getAuthContext: getAuthContext,
     isAdminRole: isAdminRole,
     isReceptionistRole: isReceptionistRole,
+    clearAuthSession: clearAuthSession,
+    logout: logout,
+    applyRoleAccess: applyRoleAccess,
     initAnimations: initAnimations,
     initAdminSidebarToggle: initAdminSidebarToggle
   };

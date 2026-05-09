@@ -1,5 +1,7 @@
 using Hotel_Manager.Data;
 using Hotel_Manager.Modal;
+using Hotel_Manager.Services.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,11 +19,13 @@ namespace Hotel_Manager.Controllers
     {
         private readonly Hotel_ManagerContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IRefreshTokenStore _refreshTokenStore;
 
-        public AuthController(Hotel_ManagerContext context, IConfiguration configuration)
+        public AuthController(Hotel_ManagerContext context, IConfiguration configuration, IRefreshTokenStore refreshTokenStore)
         {
             _context = context;
             _configuration = configuration;
+            _refreshTokenStore = refreshTokenStore;
         }
 
         [HttpPost("login")]
@@ -33,8 +37,55 @@ namespace Hotel_Manager.Controllers
                 return Unauthorized(new { message = "Email hoặc mật khẩu không đúng" });
             }
 
-            var token = GenerateJwtToken(user);
-            return Ok(new { token });
+            var accessToken = GenerateJwtToken(user);
+            var refreshToken = _refreshTokenStore.IssueToken(user.Id, TimeSpan.FromDays(7));
+            return Ok(new { token = accessToken, accessToken, refreshToken });
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout([FromBody] RefreshTokenRequest? request)
+        {
+            var accountIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(accountIdClaim, out var accountId) && accountId > 0)
+            {
+                _refreshTokenStore.RevokeAllForAccount(accountId);
+            }
+
+            if (request != null && !string.IsNullOrWhiteSpace(request.RefreshToken))
+            {
+                _refreshTokenStore.Revoke(request.RefreshToken);
+            }
+
+            return Ok(new { message = "Đăng xuất thành công" });
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.RefreshToken))
+            {
+                return BadRequest(new { message = "Refresh token không hợp lệ" });
+            }
+
+            if (!_refreshTokenStore.TryGetAccountId(request.RefreshToken, out var accountId) || accountId <= 0)
+            {
+                return Unauthorized(new { message = "Refresh token đã hết hạn hoặc không hợp lệ" });
+            }
+
+            var user = await _context.Account.AsNoTracking().FirstOrDefaultAsync(a => a.Id == accountId);
+            if (user == null)
+            {
+                _refreshTokenStore.Revoke(request.RefreshToken);
+                return Unauthorized(new { message = "Không tìm thấy tài khoản" });
+            }
+
+            var accessToken = GenerateJwtToken(user);
+            var newRefreshToken = _refreshTokenStore.IssueToken(user.Id, TimeSpan.FromDays(7));
+            _refreshTokenStore.Revoke(request.RefreshToken);
+
+            return Ok(new { token = accessToken, accessToken, refreshToken = newRefreshToken });
         }
 
         private string GenerateJwtToken(Account user)
@@ -49,7 +100,7 @@ namespace Hotel_Manager.Controllers
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddHours(6);
+            var expires = DateTime.UtcNow.AddMinutes(30);
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
@@ -101,5 +152,10 @@ namespace Hotel_Manager.Controllers
         public string Email { get; set; } = "";
         public string Phone { get; set; } = "";
         public string Password { get; set; } = "";
+    }
+
+    public class RefreshTokenRequest
+    {
+        public string RefreshToken { get; set; } = string.Empty;
     }
 }

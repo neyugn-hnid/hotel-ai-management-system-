@@ -38,6 +38,6 @@ public class Service
     [Column("updated_at")]
     public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation properties
+    
     public virtual ICollection<BookingService> BookingServices { get; set; } = new List<BookingService>();
 }

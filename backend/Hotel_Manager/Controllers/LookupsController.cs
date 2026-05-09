@@ -9,7 +9,7 @@ namespace Hotel_Manager.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Admin,Lễ tân")]
     public class LookupsController : ControllerBase
     {
         private readonly Hotel_ManagerContext _context;

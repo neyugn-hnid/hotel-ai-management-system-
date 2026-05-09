@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hotel_Manager.Data;
+using Hotel_Manager.Hubs;
 using Hotel_Manager.Modal;
 using X.PagedList;
 using Hotel_Manager.Services.BookingAi;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Hotel_Manager.Controllers
 {
@@ -19,16 +21,19 @@ namespace Hotel_Manager.Controllers
     {
         private readonly Hotel_ManagerContext _context;
         private readonly IBookingRecommendationService _bookingRecommendationService;
+        private readonly IHubContext<BookingHub> _bookingHubContext;
 
         public BookingsController(
             Hotel_ManagerContext context,
-            IBookingRecommendationService bookingRecommendationService)
+            IBookingRecommendationService bookingRecommendationService,
+            IHubContext<BookingHub> bookingHubContext)
         {
             _context = context;
             _bookingRecommendationService = bookingRecommendationService;
+            _bookingHubContext = bookingHubContext;
         }
 
-        // GET: api/Bookings
+        
         [HttpGet]
         [Authorize(Roles = "Admin,Lễ tân")]
         public ActionResult<object> GetBooking(
@@ -127,23 +132,28 @@ namespace Hotel_Manager.Controllers
             });
         }
 
-        // GET: api/Bookings/5
+        
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,Lễ tân")]
-        public async Task<ActionResult<Booking>> GetBooking(int id)
+        public async Task<ActionResult<object>> GetBooking(int id)
         {
-            var booking = await _context.Booking.FindAsync(id);
+            var booking = await _context.Booking
+                .AsNoTracking()
+                .Include(b => b.Customer)
+                .Include(b => b.Room)
+                .Include(b => b.Account)
+                .FirstOrDefaultAsync(b => b.Id == id);
 
             if (booking == null)
             {
                 return NotFound();
             }
 
-            return booking;
+            return Ok(ToBookingResponse(booking));
         }
 
-        // PUT: api/Bookings/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Lễ tân")]
         public async Task<IActionResult> PutBooking(int id, Booking booking)
@@ -174,12 +184,17 @@ namespace Hotel_Manager.Controllers
             return NoContent();
         }
 
-        // POST: api/Bookings
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult<Booking>> PostBooking(CreateBookingRequest request)
+        public async Task<ActionResult<object>> PostBooking([FromBody] CreateBookingRequest? request)
         {
+            if (request == null)
+            {
+                return BadRequest(new { message = "Dữ liệu đặt phòng không hợp lệ" });
+            }
+
             if (string.IsNullOrWhiteSpace(request.BookingCode))
             {
                 return BadRequest(new { message = "Mã đặt phòng không hợp lệ" });
@@ -212,6 +227,20 @@ namespace Hotel_Manager.Controllers
                 return BadRequest(new { message = "Không tìm thấy phòng" });
             }
 
+            if (request.AccountId.HasValue)
+            {
+                if (request.AccountId.Value <= 0)
+                {
+                    return BadRequest(new { message = "Tài khoản xử lý không hợp lệ" });
+                }
+
+                var accountExists = await _context.Account.AnyAsync(a => a.Id == request.AccountId.Value);
+                if (!accountExists)
+                {
+                    return BadRequest(new { message = "Không tìm thấy tài khoản xử lý" });
+                }
+            }
+
             var booking = new Booking
             {
                 BookingCode = request.BookingCode.Trim(),
@@ -227,13 +256,42 @@ namespace Hotel_Manager.Controllers
                 UpdatedAt = DateTime.UtcNow
             };
 
-            _context.Booking.Add(booking);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Booking.Add(booking);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return BadRequest(new { message = "Không thể tạo booking do dữ liệu không hợp lệ hoặc vi phạm ràng buộc" });
+            }
 
-            return CreatedAtAction("GetBooking", new { id = booking.Id }, booking);
+            await SyncRoomStatusForBookingAsync(booking.RoomId, booking.Status);
+            await _bookingHubContext.Clients.All.SendAsync("bookingCreated", new
+            {
+                bookingId = booking.Id,
+                bookingCode = booking.BookingCode,
+                status = booking.Status,
+                createdAt = booking.CreatedAt,
+                source = "website"
+            });
+
+            var createdBooking = await _context.Booking
+                .AsNoTracking()
+                .Include(b => b.Customer)
+                .Include(b => b.Room)
+                .Include(b => b.Account)
+                .FirstOrDefaultAsync(b => b.Id == booking.Id);
+
+            if (createdBooking == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể đọc lại booking vừa tạo" });
+            }
+
+            return CreatedAtAction("GetBooking", new { id = booking.Id }, ToBookingResponse(createdBooking));
         }
 
-        // DELETE: api/Bookings/5
+        
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBooking(int id)
@@ -272,6 +330,14 @@ namespace Hotel_Manager.Controllers
             }
             booking.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+            await SyncRoomStatusForBookingAsync(booking.RoomId, booking.Status);
+            await _bookingHubContext.Clients.All.SendAsync("bookingUpdated", new
+            {
+                bookingId = booking.Id,
+                bookingCode = booking.BookingCode,
+                status = booking.Status,
+                updatedAt = booking.UpdatedAt
+            });
 
             return Ok(new { message = "Cập nhật trạng thái booking thành công" });
         }
@@ -307,6 +373,57 @@ namespace Hotel_Manager.Controllers
             return _context.Booking.Any(e => e.Id == id);
         }
 
+        private async Task SyncRoomStatusForBookingAsync(int roomId, string? bookingStatus)
+        {
+            if (roomId <= 0)
+            {
+                return;
+            }
+
+            var room = await _context.Room.FindAsync(roomId);
+            if (room == null)
+            {
+                return;
+            }
+
+            var nextRoomStatus = ResolveRoomStatusFromBookingStatus(bookingStatus);
+            if (string.IsNullOrWhiteSpace(nextRoomStatus))
+            {
+                return;
+            }
+
+            room.Status = nextRoomStatus;
+            room.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+        }
+
+        private static string? ResolveRoomStatusFromBookingStatus(string? bookingStatus)
+        {
+            var normalized = (bookingStatus ?? string.Empty).Trim().ToLowerInvariant();
+
+            if (normalized == "chờ xác nhận" || normalized == "cho xac nhan")
+            {
+                return "Đã đặt";
+            }
+
+            if (normalized == "đã xác nhận giữ chỗ" || normalized == "da xac nhan giu cho" || normalized == "đã xác nhận" || normalized == "da xac nhan")
+            {
+                return "Đã đặt";
+            }
+
+            if (normalized == "đã check-in" || normalized == "da check-in" || normalized == "check-in" || normalized == "đang ở" || normalized == "dang o")
+            {
+                return "Đang sử dụng";
+            }
+
+            if (normalized == "đã check-out" || normalized == "da check-out" || normalized == "check-out" || normalized == "đã rời đi" || normalized == "da roi di" || normalized == "đã hủy" || normalized == "da huy" || normalized == "cancelled")
+            {
+                return "Trống";
+            }
+
+            return null;
+        }
+
         public class UpdateBookingStatusRequest
         {
             public string? Status { get; set; }
@@ -324,6 +441,31 @@ namespace Hotel_Manager.Controllers
             public string? Status { get; set; }
             public decimal TotalRoomAmount { get; set; }
             public string? Notes { get; set; }
+        }
+
+        private static object ToBookingResponse(Booking b)
+        {
+            return new
+            {
+                id = b.Id,
+                bookingCode = b.BookingCode,
+                customerId = b.CustomerId,
+                customerName = b.Customer?.FullName,
+                customerEmail = b.Customer?.Email,
+                roomId = b.RoomId,
+                roomName = b.Room?.CardName,
+                roomType = b.Room?.RoomType,
+                accountId = b.AccountId,
+                accountName = b.Account?.FullName,
+                status = b.Status,
+                checkInDate = b.CheckInDate,
+                checkOutDate = b.CheckOutDate,
+                totalRoomAmount = b.TotalRoomAmount,
+                aiMatchScore = b.AiMatchScore,
+                notes = b.Notes,
+                createdAt = b.CreatedAt,
+                updatedAt = b.UpdatedAt
+            };
         }
 
     }

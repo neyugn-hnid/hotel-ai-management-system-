@@ -27,7 +27,7 @@ namespace Hotel_Manager.Controllers
             _context = context;
         }
 
-        // GET: api/Accounts
+        
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public ActionResult<object> GetAccount(
@@ -104,7 +104,7 @@ namespace Hotel_Manager.Controllers
             });
         }
 
-        // GET: api/Accounts/5
+        
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Account>> GetAccount(int id)
@@ -155,8 +155,8 @@ namespace Hotel_Manager.Controllers
             return Ok(account);
         }
 
-        // PUT: api/Accounts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutAccount(int id, UpdateAccountRequest request)
@@ -296,8 +296,8 @@ namespace Hotel_Manager.Controllers
             });
         }
 
-        // POST: api/Accounts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Account>> PostAccount(CreateAccountRequest request)
@@ -319,7 +319,7 @@ namespace Hotel_Manager.Controllers
             return Ok(new { message = "Thêm tài khoản thành công"});
         }
 
-        // DELETE: api/Accounts/5
+        
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAccount(int id)
@@ -347,7 +347,7 @@ namespace Hotel_Manager.Controllers
                 return NotFound(new { message = "Không tìm thấy tài khoản" });
             }
 
-            // 🔥 Toggle trạng thái
+            
             account.Status = account.Status == "Hoạt động" ? "Khóa" : "Hoạt động";
             account.UpdatedAt = DateTime.UtcNow;
 

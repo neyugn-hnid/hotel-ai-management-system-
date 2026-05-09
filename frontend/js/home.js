@@ -123,13 +123,13 @@
     setCopyrightYear();
   });
 
-  // ── Set copyright year ──
+  
   function setCopyrightYear() {
     var el = document.getElementById("copyrightYear");
     if (el) el.textContent = new Date().getFullYear();
   }
 
-  // ── Set default dates for booking bar ──
+  
   function initIndexDates() {
     var today = new Date();
     var tomorrow = new Date(today);
@@ -147,9 +147,9 @@
     if (checkOut && !checkOut.value) checkOut.value = fmt(tomorrow);
   }
 
-  // ── Load featured rooms from API ──
+  
   function loadFeaturedRooms() {
-    var ROOMS_API = "https://localhost:7082/api/Rooms?pageSize=3&sortBy=pricePerNight&sortDir=desc";
+    var ROOMS_API = "https://localhost:7082/api/Rooms?pageNumber=1&pageSize=3&sortBy=createdAt&sortDir=asc";
 
     fetch(ROOMS_API)
       .then(function(res) { return res.json(); })
@@ -158,22 +158,48 @@
         if (!rooms.length) return;
 
         var typeMap = { "Standard": "STANDARD", "Deluxe": "DELUXE", "Suite": "SUITE", "Penthouse": "PENTHOUSE" };
+        var fallbackImages = [
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&q=80",
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80",
+          "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&q=80"
+        ];
 
         rooms.forEach(function(room, i) {
           var idx = i + 1;
           var typeEl = document.getElementById("roomCard" + idx + "Type");
           var nameEl = document.getElementById("roomCard" + idx + "Name");
           var priceEl = document.getElementById("roomCard" + idx + "Price");
+          var cardEl = document.querySelectorAll(".rooms-grid .room-card")[i];
+          var imageEl = cardEl ? cardEl.querySelector(".room-card__bg") : null;
 
           var roomType = room.roomType || "Standard";
           var displayType = typeMap[roomType] || roomType.toUpperCase();
+          var roomName = room.cardName || room.name || ("Phòng " + idx);
+          var roomId = room.id || room.Id;
+          var firstImage = Array.isArray(room.images) && room.images.length
+            ? (room.images[0].imageUrl || room.images[0].url || "")
+            : "";
 
           if (typeEl) typeEl.textContent = ("0" + idx).slice(-2) + " / " + displayType;
-          if (nameEl) nameEl.textContent = room.cardName || room.name || "Phòng " + idx;
+          if (nameEl) nameEl.textContent = roomName;
 
           if (priceEl) {
             var p = new Intl.NumberFormat("vi-VN").format(room.pricePerNight || 0);
             priceEl.textContent = p + " VNĐ / ĐÊM";
+          }
+
+          if (imageEl && firstImage) {
+            imageEl.src = firstImage;
+            imageEl.alt = roomName;
+          } else if (imageEl) {
+            imageEl.alt = roomName;
+            imageEl.src = fallbackImages[i] || fallbackImages[0];
+          }
+
+          if (cardEl && roomId) {
+            cardEl.onclick = function() {
+              window.location.href = "room-detail.html?id=" + encodeURIComponent(roomId);
+            };
           }
         });
       })

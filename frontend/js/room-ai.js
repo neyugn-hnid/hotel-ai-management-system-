@@ -8,7 +8,8 @@ let currentSearchContext = {
   checkOut: '',
   budget: '',
   roomType: 'All',
-  prompt: ''
+  prompt: '',
+  guestCount: 2
 };
 
 const fallbackImages = [
@@ -135,6 +136,7 @@ function roomDetailUrl(roomId) {
   if (currentSearchContext.checkOut) params.set('checkOut', currentSearchContext.checkOut);
   if (currentSearchContext.budget) params.set('budget', String(currentSearchContext.budget));
   if (currentSearchContext.roomType) params.set('roomType', currentSearchContext.roomType);
+  if (currentSearchContext.guestCount) params.set('guestCount', String(currentSearchContext.guestCount));
   return 'room-detail.html?' + params.toString();
 }
 
@@ -283,8 +285,7 @@ async function fetchAiRecommendations(input) {
     const reasons = [
       item.reason || (Number(item.matchScore || 0) >= 85
         ? 'Mức tương thích rất cao theo tiêu chí của bạn'
-        : 'Mức tương thích tốt theo dữ liệu hiện tại'),
-      'Engine backend: ' + engine
+        : 'Mức tương thích tốt theo dữ liệu hiện tại')
     ];
 
     return {
@@ -299,7 +300,6 @@ async function fetchAiRecommendations(input) {
     normalized[0].reasons = [
       recommendation.reason || normalized[0].reasons[0],
       'Điểm phù hợp: ' + String(recommendation.matchScore || normalized[0].score || 0) + '%',
-      'Engine backend: ' + engine
     ];
   }
 
@@ -323,17 +323,20 @@ async function fetchAiRecommendations(input) {
 document.getElementById('searchForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const budget = parseFloat(document.getElementById('budget').value) || 0;
+  const guestCountInput = parseInt(document.getElementById('guestCount').value, 10);
   const type = document.getElementById('roomType').value;
   const prompt = document.getElementById('aiPrompt').value || '';
   const checkInDate = document.getElementById('checkIn').value || '';
   const checkOutDate = document.getElementById('checkOut').value || '';
+  const guestCount = Number.isFinite(guestCountInput) && guestCountInput > 0 ? guestCountInput : getGuestCountFromRoomType(type);
 
   currentSearchContext = {
     checkIn: checkInDate,
     checkOut: checkOutDate,
     budget: budget > 0 ? String(budget) : '',
     roomType: type,
-    prompt: prompt
+    prompt: prompt,
+    guestCount: guestCount
   };
 
   if (checkInDate && checkOutDate && new Date(checkOutDate) <= new Date(checkInDate)) {
@@ -342,7 +345,7 @@ document.getElementById('searchForm').addEventListener('submit', async function(
   }
 
   document.getElementById('aiRecommendations').style.display = 'block';
-  document.getElementById('aiResultsGrid').innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#64748b;">Đang lấy gợi ý từ AI backend...</p>';
+  document.getElementById('aiResultsGrid').innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#64748b;">AI đang phân tích...</p>';
 
   let recommendations = [];
   try {
@@ -353,7 +356,7 @@ document.getElementById('searchForm').addEventListener('submit', async function(
       prompt,
       checkInDate,
       checkOutDate,
-      guestCount: getGuestCountFromRoomType(type)
+      guestCount
     });
   } catch (error) {
     recommendations = localRecommendFallback({ budget, type, prompt });
@@ -410,7 +413,7 @@ function displayAI(rooms) {
 }
 
 window.onload = () => {
-  // Set default dates FIRST before reading them
+  
   var checkInEl = document.getElementById('checkIn');
   var checkOutEl = document.getElementById('checkOut');
   var today = new Date().toISOString().split('T')[0];

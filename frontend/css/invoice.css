@@ -152,7 +152,7 @@
       font-size: 12px;
     }
 
-    /* Modal Styling */
+    
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.4);
@@ -253,16 +253,142 @@
       gap: 12px;
       flex: 1;
     }
-    .luxe-search-bar input {
+.luxe-search-bar input {
       border: none;
       outline: none;
       background: transparent;
       width: 100%;
       font-size: 14px;
     }
+
+.invoice-stat-value--warning {
+  color: #ffa500;
+}
+
+.invoice-filter-icon {
+  font-size: 18px;
+}
+
+.invoice-col-room {
+  width: 120px;
+}
+
+.invoice-col-date {
+  width: 130px;
+}
+
+.invoice-col-amount {
+  width: 150px;
+}
+
+.invoice-col-status {
+  width: 150px;
+  text-align: center;
+}
+
+.invoice-form-block {
+  margin-bottom: 20px;
+}
+
+.invoice-form-block--lg {
+  margin-bottom: 32px;
+}
+
+.invoice-submit-btn {
+  background: var(--dash-accent);
+  color: white;
+  border: none;
+  height: 46px;
+  justify-content: center;
+}
+
+.invoice-delete-icon-wrap {
+  width: 48px;
+  height: 48px;
+  background: #fff1f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.invoice-delete-icon {
+  color: #ff4d4f;
+  font-size: 28px;
+}
+
+.invoice-delete-text {
+  color: var(--dash-muted);
+  font-size: 14px;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.invoice-delete-btn {
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  height: 46px;
+  flex: 1;
+  justify-content: center;
+}
+
+.invoice-payment-modal {
+  width: 540px;
+}
+
+.invoice-qr-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px dashed var(--dash-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.invoice-qr-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dash-muted);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.invoice-qr-container {
+  padding: 16px;
+  background: white;
+  border: 1px solid var(--dash-border);
+  border-radius: 8px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.invoice-qr-image {
+  width: 180px;
+  height: 180px;
+  display: block;
+}
+
+.invoice-qr-note {
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--dash-muted);
+}
+
+.invoice-print-btn {
+  flex: 1;
+  background: var(--dash-accent);
+  color: white;
+  border: none;
+  height: 46px;
+  justify-content: center;
+}
   
 
-/* Page-specific responsive: invoice */
+
 @media (max-width: 768px) {
   .luxe-stat-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
   #invoiceTableBody td { white-space: nowrap; }

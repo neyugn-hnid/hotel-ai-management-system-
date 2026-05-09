@@ -4,10 +4,10 @@
 
 namespace Hotel_Manager.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class AddPhone : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
@@ -18,7 +18,7 @@ namespace Hotel_Manager.Migrations
                 nullable: true);
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

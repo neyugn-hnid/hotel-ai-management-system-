@@ -519,10 +519,52 @@ C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_M
 C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\Hotel_Ma.545A869A.Up2Date
 C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\Hotel_Manager.dll
 C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\refint\Hotel_Manager.dll
 C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\Hotel_Manager.pdb
 C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\Hotel_Manager.genruntimeconfig.cache
 C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\ref\Hotel_Manager.dll
+C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\_comment_build\appsettings.Development.json
+C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\_comment_build\appsettings.json
+C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\_comment_build\Hotel_Manager.staticwebassets.endpoints.json
+C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\_comment_build\Hotel_Manager.deps.json
+C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\_comment_build\Hotel_Manager.runtimeconfig.json
+C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\_comment_build\Hotel_Manager.dll
+C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\_comment_build\Hotel_Manager.pdb
+C:\tmp\hotel_manager_realtime_build\appsettings.Development.json
+C:\tmp\hotel_manager_realtime_build\appsettings.json
+C:\tmp\hotel_manager_realtime_build\Hotel_Manager.staticwebassets.endpoints.json
+C:\tmp\hotel_manager_realtime_build\Hotel_Manager.deps.json
+C:\tmp\hotel_manager_realtime_build\Hotel_Manager.runtimeconfig.json
+C:\tmp\hotel_manager_realtime_build\Hotel_Manager.dll
+C:\tmp\hotel_manager_realtime_build\Hotel_Manager.pdb
+C:\tmp\hotel_manager_phone_lookup_build\appsettings.Development.json
+C:\tmp\hotel_manager_phone_lookup_build\appsettings.json
+C:\tmp\hotel_manager_phone_lookup_build\Hotel_Manager.staticwebassets.endpoints.json
+C:\tmp\hotel_manager_phone_lookup_build\Hotel_Manager.deps.json
+C:\tmp\hotel_manager_phone_lookup_build\Hotel_Manager.runtimeconfig.json
+C:\tmp\hotel_manager_phone_lookup_build\Hotel_Manager.dll
+C:\tmp\hotel_manager_phone_lookup_build\Hotel_Manager.pdb
+C:\tmp\hotel_manager_customer_guard_build\appsettings.Development.json
+C:\tmp\hotel_manager_customer_guard_build\appsettings.json
+C:\tmp\hotel_manager_customer_guard_build\Hotel_Manager.staticwebassets.endpoints.json
+C:\tmp\hotel_manager_customer_guard_build\Hotel_Manager.deps.json
+C:\tmp\hotel_manager_customer_guard_build\Hotel_Manager.runtimeconfig.json
+C:\tmp\hotel_manager_customer_guard_build\Hotel_Manager.dll
+C:\tmp\hotel_manager_customer_guard_build\Hotel_Manager.pdb
+C:\tmp\hotel_manager_refresh_build\appsettings.Development.json
+C:\tmp\hotel_manager_refresh_build\appsettings.json
+C:\tmp\hotel_manager_refresh_build\Hotel_Manager.staticwebassets.endpoints.json
+C:\tmp\hotel_manager_refresh_build\Hotel_Manager.deps.json
+C:\tmp\hotel_manager_refresh_build\Hotel_Manager.runtimeconfig.json
+C:\tmp\hotel_manager_refresh_build\Hotel_Manager.dll
+C:\tmp\hotel_manager_refresh_build\Hotel_Manager.pdb
+C:\tmp\hotel_manager_room_status_build\appsettings.Development.json
+C:\tmp\hotel_manager_room_status_build\appsettings.json
+C:\tmp\hotel_manager_room_status_build\Hotel_Manager.staticwebassets.endpoints.json
+C:\tmp\hotel_manager_room_status_build\Hotel_Manager.deps.json
+C:\tmp\hotel_manager_room_status_build\Hotel_Manager.runtimeconfig.json
+C:\tmp\hotel_manager_room_status_build\Hotel_Manager.dll
+C:\tmp\hotel_manager_room_status_build\Hotel_Manager.pdb
+C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

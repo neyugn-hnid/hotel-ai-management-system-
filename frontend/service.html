@@ -13,9 +13,9 @@
     
     <aside class="luxe-sidebar">
       <div>
-        <div style="display: flex; align-items: center; gap: 12px; padding: 0 16px 40px;">
-          <div style="width: 28px; height: 28px; background: var(--dash-accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 14px;">L</div>
-          <span style="font-weight: 700; font-size: 16px; letter-spacing: -0.02em; color: white;" data-config="logo">Luxe Concierge</span>
+        <div class="admin-sidebar-brand">
+          <div class="admin-sidebar-brand__badge">L</div>
+          <span class="admin-sidebar-brand__text" data-config="logo">Luxe Concierge</span>
         </div>
 
         <nav>
@@ -33,17 +33,17 @@
 
       <div>
         <a href="setting.html" class="sidebar-item"><span class="material-symbols-outlined">settings</span><span>Cài đặt</span></a>
-        <a href="#" class="sidebar-item" style="color: #FF4444;"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
+        <a href="#" class="sidebar-item sidebar-item--logout"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
       </div>
     </aside>
 
     <main class="main-content">
-      <header style="margin-bottom: 48px; display: flex; justify-content: space-between; align-items: center;">
+      <header class="admin-page-header">
         <div>
-          <h1 style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0;">Danh mục dịch vụ</h1>
+          <h1 class="admin-page-title">Danh mục dịch vụ</h1>
         </div>
-        <button class="gold-border-btn" id="btnAddService" style="background: var(--c-blue); color: white;">
-          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 6px; vertical-align: middle;">add</span> Thêm dịch vụ
+        <button class="gold-border-btn admin-btn-primary" id="btnAddService">
+          <span class="material-symbols-outlined admin-btn-icon">add</span> Thêm dịch vụ
         </button>
       </header>
 
@@ -54,26 +54,26 @@
           </div>
           <div class="stat-box">
              <p>Đang hoạt động</p>
-             <p style="color: #0d7350;" id="stat-active">---</p>
+             <p class="admin-stat-value--green" id="stat-active">---</p>
           </div>
           <div class="stat-box">
              <p>Tạm ngưng</p>
-             <p style="color: #ef4444;" id="stat-inactive">---</p>
+             <p class="admin-stat-value--red" id="stat-inactive">---</p>
           </div>
        </div>
 
       <div class="filter-bar">
         <div class="notion-search-bar">
-          <span class="material-symbols-outlined" style="color: var(--dash-muted);">search</span>
+          <span class="material-symbols-outlined admin-search-icon">search</span>
           <input type="text" id="searchServiceInput" placeholder="Tìm tên dịch vụ..."/>
         </div>
-        <select class="notion-filter-item" id="filterCategory" style="outline: none;">
+        <select class="notion-filter-item admin-filter-select" id="filterCategory">
            <option value="">Tất cả danh mục</option>
         </select>
-        <select class="notion-filter-item" id="filterServiceStatus" style="outline: none;">
+        <select class="notion-filter-item admin-filter-select" id="filterServiceStatus">
            <option value="">Tất cả trạng thái</option>
         </select>
-        <select class="notion-filter-item" id="sortPrice" style="outline: none;">
+        <select class="notion-filter-item admin-filter-select" id="sortPrice">
            <option value="updatedAt_desc">Mới cập nhật</option>
            <option value="updatedAt_asc">Cũ nhất</option>
            <option value="name_asc">Tên A-Z</option>
@@ -83,15 +83,15 @@
         </select>
       </div>
 
-      <div class="luxury-card" style="padding: 0; overflow: hidden;">
+      <div class="luxury-card admin-card-reset">
          <table class="notion-table">
             <thead>
-               <tr style="background: var(--dash-bg);">
-                  <th style="padding-left: 24px;">Dịch vụ</th>
+               <tr class="admin-table-head-row">
+                  <th class="admin-table-head-cell--left-24">Dịch vụ</th>
                   <th>Mô tả chi tiết</th>
                   <th>Giá niêm yết</th>
                   <th>Trạng thái</th>
-                  <th style="text-align: right; padding-right: 24px;">Tiện ích</th>
+                  <th id="serviceActionsHeader" class="admin-table-head-cell--right-24">Tiện ích</th>
                </tr>
             </thead>
             <tbody id="serviceTableBody">
@@ -99,12 +99,12 @@
             </tbody>
          </table>
          
-         <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; background: var(--dash-bg); border-top: 1px solid var(--dash-border); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
-            <p style="font-size: 13px; color: var(--dash-muted);">Hiển thị <span id="totalServices">5</span> kết quả dịch vụ</p>
-            <div style="display: flex; gap: 8px;">
-               <button id="btnPrevServices" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang trước</button>
-               <span id="servicePageInfo" style="display:inline-flex; align-items:center; font-size:13px; color:var(--dash-muted); padding:0 4px;">Trang 1/1</span>
-               <button id="btnNextServices" class="btn-luxe-sec" style="font-size: 13px; height: 32px; padding: 0 12px; border-radius: 6px; border-color: #E2E8F0;">Trang sau</button>
+         <div class="admin-table-footer admin-table-footer--md">
+            <p class="admin-table-summary">Hiển thị <span id="totalServices">5</span> kết quả dịch vụ</p>
+            <div class="admin-table-actions">
+               <button id="btnPrevServices" class="btn-luxe-sec admin-table-pager-btn">Trang trước</button>
+               <span id="servicePageInfo" class="admin-table-page-info">Trang 1/1</span>
+               <button id="btnNextServices" class="btn-luxe-sec admin-table-pager-btn">Trang sau</button>
             </div>
          </div>
       </div>
@@ -114,9 +114,9 @@
   <div class="modal-overlay" id="serviceModal">
      <div class="notion-modal">
         <div class="modal-header">
-           <h2 style="font-size: 20px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+           <h2 class="admin-modal-title admin-modal-title-row">
              <span id="serviceModalTitle">Thêm dịch vụ</span>
-             <span class="material-symbols-outlined" style="cursor: pointer; opacity: 0.5;" onclick="closeServiceModal()">close</span>
+             <span class="material-symbols-outlined admin-modal-close" onclick="closeServiceModal()">close</span>
            </h2>
         </div>
         <form id="serviceForm">
@@ -126,9 +126,9 @@
            </div>
            <div class="form-row">
               <label>Mô tả dịch vụ</label>
-              <textarea class="notion-input" id="svcDesc" rows="3" style="resize: none;" required placeholder="Mô tả ngắn gọn về dịch vụ..."></textarea>
+              <textarea class="notion-input service-desc-textarea" id="svcDesc" rows="3" required placeholder="Mô tả ngắn gọn về dịch vụ..."></textarea>
            </div>
-           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+           <div class="admin-grid-two-col">
               <div class="form-row">
                  <label>Giá dịch vụ (VNĐ)</label>
                  <input type="number" class="notion-input" id="svcPrice" required/>
@@ -150,22 +150,22 @@
               </select>
            </div>
            
-           <div style="margin-top: 40px; display: flex; gap: 12px;">
-              <button type="submit" class="gold-border-btn" style="flex: 1; background: var(--dash-accent); color: white; border: none; height: 46px; justify-content: center;">Lưu dịch vụ</button>
-              <button type="button" class="gold-cancel-btn" style="flex: 1; height: 46px; justify-content: center;" onclick="closeServiceModal()">Đóng</button>
+           <div class="admin-form-actions">
+              <button type="submit" id="serviceSubmitButton" class="gold-border-btn admin-form-submit">Lưu dịch vụ</button>
+              <button type="button" class="gold-cancel-btn admin-form-cancel" onclick="closeServiceModal()">Đóng</button>
            </div>
         </form>
      </div>
   </div>
 
   <div class="modal-overlay" id="deleteConfirmModal">
-     <div class="luxury-card" style="max-width: 400px; text-align: center; position: relative;">
-        <span class="material-symbols-outlined" style="font-size: 48px; color: #ef4444; margin-bottom: 20px;">warning</span>
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">Gỡ bỏ dịch vụ?</h3>
-        <p style="color: var(--dash-muted); font-size: 14px; margin-bottom: 30px;">Bạn có chắc chắn muốn ngừng cung cấp dịch vụ này vĩnh viễn không?</p>
-        <div style="display: flex; gap: 12px;">
-           <button class="gold-border-btn" style="background: #ef4444; color: white; border: none; height: 46px; flex: 1; justify-content: center;" onclick="deleteService()">Gỡ bỏ</button>
-           <button class="gold-cancel-btn" style="flex: 1; height: 46px; justify-content: center;" onclick="closeDeleteModal()">Hủy</button>
+     <div class="luxury-card admin-delete-card">
+        <span class="material-symbols-outlined admin-delete-icon">warning</span>
+        <h3 class="admin-delete-title">Gỡ bỏ dịch vụ?</h3>
+        <p class="admin-delete-text">Bạn có chắc chắn muốn ngừng cung cấp dịch vụ này vĩnh viễn không?</p>
+        <div class="admin-delete-actions">
+           <button id="serviceDeleteButton" class="gold-border-btn admin-delete-confirm" onclick="deleteService()">Gỡ bỏ</button>
+           <button class="gold-cancel-btn admin-delete-cancel" onclick="closeDeleteModal()">Hủy</button>
         </div>
      </div>
   </div>
@@ -174,4 +174,3 @@
   <script src="js/service.js"></script>
 </body>
 </html>
-

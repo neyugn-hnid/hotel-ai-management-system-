@@ -5,6 +5,7 @@ const CUSTOMERS_API_URL = API_BASE_URL + '/api/Customers';
 const ROOMS_API_URL = API_BASE_URL + '/api/Rooms';
 const INVOICES_API_URL = API_BASE_URL + '/api/Invoices';
 const SERVICES_API_URL = API_BASE_URL + '/api/Services';
+const BOOKING_HUB_URL = API_BASE_URL + '/bookingHub';
 
 let pendingBookings = [];
 let confirmedBookings = [];
@@ -16,6 +17,8 @@ let invoiceServicesCatalog = [];
 let activeInvoiceBookingCode = null;
 let invoiceBaseAmount = 0;
 let invoicedBookingIds = new Set();
+let bookingRealtimeConnection = null;
+let bookingRealtimeRefreshTimer = null;
 
 const pendingQueryState = {
   q: '',
@@ -159,6 +162,63 @@ function escapeJsString(value) {
     .replace(/'/g, "\\'");
 }
 
+function scheduleRealtimeBookingRefresh() {
+  if (bookingRealtimeRefreshTimer) {
+    clearTimeout(bookingRealtimeRefreshTimer);
+  }
+
+  bookingRealtimeRefreshTimer = setTimeout(async function () {
+    bookingRealtimeRefreshTimer = null;
+    try {
+      await Promise.all([
+        loadAndRenderPendingBookings(),
+        loadAndRenderConfirmedBookings(),
+        fetchBookingInventory(),
+        fetchInvoiceIndex()
+      ]);
+    } catch (error) {
+      showToast(error.message || 'Không thể đồng bộ booking realtime.', 'error');
+    }
+  }, 250);
+}
+
+async function initBookingRealtime() {
+  if (!window.signalR || bookingRealtimeConnection) {
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return;
+  }
+
+  bookingRealtimeConnection = new window.signalR.HubConnectionBuilder()
+    .withUrl(BOOKING_HUB_URL, {
+      accessTokenFactory: function () {
+        return localStorage.getItem('token') || '';
+      }
+    })
+    .withAutomaticReconnect()
+    .build();
+
+  bookingRealtimeConnection.on('bookingCreated', function (payload) {
+    const bookingCode = payload && payload.bookingCode ? payload.bookingCode : 'booking mới';
+    showToast('Có phiếu đặt phòng mới từ website: ' + bookingCode, 'success');
+    scheduleRealtimeBookingRefresh();
+  });
+
+  bookingRealtimeConnection.on('bookingUpdated', function () {
+    scheduleRealtimeBookingRefresh();
+  });
+
+  try {
+    await bookingRealtimeConnection.start();
+  } catch (error) {
+    bookingRealtimeConnection = null;
+    console.warn('Booking realtime connection failed', error);
+  }
+}
+
 function normalizeBooking(raw) {
   return {
     id: Number(raw.id || 0),
@@ -222,7 +282,7 @@ function isConfirmedWorkflowStatus(status) {
 function getWorkflowStatusLabel(status) {
   const normalized = normalizeWorkflowStatus(status);
   if (normalized === 'chờ xác nhận' || normalized === 'cho xac nhan') {
-    return 'Chờ xác nhận từ web';
+    return 'Chờ xác nhận';
   }
   if (normalized === 'đã xác nhận giữ chỗ' || normalized === 'da xac nhan giu cho') {
     return 'Đã xác nhận giữ chỗ';
@@ -640,6 +700,70 @@ function resolveCustomerInsight(rawInput) {
   };
 }
 
+function buildBookingHistorySummary(searchQuery) {
+  const insight = resolveCustomerInsight(searchQuery);
+  const normalizedQuery = String(searchQuery || '').trim().toLowerCase();
+
+  const relatedBookings = pendingBookings.concat(confirmedBookings, localConfirmedBookings).filter(function (booking) {
+    const bookingName = String(booking.customerName || '').trim().toLowerCase();
+    if (insight.matchedCustomer && insight.matchedCustomer.fullName) {
+      return bookingName === String(insight.matchedCustomer.fullName).trim().toLowerCase();
+    }
+    if (normalizedQuery) {
+      const bookingText = [booking.bookingCode, booking.customerName, booking.roomName, booking.roomType, booking.status].join(' ').toLowerCase();
+      return bookingText.includes(normalizedQuery);
+    }
+    return false;
+  });
+
+  const sortedRecent = relatedBookings.slice().sort(function (a, b) {
+    const leftTime = new Date(a.createdAt || a.updatedAt || 0).getTime();
+    const rightTime = new Date(b.createdAt || b.updatedAt || 0).getTime();
+    return rightTime - leftTime;
+  });
+
+  const recentLabels = sortedRecent.slice(0, 5).map(function (booking) {
+    return [
+      booking.bookingCode || 'BKG',
+      booking.roomName || booking.roomType || 'Phòng',
+      getWorkflowStatusLabel(booking.status)
+    ].join(' • ');
+  });
+
+  const roomTypeCounts = relatedBookings.reduce(function (accumulator, booking) {
+    const key = String(booking.roomType || booking.roomName || 'Không rõ').trim();
+    accumulator[key] = (accumulator[key] || 0) + 1;
+    return accumulator;
+  }, {});
+
+  const topTypes = Object.keys(roomTypeCounts)
+    .sort(function (left, right) {
+      return roomTypeCounts[right] - roomTypeCounts[left];
+    })
+    .slice(0, 3)
+    .map(function (key) {
+      return key + ' (' + roomTypeCounts[key] + ')';
+    });
+
+  const summaryParts = [];
+  if (relatedBookings.length > 0) {
+    summaryParts.push('Khách có ' + relatedBookings.length + ' lượt đặt phòng trong hệ thống.');
+  }
+  if (recentLabels.length > 0) {
+    summaryParts.push('Booking gần đây: ' + recentLabels.join('; ') + '.');
+  }
+  if (topTypes.length > 0) {
+    summaryParts.push('Loại phòng thường đặt: ' + topTypes.join(', ') + '.');
+  }
+
+  return {
+    totalCount: relatedBookings.length,
+    recentLabels: recentLabels,
+    topTypes: topTypes,
+    summaryText: summaryParts.join(' ') || 'Khách chưa có lịch sử đặt phòng liên quan.'
+  };
+}
+
 function hashString(input) {
   const source = String(input || '');
   let hash = 0;
@@ -735,7 +859,6 @@ function scoreRoomCandidate(room, criteria) {
     score += 6;
   }
 
-  // Keep ranking deterministic for the same room/customer instead of random.
   score += (hashString(room.cardName + criteria.seed) % 5) - 2;
 
   return Math.max(20, Math.min(99, Math.round(score)));
@@ -890,6 +1013,7 @@ async function fetchAiRecommendation(input) {
       budgetLimit: input.budgetLimit,
       roomPurpose: input.roomPurpose,
       aiPrompt: input.aiPrompt,
+      bookingHistorySummary: input.bookingHistorySummary || null,
       checkInDate: input.checkInDate || null,
       checkOutDate: input.checkOutDate || null,
       guestCount: input.guestCount || null
@@ -1431,6 +1555,7 @@ function updateAIInsights(searchQuery, promptQuery, context) {
   if (!container) return;
 
   const insight = resolveCustomerInsight(searchQuery);
+  const historySummary = buildBookingHistorySummary(searchQuery);
   const criteria = (context && context.criteria) || {};
   const recognizedBy = insight.source === 'crm'
     ? 'Nhận diện từ CRM'
@@ -1440,12 +1565,13 @@ function updateAIInsights(searchQuery, promptQuery, context) {
     criteria.roomPurposeLabel && criteria.roomPurposeLabel !== 'Tất cả (AI tự phân tích)' ? 'Ưu tiên mục đích lưu trú: ' + criteria.roomPurposeLabel + '.' : 'AI tự suy luận loại phòng phù hợp theo hồ sơ và prompt.',
     criteria.guestLabel ? 'Quy mô đoàn khách: ' + criteria.guestLabel + '.' : '',
     criteria.stayNights > 0 ? 'Thời gian ở ' + criteria.stayNights + ' đêm, từ ' + escapeHtml(criteria.checkInLabel || '--') + ' đến ' + escapeHtml(criteria.checkOutLabel || '--') + '.' : '',
+    historySummary.totalCount > 0 ? escapeHtml(historySummary.summaryText) : 'Chưa có lịch sử đặt phòng liên quan trong hệ thống.',
     promptQuery ? 'Yêu cầu bổ sung: "' + escapeHtml(promptQuery) + '".' : 'Không có prompt bổ sung từ lễ tân.'
   ].filter(Boolean);
 
   const preferences = insight.preferences.length > 0
     ? insight.preferences
-    : ['Chưa có dữ liệu sở thích cấu trúc. AI sẽ ưu tiên theo ngân sách và mục đích lưu trú.'];
+    : ['Chưa có dữ liệu sở thích cấu trúc. AI sẽ ưu tiên theo ngân sách, lịch sử đặt phòng và mục đích lưu trú.'];
 
   container.innerHTML = '\
     <div class="notion-ai-box">\
@@ -1501,23 +1627,6 @@ function renderAIResults(payload) {
   const matchLabel = best.match || (String(best.matchScore || 0) + '%');
 
   container.innerHTML = '\
-    <div class="ai-summary-grid">\
-      <div class="ai-summary-card">\
-        <div class="ai-summary-label">Độ phù hợp</div>\
-        <div class="ai-summary-value">' + escapeHtml(matchLabel) + '</div>\
-        <div class="ai-summary-note">Điểm tổng hợp từ ngân sách, mục đích, hồ sơ khách và độ sẵn sàng phòng.</div>\
-      </div>\
-      <div class="ai-summary-card">\
-        <div class="ai-summary-label">Ngân sách</div>\
-        <div class="ai-summary-value" style="font-size:18px;">' + escapeHtml(budgetDelta) + '</div>\
-        <div class="ai-summary-note">' + escapeHtml(payload.criteria && payload.criteria.budgetLimit > 0 ? 'Đối chiếu trực tiếp với giới hạn đã nhập.' : 'AI tối ưu theo chất lượng tổng thể thay vì giới hạn giá.') + '</div>\
-      </div>\
-      <div class="ai-summary-card">\
-        <div class="ai-summary-label">Nguồn suy luận</div>\
-        <div class="ai-summary-value" style="font-size:18px; text-transform:uppercase;">' + escapeHtml(best.engine || 'rule') + '</div>\
-        <div class="ai-summary-note">Ưu tiên backend AI, tự fallback sang ranking cục bộ nếu API không phản hồi.</div>\
-      </div>\
-    </div>\
     <div class="room-match-card">\
       <img src="' + escapeHtml(best.img) + '" style="width: 100%; height: 100%; object-fit: cover;" alt="' + escapeHtml(best.name) + '"/>\
       <div style="padding: 32px;">\
@@ -1661,7 +1770,6 @@ window.closeSuccessModal = function () {
 };
 
 document.addEventListener('DOMContentLoaded', async function () {
-  // Set default dates
   var checkInEl = document.getElementById('checkInDate');
   var checkOutEl = document.getElementById('checkOutDate');
   var today = new Date();
@@ -1680,6 +1788,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 
   await Promise.all([loadAndRenderPendingBookings(), loadAndRenderConfirmedBookings()]);
+  await initBookingRealtime();
 
   const debounced = window.AppCore && typeof window.AppCore.debounce === 'function'
     ? window.AppCore.debounce
@@ -1804,6 +1913,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       const checkInDate = document.getElementById('checkInDate') ? document.getElementById('checkInDate').value : '';
       const checkOutDate = document.getElementById('checkOutDate') ? document.getElementById('checkOutDate').value : '';
       const matchedCustomer = findCustomerFromInput(customerSearch);
+      const historySummary = buildBookingHistorySummary(customerSearch);
       const promptTokens = String(aiPrompt || '')
         .toLowerCase()
         .split(/[^\p{L}\p{N}]+/u)
@@ -1844,7 +1954,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       };
       const rankedOptions = buildRankedRoomOptions(criteria, 3);
 
-      updateAIInsights(customerSearch, aiPrompt, { criteria: criteria });
+      updateAIInsights(customerSearch, aiPrompt, { criteria: criteria, historySummary: historySummary });
       renderAILoading();
 
       fetchAiRecommendation({
@@ -1852,6 +1962,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         budgetLimit: Number(budgetValue || 0),
         roomPurpose: roomPurpose,
         aiPrompt: aiPrompt,
+        bookingHistorySummary: historySummary.summaryText,
         checkInDate: checkInDate || null,
         checkOutDate: checkOutDate || null,
         guestCount: criteria.guestCount || null

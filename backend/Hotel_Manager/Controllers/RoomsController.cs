@@ -23,8 +23,9 @@ namespace Hotel_Manager.Controllers
             _context = context;
         }
 
-        // GET: api/Rooms
+        
         [HttpGet]
+        [Authorize(Roles = "Admin,Lễ tân")]
         [AllowAnonymous]
         public ActionResult<object> GetRoom(
             [FromQuery] string? q,
@@ -102,7 +103,7 @@ namespace Hotel_Manager.Controllers
             });
         }
 
-        // GET: api/Rooms/5
+        
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<ActionResult<Room>> GetRoom(int id)
@@ -120,8 +121,8 @@ namespace Hotel_Manager.Controllers
             return room;
         }
 
-        // PUT: api/Rooms/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutRoom(int id, Room room)
@@ -152,8 +153,8 @@ namespace Hotel_Manager.Controllers
             return NoContent();
         }
 
-        // POST: api/Rooms
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateRoom(CreateRoomRequest request)
@@ -169,7 +170,7 @@ namespace Hotel_Manager.Controllers
             _context.Room.Add(room);
             await _context.SaveChangesAsync();
 
-            // 🔥 thêm ảnh
+            
             if (request.Images != null && request.Images.Any())
             {
                 var images = request.Images.Select(url => new RoomImage
@@ -185,7 +186,7 @@ namespace Hotel_Manager.Controllers
             return Ok(new { message = "Tạo phòng thành công" });
         }
 
-        // DELETE: api/Rooms/5
+        
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteRoom(int id)

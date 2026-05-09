@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ namespace Hotel_Manager.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+        [Authorize(Roles = "Admin,Lễ tân")]
     public class BookingServicesController : ControllerBase
     {
         private readonly Hotel_ManagerContext _context;
@@ -21,14 +23,14 @@ namespace Hotel_Manager.Controllers
             _context = context;
         }
 
-        // GET: api/BookingServices
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookingService>>> GetBookingService()
         {
             return await _context.BookingService.ToListAsync();
         }
 
-        // GET: api/BookingServices/5
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<BookingService>> GetBookingService(int id)
         {
@@ -42,8 +44,8 @@ namespace Hotel_Manager.Controllers
             return bookingService;
         }
 
-        // PUT: api/BookingServices/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBookingService(int id, BookingService bookingService)
         {
@@ -73,9 +75,10 @@ namespace Hotel_Manager.Controllers
             return NoContent();
         }
 
-        // POST: api/BookingServices
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
+        
         [HttpPost]
+            [Authorize(Roles = "Admin")]
         public async Task<ActionResult<BookingService>> PostBookingService(BookingService bookingService)
         {
             _context.BookingService.Add(bookingService);
@@ -84,8 +87,9 @@ namespace Hotel_Manager.Controllers
             return CreatedAtAction("GetBookingService", new { id = bookingService.Id }, bookingService);
         }
 
-        // DELETE: api/BookingServices/5
+        
         [HttpDelete("{id}")]
+            [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBookingService(int id)
         {
             var bookingService = await _context.BookingService.FindAsync(id);

@@ -13,20 +13,20 @@
     <div class="navbar__logo">LUXE CONCIERGE</div>
     <div class="navbar__links">
       <a href="index.html" class="navbar__link small-caps">Trang chủ</a>
-      <a href="room-ai.html" class="navbar__link small-caps active" style="opacity: 1;">Phòng Nghỉ</a>
+      <a href="room-ai.html" class="navbar__link small-caps active room-ai-nav-link">Phòng Nghỉ</a>
       <a href="index.html#amenities" class="navbar__link small-caps">Tiện Ích</a>
       <a href="index.html#dining" class="navbar__link small-caps">Ẩm Thực</a>
     </div>
     <div class="navbar__actions">
-      <a href="room-ai.html" class="nav-pill" style="background: var(--c-gold); border: none; color: white; padding: 0 20px; height: 38px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;">Đặt phòng ngay</a>
+      <a href="room-ai.html" class="nav-pill nav-pill-primary">Đặt phòng ngay</a>
     </div>
   </nav>
 
-  <section class="hero" style="min-height: 70vh;">
+  <section class="hero room-ai-hero">
     <div class="hero__slideshow">
-      <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1920&q=80" class="hero__slide" style="animation-delay: 0s;" alt="Rooms 1"/>
-      <img src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=1920&q=80" class="hero__slide" style="animation-delay: 5s;" alt="Rooms 2"/>
-      <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1920&q=80" class="hero__slide" style="animation-delay: 10s;" alt="Rooms 3"/>
+      <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1920&q=80" class="hero__slide room-ai-slide-0" alt="Rooms 1"/>
+      <img src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=1920&q=80" class="hero__slide room-ai-slide-5" alt="Rooms 2"/>
+      <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1920&q=80" class="hero__slide room-ai-slide-10" alt="Rooms 3"/>
     </div>
     <div class="hero__overlay"></div>
 
@@ -39,11 +39,11 @@
     </div>
   </section>
 
-  <main class="container" style="margin-top: -80px; position: relative; z-index: 20;">
+  <main class="container room-ai-main">
     
-    <div style="background: white; padding: 40px; box-shadow: 0 40px 80px rgba(0,0,0,0.1); border-radius: 4px;">
+    <div class="room-ai-search-card">
       <form id="searchForm">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 30px; align-items: flex-end; margin-bottom: 24px;">
+        <div class="room-ai-search-grid">
           <div>
             <label class="label-small">Nhận phòng</label>
             <input type="date" class="luxury-input" id="checkIn" />
@@ -54,7 +54,11 @@
           </div>
           <div>
             <label class="label-small">Ngân sách / Đêm (VNĐ)</label>
-            <input type="number" class="luxury-input" id="budget" placeholder="VD: 15000000"/>
+            <input type="number" class="luxury-input" id="budget" placeholder="VD: 15000000" required/>
+          </div>
+          <div>
+            <label class="label-small">Số lượng khách</label>
+            <input type="number" class="luxury-input" id="guestCount" min="1" max="20" step="1" value="2" placeholder="VD: 2" required/>
           </div>
           <div>
             <label class="label-small">Mục đích chuyến đi</label>
@@ -67,39 +71,38 @@
           </div>
         </div>
 
-        <div style="margin-bottom: 24px;">
-          <label class="label-small" style="display: flex; justify-content: space-between;">
+        <div class="room-ai-prompt-wrap">
+          <label class="label-small room-ai-prompt-label">
             <span>AI Concierge Prompt (Mô tả chi tiết mong muốn của bạn)</span>
           </label>
-          <textarea id="aiPrompt" class="luxury-input" rows="3" placeholder="Ví dụ: Tôi muốn một căn phòng có ban công nhìn ra biển, thiết kế lãng mạn và có bồn tắm nằm. Xin thêm hoa hồng set up trên giường..." style="resize: vertical; line-height: 1.6; padding: 16px;"></textarea>
+          <textarea id="aiPrompt" class="luxury-input room-ai-prompt-input" rows="3" placeholder="Ví dụ: Tôi muốn một căn phòng có ban công nhìn ra biển, thiết kế lãng mạn và có bồn tắm nằm. Xin thêm hoa hồng set up trên giường..."></textarea>
         </div>
 
         <div>
-          <button type="submit" class="btn-find" style="width: 100%; height: 55px; border-radius: 4px; font-size: 13px; border: none; background: var(--c-gold); color: white; cursor: pointer; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; transition: background 0.3s;" onmouseover="this.style.background='var(--c-gold-light)'" onmouseout="this.style.background='var(--c-gold)'">Trợ Lý AI Khám Phá Phòng</button>
+          <button type="submit" class="btn-find room-ai-submit-btn">Trợ Lý AI Khám Phá Phòng</button>
         </div>
       </form>
     </div>
 
-    <section id="aiRecommendations" style="display: none; margin-top: 100px;">
-      <div style="text-align: center; margin-bottom: 60px;">
-        <span class="curated-badge" style="display: inline-block; margin-bottom: 15px;">AI Concierge Curated</span>
-        <h2 style="font-size: 3rem;">Gợi Ý <span class="serif italic gold">Dành Riêng Cho Bạn</span></h2>
+    <section id="aiRecommendations" class="room-ai-recommendations">
+      <div class="room-ai-section-heading">
+        <h2 class="room-ai-heading-xl">Gợi Ý <span class="serif italic gold">Dành Riêng Cho Bạn</span></h2>
       </div>
-      <div id="aiResultsGrid" class="rooms-grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); background: none; gap: 40px;">
+      <div id="aiResultsGrid" class="rooms-grid room-ai-results-grid">
         
       </div>
     </section>
 
-    <section style="margin-top: 100px; padding-bottom: 100px;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px;">
+    <section class="room-ai-all-rooms-section">
+      <div class="room-ai-section-header">
         <div>
           <span class="small-caps gold">Danh sách phòng nghỉ</span>
-          <h2 style="font-size: 3rem; margin-top: 15px;">Tất Cả Hạng Phòng</h2>
+          <h2 class="room-ai-heading-xl room-ai-heading-xl--mt">Tất Cả Hạng Phòng</h2>
         </div>
-        <span class="small-caps" style="opacity: 0.4;" id="roomResultCount">Hiển thị kết quả...</span>
+        <span class="small-caps room-ai-result-count" id="roomResultCount">Hiển thị kết quả...</span>
       </div>
 
-      <div id="allRoomsGrid" class="rooms-grid" style="background: none; gap: 40px; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+      <div id="allRoomsGrid" class="rooms-grid room-ai-results-grid">
         
       </div>
 
@@ -112,8 +115,8 @@
   <footer class="footer">
     <div class="container footer-grid">
       <div>
-        <div class="navbar__logo logo" style="margin-bottom: 30px;">LUXE CONCIERGE</div>
-        <p style="opacity: 0.4; font-size: 14px; line-height: 1.8;">
+        <div class="navbar__logo logo room-ai-footer-logo">LUXE CONCIERGE</div>
+        <p class="room-ai-footer-text">
           Định nghĩa lại chuẩn mực nghỉ dưỡng cao cấp tại trung tâm thành phố. Mỗi khoảnh khắc tại đây đều được thiết kế để trở nên độc bản.
         </p>
       </div>
@@ -132,18 +135,18 @@
       </div>
       <div>
         <span class="small-caps footer__heading">Bản tin</span>
-        <p style="opacity: 0.4; font-size: 14px; margin-bottom: 20px;">Nhận các cập nhật và ưu đãi mới nhất.</p>
-        <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding: 10px 0; display: flex; justify-content: space-between;">
-          <input type="email" placeholder="Email của bạn" style="background: transparent; border: none; color: white; outline: none; flex: 1;"/>
-          <button class="small-caps gold" style="background: transparent; border: none; cursor: pointer;">Gửi</button>
+        <p class="room-ai-footer-note">Nhận các cập nhật và ưu đãi mới nhất.</p>
+        <div class="room-ai-footer-newsletter">
+          <input type="email" placeholder="Email của bạn" class="room-ai-footer-input"/>
+          <button class="small-caps gold room-ai-footer-button">Gửi</button>
         </div>
       </div>
     </div>
     <div class="container footer__bottom">
       <span>&copy; 2026 Luxe Concierge Hotels. All rights reserved.</span>
-      <div style="display: flex; gap: 30px;">
-        <a href="#" style="color: inherit; text-decoration: none;">Privacy Policy</a>
-        <a href="#" style="color: inherit; text-decoration: none;">Terms of Service</a>
+      <div class="room-ai-footer-links">
+        <a href="#" class="room-ai-footer-link">Privacy Policy</a>
+        <a href="#" class="room-ai-footer-link">Terms of Service</a>
       </div>
     </div>
   </footer>
@@ -159,11 +162,7 @@
         nav.classList.remove('scrolled');
       }
     });
-
-    // Small hack to ensure room cards look premium (the script room-ai.js generates them)
-    // We can't easily change the script but we can ensure the classes it uses are styled.
   </script>
 
 </body>
 </html>
-
