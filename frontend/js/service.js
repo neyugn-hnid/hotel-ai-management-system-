@@ -138,7 +138,7 @@ async function fetchServices() {
     pagingState.hasNextPage = false;
     pagingState.hasPreviousPage = false;
     showToast(error.message || 'Lỗi tải dịch vụ.', 'error');
-    console.error('Failed to fetch services:', error);
+
   }
 }
 
@@ -268,8 +268,44 @@ async function saveService(e) {
     return;
   }
 
-  const name = document.getElementById('svcName').value;
-  const description = document.getElementById('svcDesc').value;
+  const validation = window.AppCore && window.AppCore.Validation;
+  if (validation && !validation.validateFields(e.target, [
+    {
+      input: '#svcName',
+      validate: function(value) {
+        return validation.normalizeText(value).length >= 2 ? '' : 'Tên dịch vụ phải có ít nhất 2 ký tự.';
+      }
+    },
+    {
+      input: '#svcDesc',
+      validate: function(value) {
+        return validation.normalizeText(value).length >= 10 ? '' : 'Mô tả dịch vụ phải có ít nhất 10 ký tự.';
+      }
+    },
+    {
+      input: '#svcPrice',
+      validate: function(value) {
+        return validation.isPositiveNumber(value) ? '' : 'Giá dịch vụ phải lớn hơn 0.';
+      }
+    },
+    {
+      input: '#svcCategory',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng chọn danh mục.';
+      }
+    },
+    {
+      input: '#svcStatus',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng chọn trạng thái.';
+      }
+    }
+  ])) {
+    return;
+  }
+
+  const name = document.getElementById('svcName').value.trim();
+  const description = document.getElementById('svcDesc').value.trim();
   const price = parseFloat(document.getElementById('svcPrice').value);
   const status = document.getElementById('svcStatus').value;
   const category = document.getElementById('svcCategory').value || 'Tiện ích & Khác';
@@ -315,7 +351,7 @@ async function saveService(e) {
     await loadAndRenderServices();
   } catch (error) {
     showToast(error.message || 'Không thể lưu dịch vụ.', 'error');
-    console.error('Failed to save service:', error);
+
   }
 }
 
@@ -365,7 +401,7 @@ async function deleteService() {
     showToast('Xóa dịch vụ thành công!');
   } catch (error) {
     showToast(error.message || 'Không thể xóa dịch vụ.', 'error');
-    console.error('Failed to delete service:', error);
+
   }
 }
 
@@ -458,7 +494,7 @@ async function loadLookups() {
     _populateSelect('filterServiceStatus', data.serviceStatuses, 'Tất cả trạng thái', '');
     _populateSelect('svcCategory', data.serviceCategories);
     _populateSelect('svcStatus', data.serviceStatuses);
-  } catch (e) { console.warn('Lookup load failed:', e); }
+  } catch (e) {}
 }
 
 function _populateSelect(elId, items, defaultLabel, defaultValue) {

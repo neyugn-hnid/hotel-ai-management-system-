@@ -50,17 +50,28 @@ function getCurrentRole() {
 }
 
 function isAdminCustomerRole(role) {
-  return String(role || '').trim().toLowerCase() === 'admin';
+  return String(role || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]/g, '') === 'admin';
 }
 
 function isReceptionistCustomerRole(role) {
-  const normalized = String(role || '').trim().toLowerCase();
-  return normalized === 'lễ tân'
-    || normalized === 'le tan'
-    || normalized === 'letan'
+  const normalized = String(role || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]/g, '');
+  return normalized === 'letan'
     || normalized === 'receptionist'
     || normalized === 'staff'
-    || normalized === 'employee';
+    || normalized === 'employee'
+    || normalized === 'nhanvien';
 }
 
 function canEditCustomers() {
@@ -209,7 +220,7 @@ async function fetchCustomers() {
     pagingState.hasNextPage = false;
     pagingState.hasPreviousPage = false;
     showToast(error.message || 'Lỗi tải khách hàng.', 'error');
-    console.error('Failed to fetch customers:', error);
+
   }
 }
 
@@ -336,6 +347,42 @@ async function saveCustomer(e) {
     return;
   }
 
+  const validation = window.AppCore && window.AppCore.Validation;
+  if (validation && !validation.validateFields(e.target, [
+    {
+      input: '#cusName',
+      validate: function(value) {
+        return validation.normalizeText(value).length >= 2 ? '' : 'Họ và tên phải có ít nhất 2 ký tự.';
+      }
+    },
+    {
+      input: '#cusCCCD',
+      validate: function(value) {
+        return validation.isValidIdentityCard(value) ? '' : 'CCCD/CMND phải gồm 9 hoặc 12 chữ số.';
+      }
+    },
+    {
+      input: '#cusPhone',
+      validate: function(value) {
+        return validation.isValidPhone(value) ? '' : 'Số điện thoại không hợp lệ.';
+      }
+    },
+    {
+      input: '#cusTier',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng chọn hạng thành viên.';
+      }
+    },
+    {
+      input: '#cusStatus',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng chọn trạng thái.';
+      }
+    }
+  ])) {
+    return;
+  }
+
   const token = localStorage.getItem('token');
   const headers = {
     'Content-Type': 'application/json'
@@ -373,7 +420,7 @@ async function saveCustomer(e) {
     await loadAndRenderCustomers();
   } catch (error) {
     showToast(error.message || 'Không thể lưu khách hàng.', 'error');
-    console.error('Failed to save customer:', error);
+
   }
 }
 
@@ -423,7 +470,7 @@ async function deleteCustomer() {
     showToast('Xóa khách hàng thành công!');
   } catch (error) {
     showToast(error.message || 'Không thể xóa khách hàng.', 'error');
-    console.error('Failed to delete customer:', error);
+
   }
 }
 
@@ -515,7 +562,7 @@ async function loadLookups() {
     _populateSelect('filterStatus', customerStatuses, 'Tất cả trạng thái', '');
     _populateSelect('cusTier', ['Khách mới', 'Silver Member', 'Gold Member', 'Elite Suite']);
     _populateSelect('cusStatus', customerStatuses);
-  } catch (e) { console.warn('Lookup load failed:', e); }
+  } catch (e) {}
 }
 
 function _populateSelect(elId, items, defaultLabel, defaultValue) {

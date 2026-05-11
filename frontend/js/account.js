@@ -52,6 +52,32 @@ function normalizeStatus(status) {
   return 'Khóa';
 }
 
+function encodeHtmlText(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return String(text || '').replace(/[&<>"']/g, function(char) {
+    return map[char];
+  });
+}
+
+function translateRole(role) {
+  const normalized = String(role || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd');
+  if (normalized === 'admin') return 'Quản trị viên';
+  if (normalized === 'receptionist' || normalized === 'le tan' || normalized === 'letan') return 'Lễ tân';
+  if (normalized === 'customer' || normalized === 'khach' || normalized === 'guest') return 'Khách';
+  return role;
+}
+
 function formatLastLogin(lastLoginAt) {
   if (!lastLoginAt) return 'Chưa đăng nhập';
 
@@ -73,13 +99,14 @@ function normalizeAccount(raw) {
     id: String(raw.id ?? ''),
     name: raw.fullName || 'Chưa có tên',
     email: raw.email || '',
-    role: raw.role || 'Nhân viên',
+    role: String(raw.role || 'Customer').trim(),
     status: normalizeStatus(raw.status),
     lastLogin: formatLastLogin(raw.lastLoginAt),
     avatar: '',
     color: raw.avatarColor || pickAvatarColor(raw.email || raw.id)
   };
 }
+
 
 function showToast(message, variant) {
   if (window.AppCore && typeof window.AppCore.toast === 'function') {
@@ -140,7 +167,8 @@ async function loadAccountsFromApi() {
     });
 
     if (!response.ok) {
-      throw new Error('Không thể tải danh sách tài khoản.');
+      const errorText = await response.text();
+      throw new Error('HTTP ' + response.status + ': ' + (errorText || 'Không thể tải danh sách tài khoản.'));
     }
 
     const data = await response.json();
@@ -158,7 +186,6 @@ async function loadAccountsFromApi() {
     pagingState.hasNextPage = false;
     pagingState.hasPreviousPage = false;
     showToast(error.message || 'Lỗi tải tài khoản.', 'error');
-    console.error('Failed to load accounts:', error);
   }
 }
 
@@ -191,10 +218,12 @@ function renderAccounts() {
     }
 
     let roleBadge = '';
-    if (acc.role === 'Admin') {
-      roleBadge = '<span style="background:#eff6ff; color:#1e40af; padding:.25rem .75rem; border-radius:.5rem; font-size:.75rem; font-weight:700;">' + acc.role + '</span>';
+    const roleLabel = translateRole(acc.role);
+    const isAdmin = String(acc.role || '').toLowerCase() === 'admin';
+    if (isAdmin) {
+      roleBadge = '<span style="background:#eff6ff; color:#1e40af; padding:.25rem .75rem; border-radius:.5rem; font-size:.75rem; font-weight:700;">' + encodeHtmlText(roleLabel) + '</span>';
     } else {
-      roleBadge = '<span style="background:#f1f5f9; color:#334155; padding:.25rem .75rem; border-radius:.5rem; font-size:.75rem; font-weight:700;">' + acc.role + '</span>';
+      roleBadge = '<span style="background:#f1f5f9; color:#334155; padding:.25rem .75rem; border-radius:.5rem; font-size:.75rem; font-weight:700;">' + encodeHtmlText(roleLabel) + '</span>';
     }
 
     let statusBadge = '';
@@ -205,7 +234,7 @@ function renderAccounts() {
     }
 
     let actionsHtml = '<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" title="Chỉnh sửa" onclick="editAccount(\'' + acc.id + '\')"><span class="material-symbols-outlined" style="font-size:18px; color:var(--dash-muted);">edit</span></button>';
-    if (acc.role !== 'Admin') {
+    if (!isAdmin) {
       if (acc.status === 'Hoạt động') {
         actionsHtml += '<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" title="Khóa tài khoản" onclick="toggleStatus(\'' + acc.id + '\')"><span class="material-symbols-outlined" style="font-size:18px;">lock</span></button>';
       } else {
@@ -218,14 +247,14 @@ function renderAccounts() {
         <div style="display:flex; align-items:center; gap:1rem;">\
           ' + avatarHtml + '\
           <div>\
-            <p style="font-weight:700; color:var(--color-on-surface);">' + acc.name + '</p>\
-            <p style="font-size:.875rem; color:var(--color-on-surface-variant); font-weight:500;">' + acc.email + '</p>\
+            <p style="font-weight:700; color:var(--color-on-surface);">' + encodeHtmlText(acc.name) + '</p>\
+            <p style="font-size:.875rem; color:var(--color-on-surface-variant); font-weight:500;">' + encodeHtmlText(acc.email) + '</p>\
           </div>\
         </div>\
       </td>\
       <td style="padding:1rem 1.5rem;">' + roleBadge + '</td>\
       <td style="padding:1rem 1.5rem;">' + statusBadge + '</td>\
-      <td style="padding:1rem 1.5rem; font-size:.875rem; font-weight:500; color:var(--color-on-surface-variant);">' + acc.lastLogin + '</td>\
+      <td style="padding:1rem 1.5rem; font-size:.875rem; font-weight:500; color:var(--color-on-surface-variant);">' + encodeHtmlText(acc.lastLogin) + '</td>\
       <td style="padding:1rem 1.5rem; text-align:right;">\
         <div style="display:flex; gap:4px; justify-content:flex-end;">\
           ' + actionsHtml + '\
@@ -241,7 +270,7 @@ function renderAccounts() {
   const statAdmin = document.getElementById('stat-admin');
   if (statAdmin) {
     statAdmin.innerText = String(accounts.filter(function (acc) {
-      return acc.role === 'Admin';
+      return String(acc.role || '').toLowerCase() === 'admin';
     }).length);
   }
 
@@ -331,7 +360,7 @@ async function confirmDelete() {
     showToast('Đã xóa tài khoản.');
   } catch (error) {
     showToast(error.message || 'Không thể xóa tài khoản.', 'error');
-    console.error('Delete account failed:', error);
+
   }
 }
 
@@ -385,16 +414,59 @@ async function toggleStatus(id) {
     showToast('Cập nhật trạng thái thành công');
   } catch (err) {
     showToast(err.message || 'Không thể cập nhật trạng thái.', 'error');
-    console.error(err);
+
   }
 }
 
 async function handleFormSubmit(event) {
   event.preventDefault();
+  const form = event.target;
+  const validation = window.AppCore && window.AppCore.Validation;
 
   const id = document.getElementById('accId').value;
-  const name = document.getElementById('accName').value;
-  const email = document.getElementById('accEmail').value;
+  if (validation && !validation.validateFields(form, [
+    {
+      input: '#accName',
+      validate: function(value) {
+        return validation.normalizeText(value).length >= 2 ? '' : 'Họ và tên phải có ít nhất 2 ký tự.';
+      }
+    },
+    {
+      input: '#accEmail',
+      validate: function(value) {
+        return validation.isValidEmail(value) ? '' : 'Email không đúng định dạng.';
+      }
+    },
+    {
+      input: '#accPassword',
+      validate: function(value) {
+        if (!id && String(value || '').trim().length < 6) {
+          return 'Mật khẩu phải có ít nhất 6 ký tự.';
+        }
+        if (id && String(value || '').trim() && String(value || '').trim().length < 6) {
+          return 'Mật khẩu mới phải có ít nhất 6 ký tự.';
+        }
+        return '';
+      }
+    },
+    {
+      input: '#accRole',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng chọn vai trò.';
+      }
+    },
+    {
+      input: '#accStatus',
+      validate: function(value) {
+        return !id || validation.normalizeText(value) ? '' : 'Vui lòng chọn trạng thái.';
+      }
+    }
+  ])) {
+    return;
+  }
+
+  const name = document.getElementById('accName').value.trim();
+  const email = document.getElementById('accEmail').value.trim();
   const password = document.getElementById('accPassword').value;
   const role = document.getElementById('accRole').value;
   const status = id ? document.getElementById('accStatus').value : 'Hoạt động';
@@ -439,7 +511,7 @@ async function handleFormSubmit(event) {
     await loadAndRenderAccounts();
   } catch (error) {
     showToast(error.message || 'Lỗi khi lưu tài khoản.', 'error');
-    console.error('Lỗi:', error);
+
     return;
   }
 
@@ -532,9 +604,12 @@ async function loadLookups() {
     const data = await res.json();
     _populateSelect('filterRole', data.accountRoles, 'Tất cả vai trò', '');
     _populateSelect('filterStatus', data.accountStatuses, 'Tất cả trạng thái', '');
-    _populateSelect('accRole', data.accountRoles);
+    _populateSelect('accRole', [
+      { value: 'Admin', label: 'Quản trị viên' },
+      { value: 'Receptionist', label: 'Lễ tân' }
+    ]);
     _populateSelect('accStatus', data.accountStatuses);
-  } catch (e) { console.warn('Lookup load failed:', e); }
+  } catch (e) {}
 }
 
 function _populateSelect(elId, items, defaultLabel, defaultValue) {
@@ -551,8 +626,8 @@ function _populateSelect(elId, items, defaultLabel, defaultValue) {
   }
   items.forEach(function(item) {
     var opt = document.createElement('option');
-    opt.value = item;
-    opt.textContent = item;
+    opt.value = typeof item === 'string' ? item : item.value;
+    opt.textContent = typeof item === 'string' ? item : item.label;
     el.appendChild(opt);
   });
 }

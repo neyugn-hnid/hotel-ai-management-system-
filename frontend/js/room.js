@@ -140,7 +140,7 @@ async function fetchRooms() {
     pagingState.hasNextPage = false;
     pagingState.hasPreviousPage = false;
     showToast(error.message || 'Lỗi tải dữ liệu phòng.', 'error');
-    console.error('Failed to fetch rooms:', error);
+
   }
 }
 
@@ -348,9 +348,45 @@ async function saveRoom(e) {
     showToast('Bạn không có quyền tạo hoặc sửa phòng.', 'error');
     return;
   }
-  
-  const name = document.getElementById('roomName').value;
-  const description = document.getElementById('roomDescription').value;
+
+  const validation = window.AppCore && window.AppCore.Validation;
+  if (validation && !validation.validateFields(e.target, [
+    {
+      input: '#roomName',
+      validate: function(value) {
+        return validation.normalizeText(value).length >= 2 ? '' : 'Tên phòng phải có ít nhất 2 ký tự.';
+      }
+    },
+    {
+      input: '#roomDescription',
+      validate: function(value) {
+        return validation.normalizeText(value).length >= 10 ? '' : 'Mô tả phòng phải có ít nhất 10 ký tự.';
+      }
+    },
+    {
+      input: '#roomPrice',
+      validate: function(value) {
+        return validation.isPositiveNumber(value) ? '' : 'Giá phòng phải lớn hơn 0.';
+      }
+    },
+    {
+      input: '#roomType',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng chọn loại phòng.';
+      }
+    },
+    {
+      input: '#roomStatus',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng chọn trạng thái phòng.';
+      }
+    }
+  ])) {
+    return;
+  }
+
+  const name = document.getElementById('roomName').value.trim();
+  const description = document.getElementById('roomDescription').value.trim();
   const price = parseFloat(document.getElementById('roomPrice').value);
   const type = document.getElementById('roomType').value;
   const status = document.getElementById('roomStatus').value;
@@ -411,7 +447,7 @@ async function saveRoom(e) {
     await applyAllFilters();
   } catch (error) {
     showToast(error.message || 'Lưu phòng thất bại.', 'error');
-    console.error('Failed to save room:', error);
+
   }
 }
 
@@ -460,7 +496,7 @@ async function deleteRoom() {
       showToast('Xóa phòng thành công!');
     } catch (error) {
       showToast(error.message || 'Không thể xóa phòng.', 'error');
-      console.error('Failed to delete room:', error);
+
     }
   }
 }
@@ -514,7 +550,7 @@ async function loadLookups() {
     _populateSelect('filterStatus', data.roomStatuses, 'Tất cả trạng thái', '');
     _populateSelect('roomType', data.roomTypes);
     _populateSelect('roomStatus', data.roomStatuses);
-  } catch (e) { console.warn('Lookup load failed:', e); }
+  } catch (e) {}
 }
 
 function _populateSelect(elId, items, defaultLabel, defaultValue) {

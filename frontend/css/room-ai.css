@@ -161,7 +161,78 @@
   text-decoration: none;
 }
 
+@media (max-width: 1024px) {
+  .room-ai-main {
+    margin-top: -48px;
+  }
+
+  .room-ai-search-card {
+    padding: 30px;
+    border-radius: 20px;
+  }
+
+  .room-ai-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .room-ai-results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
 @media (max-width: 768px) {
+  .room-ai-hero {
+    min-height: 62vh;
+  }
+
+  .room-ai-main {
+    margin-top: -28px;
+  }
+
+  .room-ai-search-card {
+    padding: 20px 16px;
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+  }
+
+  .room-ai-search-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .room-ai-prompt-wrap {
+    margin-bottom: 18px;
+  }
+
+  .room-ai-prompt-label {
+    display: block;
+  }
+
+  .room-ai-submit-btn {
+    height: 52px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+
+  .room-ai-recommendations,
+  .room-ai-all-rooms-section {
+    margin-top: 56px;
+  }
+
+  .room-ai-heading-xl {
+    font-size: 2.2rem;
+    line-height: 1.08;
+  }
+
+  .room-ai-section-heading,
+  .room-ai-section-header {
+    margin-bottom: 28px;
+  }
+
   #searchForm {
     display: flex !important;
     flex-direction: column !important;
@@ -191,6 +262,18 @@
 }
 
 @media (max-width: 480px) {
+  .room-ai-search-card {
+    padding: 18px 14px;
+  }
+
+  .room-ai-heading-xl {
+    font-size: 1.9rem;
+  }
+
+  .room-ai-results-grid {
+    gap: 16px;
+  }
+
   #aiPrompt {
     min-height: 96px;
   }

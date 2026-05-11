@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,7 +13,7 @@ namespace Hotel_Manager.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-        [Authorize(Roles = "Admin,Lễ tân")]
+        [Authorize(Roles = "Admin,Receptionist")]
     public class BookingServicesController : ControllerBase
     {
         private readonly Hotel_ManagerContext _context;

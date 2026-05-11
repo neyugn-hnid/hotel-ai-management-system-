@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,7 +25,7 @@ namespace Hotel_Manager.Controllers
 
         
         [HttpGet]
-        [Authorize(Roles = "Admin,Lễ tân")]
+        [Authorize(Roles = "Admin,Receptionist")]
         [AllowAnonymous]
         public ActionResult<object> GetRoom(
             [FromQuery] string? q,

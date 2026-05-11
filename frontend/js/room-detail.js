@@ -13,7 +13,7 @@ function showToast(message, variant) {
     window.AppCore.toast(message, variant);
     return;
   }
-  console.warn(message);
+
 }
 
 function getQueryParam(name) {
@@ -68,7 +68,6 @@ function normalizeRoom(raw) {
       return url && typeof url === 'string';
     });
 
-  
   if (imageUrls.length === 0) {
     const fallbackImages = [
       'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=80',
@@ -170,12 +169,13 @@ function updateSummary() {
   document.getElementById('summaryTotal').innerText = total.toLocaleString('vi-VN');
 }
 
-async function createCustomer(name, phone) {
+async function createCustomer(name, phone, loyaltyTier) {
   const customerData = {
     fullName: String(name || '').trim(),
     email: null,
     phoneNumber: sanitizePhone(phone),
     identityCard: null,
+    loyaltyTier: String(loyaltyTier || 'Khách mới'),
     status: 'Khách mới',
     aiPreferences: ''
   };
@@ -219,13 +219,79 @@ async function findCustomerByPhone(phone) {
   return await response.json();
 }
 
-async function findOrCreateCustomer(name, phone) {
+async function findOrCreateCustomer(name, phone, loyaltyTier) {
   const existingCustomer = await findCustomerByPhone(phone);
   if (existingCustomer && existingCustomer.id) {
     return existingCustomer;
   }
 
-  return await createCustomer(name, phone);
+  return await createCustomer(name, phone, loyaltyTier);
+}
+
+function refillBookingContactInfo() {
+  try {
+    var storedName = localStorage.getItem('customerName') || '';
+    var storedPhone = localStorage.getItem('customerPhone') || '';
+    var nameInput = document.getElementById('bookName');
+    var phoneInput = document.getElementById('bookPhone');
+
+    if (nameInput && storedName) {
+      nameInput.value = storedName;
+    }
+    if (phoneInput && storedPhone) {
+      phoneInput.value = storedPhone;
+    }
+  } catch (e) {
+
+  }
+}
+
+function isLoggedInCustomer() {
+  return Boolean(localStorage.getItem('token'));
+}
+
+async function hydrateBookingContactInfoFromAccount() {
+  try {
+    var hasStoredName = String(localStorage.getItem('customerName') || '').trim();
+    var hasStoredPhone = String(localStorage.getItem('customerPhone') || '').trim();
+    if (hasStoredName && hasStoredPhone) {
+      return;
+    }
+
+    var token = localStorage.getItem('token');
+    if (!token) {
+      return;
+    }
+
+    var response = await fetch(API_BASE_URL + '/Accounts/me', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      }
+    });
+
+    if (!response.ok) {
+      return;
+    }
+
+    var account = await response.json();
+    var accountId = account.id || account.Id || '';
+    var fullName = account.fullName || account.FullName || '';
+    var phone = account.phoneNumber || account.PhoneNumber || '';
+
+    if (String(accountId || '').trim()) {
+      localStorage.setItem('accountId', String(accountId));
+    }
+    if (String(fullName || '').trim()) {
+      localStorage.setItem('customerName', String(fullName).trim());
+    }
+    if (String(phone || '').trim()) {
+      localStorage.setItem('customerPhone', String(phone).trim());
+    }
+  } catch (e) {
+
+  }
 }
 
 window.onload = async function () {
@@ -252,13 +318,49 @@ window.onload = async function () {
   checkInInput.addEventListener('change', updateSummary);
   checkOutInput.addEventListener('change', updateSummary);
 
+  await hydrateBookingContactInfoFromAccount();
+  refillBookingContactInfo();
+
   document.getElementById('bookingForm').addEventListener('submit', async function (e) {
     e.preventDefault();
+    var validation = window.AppCore && window.AppCore.Validation;
+    if (validation && !validation.validateFields(e.target, [
+      {
+        input: '#bookCheckIn',
+        validate: function(value) {
+          return validation.parseFlexibleDate(value) ? '' : 'Vui lòng chọn ngày nhận phòng.';
+        }
+      },
+      {
+        input: '#bookCheckOut',
+        validate: function(value) {
+          var inDate = validation.parseFlexibleDate(document.getElementById('bookCheckIn').value);
+          var outDate = validation.parseFlexibleDate(value);
+          if (!outDate) return 'Vui lòng chọn ngày trả phòng.';
+          if (inDate && outDate <= inDate) return 'Ngày trả phòng phải sau ngày nhận phòng.';
+          return '';
+        }
+      },
+      {
+        input: '#bookName',
+        validate: function(value) {
+          return validation.normalizeText(value).length >= 2 ? '' : 'Họ và tên phải có ít nhất 2 ký tự.';
+        }
+      },
+      {
+        input: '#bookPhone',
+        validate: function(value) {
+          return validation.isValidPhone(value) ? '' : 'Số điện thoại không hợp lệ.';
+        }
+      }
+    ])) {
+      return;
+    }
 
     const checkIn = checkInInput.value;
     const checkOut = checkOutInput.value;
-    const name = document.getElementById('bookName').value;
-    const phone = document.getElementById('bookPhone').value;
+    const name = document.getElementById('bookName').value.trim();
+    const phone = document.getElementById('bookPhone').value.trim();
 
     const d1 = new Date(checkIn);
     const d2 = new Date(checkOut);
@@ -278,13 +380,23 @@ window.onload = async function () {
     document.getElementById('cTotal').innerText = total.toLocaleString('vi-VN') + ' ₫';
 
     try {
-      const customer = await findOrCreateCustomer(name, phone);
+      const customer = await findOrCreateCustomer(
+        name,
+        phone,
+        isLoggedInCustomer() ? 'Khách mới' : 'Silver Member'
+      );
       const customerId = customer.id;
+      try {
+        localStorage.setItem('customerId', String(customerId || ''));
+        localStorage.setItem('customerName', String(name || ''));
+        localStorage.setItem('customerPhone', String(phone || ''));
+      } catch (_) { }
+      const storedAccountId = Number(localStorage.getItem('accountId') || 0);
       const bookingData = {
         bookingCode: 'BKG-WEB' + Date.now(),
         customerId: customerId,
         roomId: currentRoom.id || currentRoom.Id,
-        accountId: null,
+        accountId: storedAccountId > 0 ? storedAccountId : null,
         checkInDate: checkIn + 'T00:00:00',
         checkOutDate: checkOut + 'T00:00:00',
         status: 'Chờ xác nhận',
@@ -309,6 +421,7 @@ window.onload = async function () {
       document.getElementById('bookingForm').reset();
       checkInInput.value = getQueryParam('checkIn') || today;
       checkOutInput.value = getQueryParam('checkOut') || tomorrow.toISOString().split('T')[0];
+      refillBookingContactInfo();
       updateSummary();
     } catch (error) {
       showToast(error.message || 'Lỗi khi đặt phòng. Vui lòng thử lại.', 'error');

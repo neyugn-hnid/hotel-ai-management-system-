@@ -1,30 +1,6 @@
 ﻿INSERT INTO accounts (full_name, email, phone_number, password_hash, role, status, avatar, last_login, created_at, updated_at) VALUES
-('ADMIN', 'admin@gamil.com.com', '0999999999', 'admin@123', 'Admin', 1, NULL, GETUTCDATE(), GETUTCDATE(), GETUTCDATE())
+('ADMIN', 'admin@gamil.com.com', '0999999999', '$2a$11$oynKAF/blvasDjgkLZbhDetw7nm4wT/rDaHZoEoOAtdLxPie85VhG', 'Admin', 1, NULL, GETUTCDATE(), GETUTCDATE(), GETUTCDATE())
 
-INSERT INTO room_images (room_id, image_url, created_at) VALUES
-(4, 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80',GETUTCDATE()),
-
-(5, 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&q=80',GETUTCDATE()),
-
-(6, 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&q=80',GETUTCDATE()),
-
-(7, 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&q=80',GETUTCDATE()),
-
-(8, 'https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&q=80',GETUTCDATE()),
-
-(9, 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800&q=80',GETUTCDATE()),
-
-(10, 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800&q=80',GETUTCDATE()),
-
-(11, 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80',GETUTCDATE()),
-
-(12, 'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=800&q=80',GETUTCDATE()),
-
-(13, 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&q=80',GETUTCDATE()),
-
-(14, 'https://images.unsplash.com/photo-1502672260266-1c1e52509def?w=800&q=80',GETUTCDATE()),
-
-(15, 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',GETUTCDATE());
 
 INSERT INTO rooms 
 ( name, room_type, price_per_night, status, description, created_at, updated_at)
@@ -104,7 +80,7 @@ INSERT INTO room_images (room_id, image_url, created_at) VALUES
 (12, 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',GETUTCDATE());
 
 
-INSERT INTO room_images (room_id, image_url, is_primary) VALUES
+INSERT INTO room_images (room_id, image_url, created_at) VALUES
 
 
 (1, 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80',GETUTCDATE()),

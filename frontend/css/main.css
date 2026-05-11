@@ -482,6 +482,105 @@ h1, h2, h3, h4 {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
+.public-menu-toggle,
+.public-nav-panel {
+    display: none;
+}
+
+.public-user-menu {
+    position: relative;
+}
+
+.public-user-menu__trigger {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(14px);
+}
+
+.public-user-menu__avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: white;
+    background: linear-gradient(135deg, rgba(197, 160, 89, 0.95), rgba(139, 107, 47, 0.95));
+}
+
+.public-user-menu__dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    min-width: 220px;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(5, 5, 5, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(18px);
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+    z-index: 1305;
+}
+
+.public-user-menu.is-open .public-user-menu__dropdown {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.public-user-menu__meta {
+    padding: 6px 4px 12px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.public-user-menu__name {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.public-user-menu__email {
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+}
+
+.public-user-menu__logout {
+    width: 100%;
+    border: none;
+    background: rgba(255, 255, 255, 0.04);
+    color: white;
+    padding: 12px 14px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.public-user-menu__logout:hover {
+    background: rgba(197, 160, 89, 0.16);
+    color: var(--c-gold-light);
+}
+
 
 
 .hero {
@@ -1328,11 +1427,152 @@ h1, h2, h3, h4 {
     .rooms-grid { grid-template-columns: 1fr 1fr; }
     .story__img-float { display: none; }
     .navbar__links { display: none; }
+    .public-menu-toggle {
+        display: inline-flex;
+        width: 44px;
+        height: 44px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        cursor: pointer;
+        backdrop-filter: blur(12px);
+        margin-left: auto;
+    }
+
+    .public-menu-toggle .material-symbols-outlined {
+        font-size: 22px;
+    }
+
+    .public-nav-panel.active {
+        display: block;
+        position: fixed;
+        top: 88px;
+        left: 16px;
+        right: 16px;
+        z-index: 1300;
+    }
+
+    .public-nav-panel__inner {
+        background: rgba(5, 5, 5, 0.97);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 18px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(18px);
+    }
+
+    .public-nav-panel__links,
+    .public-nav-panel__actions {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .public-nav-panel__links {
+        gap: 6px;
+        margin-bottom: 14px;
+    }
+
+    .public-nav-panel__actions {
+        gap: 10px;
+    }
+
+    .public-nav-panel .navbar__link {
+        display: block;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        opacity: 1;
+    }
+
+    .public-nav-panel .nav-pill,
+    .public-nav-panel .nav-pill.nav-pill-primary {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .public-nav-panel .public-user-menu {
+        width: 100%;
+    }
+
+    .public-nav-panel .public-user-menu__trigger {
+        width: 100%;
+        height: auto;
+        border-radius: 14px;
+        padding: 10px 12px;
+        justify-content: flex-start;
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .public-nav-panel .public-user-menu__trigger::after {
+        content: "Tài khoản";
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .public-nav-panel .public-user-menu__avatar {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+    }
+
+    .public-nav-panel .public-user-menu__dropdown {
+        position: static;
+        min-width: 0;
+        margin-top: 10px;
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+        display: none;
+    }
+
+    .public-nav-panel .public-user-menu.is-open .public-user-menu__dropdown {
+        display: block;
+    }
 }
 
 @media (max-width: 768px) {
+    .admin-grid-two-col {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
     .rooms-grid { grid-template-columns: 1fr; }
-    .navbar { padding: 20px 30px; }
+    .navbar {
+        padding: 18px 20px;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .navbar__logo {
+        font-size: 1.15rem;
+        letter-spacing: 0.16em;
+        max-width: 100%;
+    }
+
+    .navbar__actions {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .navbar > .navbar__actions {
+        display: none !important;
+    }
+
+    .navbar.navbar--mobile-open {
+        background: rgba(5, 5, 5, 0.96);
+        backdrop-filter: blur(16px);
+    }
     
     .booking-bar { 
         display: flex !important;
@@ -1525,13 +1765,9 @@ h1, h2, h3, h4 {
     
     
     .navbar {
-        flex-direction: column !important;
+        flex-direction: row !important;
         padding: 16px 20px !important;
-        gap: 16px !important;
-    }
-    .navbar__actions {
-        width: 100% !important;
-        justify-content: space-between !important;
+        gap: 12px !important;
     }
     
     
@@ -1557,6 +1793,10 @@ h1, h2, h3, h4 {
 @media (max-width: 768px) {
     html, body {
         overflow-x: hidden;
+    }
+
+    body.public-menu-open {
+        overflow: hidden;
     }
 
     .container {
@@ -1592,6 +1832,24 @@ h1, h2, h3, h4 {
         padding: 14px !important;
     }
 
+    .admin-page-header,
+    .account-page-header,
+    .setting-page-header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+    }
+
+    .admin-page-header > button,
+    .account-page-header > button,
+    .setting-save-wrap .btn-save,
+    .gold-border-btn.admin-btn-primary,
+    .account-add-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
     .main-content > header {
         margin-bottom: 18px !important;
     }
@@ -1610,6 +1868,51 @@ h1, h2, h3, h4 {
     .luxury-card {
         border-radius: 12px !important;
         padding: 14px !important;
+    }
+
+    .admin-card-reset,
+    .account-table-card {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .notion-table {
+        min-width: 680px;
+    }
+
+    .admin-table-footer,
+    .account-table-footer,
+    .admin-table-actions,
+    .account-table-footer__actions,
+    .admin-form-actions,
+    .admin-delete-actions,
+    .account-modal-actions,
+    .account-delete-actions,
+    .booking-invoice-actions,
+    .booking-toolbar,
+    .booking-section-header,
+    .footer__bottom,
+    .footer__links-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    .admin-table-pager-btn,
+    .account-table-pager-btn,
+    .booking-toolbar__btn,
+    .booking-invoice-actions__save,
+    .booking-invoice-actions__cancel,
+    .admin-form-submit,
+    .admin-form-cancel,
+    .admin-delete-confirm,
+    .admin-delete-cancel,
+    .account-modal-save-btn,
+    .account-modal-close-btn,
+    .account-delete-confirm-btn,
+    .account-delete-cancel-btn {
+        width: 100% !important;
+        justify-content: center !important;
     }
 
     .notion-search-bar {
@@ -1647,6 +1950,12 @@ h1, h2, h3, h4 {
         padding: 18px !important;
         border-radius: 14px !important;
     }
+
+    .modal__box {
+        max-width: 100%;
+        padding: 24px 18px;
+        border-radius: 16px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1657,6 +1966,26 @@ h1, h2, h3, h4 {
     .navbar__logo {
         font-size: 1.05rem;
         letter-spacing: 0.12em;
+    }
+
+    .navbar__actions {
+        width: 100% !important;
+    }
+
+    .nav-pill.nav-pill-primary {
+        width: 100%;
+        min-height: 42px;
+    }
+
+    .public-nav-panel.active {
+        top: 74px;
+        left: 12px;
+        right: 12px;
+    }
+
+    .public-nav-panel__inner {
+        padding: 14px;
+        border-radius: 16px;
     }
 
     .hero__title {
@@ -1696,6 +2025,23 @@ h1, h2, h3, h4 {
     .login-box,
     .modal-overlay .luxury-card {
         padding: 14px !important;
+    }
+
+    .footer {
+        padding: 72px 0 40px;
+    }
+
+    .footer-grid {
+        gap: 32px;
+        margin-bottom: 48px;
+    }
+
+    .footer__heading {
+        margin-bottom: 18px;
+    }
+
+    .footer__link {
+        margin-bottom: 12px;
     }
 }
 

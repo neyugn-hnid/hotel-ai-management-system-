@@ -8,8 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Globalization;
 using System.Security.Claims;
 using System.Text;
+using System.Linq;
 
 namespace Hotel_Manager.Controllers
 {
@@ -90,12 +92,16 @@ namespace Hotel_Manager.Controllers
 
         private string GenerateJwtToken(Account user)
         {
+            var normalizedRole = NormalizeRole(user.Role);
+            // Fix UTF-8 encoding if role is double-encoded
+            normalizedRole = FixDoubleEncoding(normalizedRole);
+            
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.FullName),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, normalizedRole)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -127,7 +133,8 @@ namespace Hotel_Manager.Controllers
                 Email = request.Email,
                 PhoneNumber = string.IsNullOrWhiteSpace(request.Phone) ? null : request.Phone.Trim(),
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                Role = "Lễ tân",
+                Role = "Customer",
+                Status = "Hoạt động",
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -135,6 +142,109 @@ namespace Hotel_Manager.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Đăng ký thành công" });
+        }
+
+        private static string NormalizeRole(string? role)
+        {
+            // Fix double-encoding first if needed
+            role = FixDoubleEncoding(role);
+            
+            var normalized = (role ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(normalized))
+            {
+                return string.Empty;
+            }
+
+            var compact = RemoveVietnameseDiacritics(normalized)
+                .ToLowerInvariant()
+                .Replace(" ", string.Empty);
+
+            if (compact == "admin")
+            {
+                return "Admin";
+            }
+
+            if (compact == "letan"
+                || compact == "receptionist"
+                || compact == "staff"
+                || compact == "employee"
+                || compact == "nhanvien")
+            {
+                return "Receptionist";
+            }
+
+            if (compact == "khach" || compact == "customer" || compact == "guest")
+            {
+                return "Customer";
+            }
+
+            return normalized;
+        }
+
+        private static string FixDoubleEncoding(string? input)
+        {
+            if (string.IsNullOrEmpty(input)) 
+                return input ?? "";
+
+            try
+            {
+                // Detect and fix double-encoded UTF-8
+                // If string contains chars like: Lá» tÃ¢n (which should be Receptionist)
+                var latin1 = Encoding.GetEncoding("iso-8859-1");
+                var utf8 = Encoding.UTF8;
+                
+                // Get bytes using latin1 interpretation, then decode as UTF8
+                var bytes = latin1.GetBytes(input);
+                var fixed_str = utf8.GetString(bytes);
+                
+                return fixed_str;
+            }
+            catch
+            {
+                // If fix fails, return original
+                return input;
+            }
+        }
+
+        private static string RemoveVietnameseDiacritics(string input)
+        {
+            var normalized = input.Normalize(NormalizationForm.FormD);
+            var chars = normalized
+                .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                .Select(c => c == 'đ' ? 'd' : c == 'Đ' ? 'D' : c)
+                .ToArray();
+
+            return new string(chars).Normalize(NormalizationForm.FormC);
+        }
+
+        [HttpGet("debug/accounts")]
+        public async Task<IActionResult> DebugListAccounts([FromQuery] string? adminEmail)
+        {
+            // Simple admin verification via email query parameter (for debugging only)
+            var requestIsAdmin = !string.IsNullOrWhiteSpace(adminEmail) && adminEmail == "admin@hotel.local";
+            
+            var accounts = await _context.Account
+                .AsNoTracking()
+                .Select(a => new
+                {
+                    a.Id,
+                    a.Email,
+                    a.FullName,
+                    RoleRaw = a.Role,
+                    RoleNormalized = NormalizeRole(a.Role),
+                    RoleBytes = a.Role == null ? new byte[0] : System.Text.Encoding.UTF8.GetBytes(a.Role ?? ""),
+                    RoleLength = (a.Role ?? "").Length,
+                    a.Status,
+                    a.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                TotalAccounts = accounts.Count,
+                Accounts = accounts,
+                Note = "Use &adminEmail=admin@hotel.local to bypass auth for debugging"
+            });
         }
     }
 

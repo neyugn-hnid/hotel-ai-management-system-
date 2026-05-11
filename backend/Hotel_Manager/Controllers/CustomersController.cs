@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,7 +25,7 @@ namespace Hotel_Manager.Controllers
 
         
         [HttpGet]
-        [Authorize(Roles = "Admin,Lễ tân")]
+        [Authorize(Roles = "Admin,Receptionist")]
         public ActionResult<object> GetCustomer(
             [FromQuery] string? q,
             [FromQuery] string? status,
@@ -95,8 +95,8 @@ namespace Hotel_Manager.Controllers
 
         
         [HttpGet("{id}")]
-            [Authorize(Roles = "Admin,Lễ tân")]
-        [Authorize(Roles = "Admin,Lễ tân")]
+            [Authorize(Roles = "Admin,Receptionist")]
+        [Authorize(Roles = "Admin,Receptionist")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
             var customer = await _context.Customer.FindAsync(id);
@@ -135,7 +135,7 @@ namespace Hotel_Manager.Controllers
         
         
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin,Lễ tân")]
+        [Authorize(Roles = "Admin,Receptionist")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
         {
             if (id != customer.Id)

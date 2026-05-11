@@ -390,6 +390,25 @@
 
 
 @media (max-width: 768px) {
+  .booking-invoice-lookup,
+  .booking-invoice-lookup__row {
+    flex-direction: column;
+  }
+
+  .invoice-payment-modal,
+  #invoiceModal .notion-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .invoice-qr-section {
+    align-items: stretch;
+  }
+
+  .invoice-qr-container {
+    width: 100%;
+  }
+
   .luxe-stat-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
   #invoiceTableBody td { white-space: nowrap; }
   #paymentDetailsModal .luxury-card { max-width: 100% !important; }
@@ -397,5 +416,11 @@
   #paymentDetailsContent { overflow-x: auto; }
 }
 @media (max-width: 480px) {
+  .invoice-col-room,
+  .invoice-col-date,
+  .invoice-col-status {
+    display: none;
+  }
+
   #paymentDetailsModal .luxury-card { padding: 14px !important; }
 }

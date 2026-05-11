@@ -45,7 +45,7 @@ function showToast(message, variant) {
     window.AppCore.toast(message, variant);
     return;
   }
-  console.warn(message);
+
 }
 
 async function extractApiError(response, fallbackMessage) {
@@ -605,11 +605,53 @@ async function saveInvoice(e) {
     showToast('Bạn không có quyền tạo hoặc sửa hóa đơn.', 'error');
     return;
   }
-  
-  const customer = document.getElementById('invCustomer').value;
-  const cccd = document.getElementById('invCccd').value;
-  const room = document.getElementById('invRoom').value;
-  const date = document.getElementById('invDate').value;
+
+  const validation = window.AppCore && window.AppCore.Validation;
+  if (validation && !validation.validateFields(e.target, [
+    {
+      input: '#invCustomer',
+      validate: function(value) {
+        return validation.normalizeText(value).length >= 2 ? '' : 'Tên khách hàng phải có ít nhất 2 ký tự.';
+      }
+    },
+    {
+      input: '#invCccd',
+      validate: function(value) {
+        return validation.isValidIdentityCard(value) ? '' : 'CCCD phải gồm 9 hoặc 12 chữ số.';
+      }
+    },
+    {
+      input: '#invRoom',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng nhập phòng lưu trú.';
+      }
+    },
+    {
+      input: '#invDate',
+      validate: function(value) {
+        return validation.parseFlexibleDate(value) ? '' : 'Ngày lập hóa đơn không hợp lệ.';
+      }
+    },
+    {
+      input: '#invAmount',
+      validate: function(value) {
+        return validation.isPositiveNumber(value) ? '' : 'Tổng tiền phải lớn hơn 0.';
+      }
+    },
+    {
+      input: '#invStatus',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng chọn trạng thái.';
+      }
+    }
+  ])) {
+    return;
+  }
+
+  const customer = document.getElementById('invCustomer').value.trim();
+  const cccd = document.getElementById('invCccd').value.trim();
+  const room = document.getElementById('invRoom').value.trim();
+  const date = document.getElementById('invDate').value.trim();
   const amount = parseFloat(document.getElementById('invAmount').value);
   const status = document.getElementById('invStatus').value;
   const services = getSelectedServiceNames();
@@ -777,7 +819,7 @@ function openPaymentModal(id) {
   qrImg.onerror = function() {
     this.style.opacity = '1';
     this.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('STK: ' + accountNo + ' - NH: ' + bankId + ' - Tien: ' + amount)}`;
-    console.error("VietQR failed, falling back to basic QR");
+
   };
 }
 

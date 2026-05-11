@@ -204,7 +204,7 @@
         });
       })
       .catch(function(err) {
-        console.warn("Không thể tải phòng nổi bật:", err);
+
       });
   }
 })(window);

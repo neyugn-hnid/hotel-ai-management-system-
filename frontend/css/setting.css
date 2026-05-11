@@ -209,11 +209,37 @@
 
 
 @media (max-width: 768px) {
+  .main-content {
+    padding: 72px 16px 24px !important;
+  }
+
+  .setting-page-description {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
   .settings-section { padding: 16px !important; }
   .settings-title { font-size: 18px !important; }
   .luxe-input-group { grid-template-columns: 1fr !important; gap: 10px !important; }
-  #settingsForm .btn-save { width: 100% !important; }
+  .luxe-input-group,
+  .password-wrapper {
+    max-width: 100%;
+  }
+
+  .setting-save-wrap,
+  #settingsForm .btn-save {
+    width: 100% !important;
+  }
 }
 @media (max-width: 480px) {
+  .settings-section {
+    padding: 14px !important;
+  }
+
+  .btn-save {
+    width: 100%;
+    justify-content: center;
+  }
+
   .luxe-label { font-size: 11px; }
 }

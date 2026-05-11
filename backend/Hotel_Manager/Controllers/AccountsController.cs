@@ -1,4 +1,4 @@
-﻿using Azure.Core;
+using Azure.Core;
 using Hotel_Manager.Data;
 using Hotel_Manager.Modal;
 using Microsoft.AspNetCore.Authorization;
@@ -9,8 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Plugins;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using X.PagedList;
 
@@ -85,8 +87,22 @@ namespace Hotel_Manager.Controllers
                 .Take(pageSize)
                 .ToList();
 
-            IPagedList<Account> paged = new StaticPagedList<Account>(
-                pageItems,
+            var normalizedItems = pageItems.Select(a => new
+            {
+                a.Id,
+                a.FullName,
+                a.Email,
+                a.PhoneNumber,
+                Role = NormalizeRole(a.Role),
+                a.Status,
+                a.AvatarColor,
+                a.LastLoginAt,
+                a.CreatedAt,
+                a.UpdatedAt
+            }).ToList();
+
+            IPagedList<object> paged = new StaticPagedList<object>(
+                normalizedItems,
                 pageNumber,
                 pageSize,
                 totalCount
@@ -138,7 +154,7 @@ namespace Hotel_Manager.Controllers
                     a.FullName,
                     a.Email,
                     a.PhoneNumber,
-                    a.Role,
+                    Role = NormalizeRole(a.Role),
                     a.Status,
                     a.AvatarColor,
                     a.LastLoginAt,
@@ -153,6 +169,29 @@ namespace Hotel_Manager.Controllers
             }
 
             return Ok(account);
+        }
+
+        [HttpGet("debug/claims")]
+        [Authorize]
+        public ActionResult<object> DebugClaims()
+        {
+            var allClaims = User.Claims
+                .Select(c => new { c.Type, c.Value })
+                .ToList();
+
+            var roleClaimsRaw = User.FindAll(ClaimTypes.Role);
+            var rolesInUser = User.IsInRole("Admin") ? "Admin" : User.IsInRole("Receptionist") ? "Receptionist" : "OTHER";
+
+            return Ok(new
+            {
+                AllClaims = allClaims,
+                RoleClaimsRaw = roleClaimsRaw.Select(c => c.Value).ToList(),
+                IsInRoleAdmin = User.IsInRole("Admin"),
+                IsInRoleReceptionist = User.IsInRole("Receptionist"),
+                CurrentRolesFromIsInRole = rolesInUser,
+                UserIdentity = User.Identity?.Name,
+                UserAuthenticationType = User.Identity?.AuthenticationType
+            });
         }
 
         
@@ -171,7 +210,7 @@ namespace Hotel_Manager.Controllers
             account.FullName = request.FullName;
             account.Email = request.Email;
             account.PhoneNumber = request.PhoneNumber;
-            account.Role = request.Role;
+            account.Role = NormalizeRole(request.Role);
             account.Status = request.Status;
 
             if (!string.IsNullOrWhiteSpace(request.Password))
@@ -308,7 +347,7 @@ namespace Hotel_Manager.Controllers
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                Role = request.Role,
+                Role = NormalizeRole(request.Role),
                 Status = request.Status
 
             };
@@ -393,6 +432,51 @@ namespace Hotel_Manager.Controllers
             public string? CurrentPassword { get; set; }
             public string? NewPassword { get; set; }
             public string? ConfirmPassword { get; set; }
+        }
+
+        private static string NormalizeRole(string? role)
+        {
+            var normalized = (role ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(normalized))
+            {
+                return string.Empty;
+            }
+
+            var compact = RemoveVietnameseDiacritics(normalized)
+                .ToLowerInvariant()
+                .Replace(" ", string.Empty);
+
+            if (compact == "admin")
+            {
+                return "Admin";
+            }
+
+            if (compact == "letan"
+                || compact == "receptionist"
+                || compact == "staff"
+                || compact == "employee"
+                || compact == "nhanvien")
+            {
+                return "Receptionist";
+            }
+
+            if (compact == "khach" || compact == "customer" || compact == "guest")
+            {
+                return "Customer";
+            }
+
+            return normalized;
+        }
+
+        private static string RemoveVietnameseDiacritics(string input)
+        {
+            var normalized = input.Normalize(NormalizationForm.FormD);
+            var chars = normalized
+                .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                .Select(c => c == 'đ' ? 'd' : c == 'Đ' ? 'D' : c)
+                .ToArray();
+
+            return new string(chars).Normalize(NormalizationForm.FormC);
         }
 
        

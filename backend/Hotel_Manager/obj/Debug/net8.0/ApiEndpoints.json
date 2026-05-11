@@ -152,6 +152,16 @@
   },
   {
     "ContainingType": "Hotel_Manager.Controllers.AccountsController",
+    "Method": "DebugClaims",
+    "RelativePath": "api/Accounts/debug/claims",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Hotel_Manager.Controllers.AccountsController",
     "Method": "GetMyAccount",
     "RelativePath": "api/Accounts/me",
     "HttpMethod": "GET",
@@ -172,6 +182,22 @@
         "Name": "request",
         "Type": "Hotel_Manager.Controllers.AccountsController\u002BUpdateSelfAccountRequest",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Hotel_Manager.Controllers.AuthController",
+    "Method": "DebugListAccounts",
+    "RelativePath": "api/Auth/debug/accounts",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "adminEmail",
+        "Type": "System.String",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []

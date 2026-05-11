@@ -25,9 +25,40 @@ function closeRegisterModal() {
 }
 async function handleRegister(e) {
   e.preventDefault();
-  const name = document.getElementById("regName").value;
-  const email = document.getElementById("regEmail").value;
-  const phone = document.getElementById("regPhone").value;
+  const form = e.target;
+  const validation = window.AppCore && window.AppCore.Validation;
+  if (validation && !validation.validateFields(form, [
+    {
+      input: "#regName",
+      validate: function(value) {
+        return validation.normalizeText(value).length >= 2 ? "" : "Họ và tên phải có ít nhất 2 ký tự.";
+      }
+    },
+    {
+      input: "#regEmail",
+      validate: function(value) {
+        return validation.isValidEmail(value) ? "" : "Email không đúng định dạng.";
+      }
+    },
+    {
+      input: "#regPhone",
+      validate: function(value) {
+        return validation.isValidPhone(value) ? "" : "Số điện thoại không hợp lệ.";
+      }
+    },
+    {
+      input: "#regPassword",
+      validate: function(value) {
+        return String(value || "").trim().length >= 6 ? "" : "Mật khẩu phải có ít nhất 6 ký tự.";
+      }
+    }
+  ])) {
+    return;
+  }
+
+  const name = document.getElementById("regName").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
   const pass = document.getElementById("regPassword").value;
 
   const errorMsg = document.getElementById("regErrorMsg");
@@ -56,14 +87,27 @@ async function handleRegister(e) {
 
     if (window.AppCore && typeof window.AppCore.toast === "function") {
       window.AppCore.toast(
-        "Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.",
+        "Đăng ký thành công!",
       );
     }
+
+    fetch("https://localhost:7082/api/Customers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: name,
+        email: email,
+        phoneNumber: phone,
+        identityCard: null,
+        status: "Khách mới",
+        aiPreferences: null
+      })
+    }).catch(() => {});
 
     setTimeout(() => {
       closeRegisterModal();
       openLoginModal();
-    }, 700);
+    }, 300);
   } catch (error) {
     errorMsg.innerText = error.message;
     errorMsg.style.display = "block";
@@ -88,33 +132,82 @@ function extractRoleFromToken(token) {
     const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
     const normalized = payload.padEnd(payload.length + ((4 - (payload.length % 4)) % 4), "=");
     const decoded = JSON.parse(atob(normalized));
-    return String(
+    
+    const role = String(
       decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
       || decoded.role
       || ""
     ).trim();
-  } catch (_) {
+    
+    return role;
+  } catch (e) {
     return "";
   }
 }
 
 function isReceptionistRoleValue(role) {
-  const normalized = String(role || "").trim().toLowerCase();
-  return normalized === "lễ tân"
-    || normalized === "le tan"
-    || normalized === "letan"
+  const normalized = String(role || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9]/g, "");
+  return normalized === "letan"
     || normalized === "receptionist"
     || normalized === "staff"
-    || normalized === "employee";
+    || normalized === "employee"
+    || normalized === "nhanvien";
+}
+
+function setStoredCustomerSession(info) {
+  try {
+    const accountId = info && (info.accountId || info.AccountId || info.id || info.Id || "");
+    const customerId = info && (info.customerId || info.CustomerId || "");
+    const fullName = info && (info.fullName || info.FullName || info.name || "");
+    const phone = info && (info.phoneNumber || info.PhoneNumber || info.phone || "");
+
+    if (accountId !== undefined && accountId !== null && String(accountId).trim()) {
+      localStorage.setItem("accountId", String(accountId));
+    }
+    if (customerId !== undefined && customerId !== null && String(customerId).trim()) {
+      localStorage.setItem("customerId", String(customerId));
+    }
+    if (String(fullName || "").trim()) {
+      localStorage.setItem("customerName", String(fullName).trim());
+    }
+    if (String(phone || "").trim()) {
+      localStorage.setItem("customerPhone", String(phone).trim());
+    }
+  } catch (e) {}
 }
 
 async function handleLogin(e) {
   e.preventDefault();
+  const form = e.target;
+  const validation = window.AppCore && window.AppCore.Validation;
+  if (validation && !validation.validateFields(form, [
+    {
+      input: "#loginEmail",
+      validate: function(value) {
+        return validation.isValidEmail(value) ? "" : "Email không đúng định dạng.";
+      }
+    },
+    {
+      input: "#loginPassword",
+      validate: function(value) {
+        return String(value || "").trim() ? "" : "Vui lòng nhập mật khẩu.";
+      }
+    }
+  ])) {
+    return;
+  }
 
-  const email = document.getElementById("loginEmail").value;
+  const email = document.getElementById("loginEmail").value.trim();
   const pass = document.getElementById("loginPassword").value;
   const errorMsg = document.getElementById("loginErrorMsg");
   const btn = document.getElementById("btnLoginSubmit");
+
 
   errorMsg.style.display = "none";
   btn.innerText = "Đang đăng nhập...";
@@ -140,6 +233,8 @@ async function handleLogin(e) {
         data.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.",
       );
     }
+
+    
     if (window.AppCore && typeof window.AppCore.toast === "function") {
       window.AppCore.toast("Đăng nhập thành công!");
     }
@@ -151,18 +246,82 @@ async function handleLogin(e) {
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("userEmail", email);
     }
-    
+
+
+    await (async function syncCustomerInfo() {
+      try {
+        const tokenVal = data.token || localStorage.getItem('token');
+        if (!tokenVal) return;
+
+        const accRes = await fetch('https://localhost:7082/api/Accounts/me', {
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tokenVal }
+        });
+
+        if (!accRes.ok) return;
+        const acc = await accRes.json();
+        const accountId = acc.id || acc.Id || '';
+        const phone = acc.phoneNumber || acc.PhoneNumber || '';
+        const fullName = acc.fullName || acc.FullName || acc.Fullname || acc.FullName;
+
+        setStoredCustomerSession({
+          accountId: accountId,
+          fullName: fullName,
+          phoneNumber: phone
+        });
+
+        if (!phone) return;
+
+        const params = new URLSearchParams({ phone: phone.replace(/\s+/g, '') });
+        const custRes = await fetch('https://localhost:7082/api/Customers/public/by-phone?' + params.toString(), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (custRes.status === 200) {
+          const cust = await custRes.json();
+          setStoredCustomerSession({
+            accountId: accountId,
+            customerId: cust.id || cust.Id || '',
+            fullName: cust.fullName || cust.FullName || fullName || '',
+            phoneNumber: cust.phoneNumber || cust.PhoneNumber || phone || ''
+          });
+        } else if (custRes.status === 404) {
+          try {
+            const createRes = await fetch('https://localhost:7082/api/Customers', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fullName: fullName || email, email: email, phoneNumber: phone, identityCard: null, loyaltyTier: 'Khách mới', status: 'Khách mới', aiPreferences: null })
+            });
+            if (createRes.ok) {
+              const created = await createRes.json();
+              setStoredCustomerSession({
+                accountId: accountId,
+                customerId: created.id || created.Id || '',
+                fullName: created.fullName || created.FullName || fullName || '',
+                phoneNumber: created.phoneNumber || created.PhoneNumber || phone || ''
+              });
+            }
+          } catch (e) {}
+        }
+      } catch (e) {}
+    })();
+
     try {
       var role = extractRoleFromToken(data.token);
-      var isReceptionist = isReceptionistRoleValue(role)
-        || Boolean(window.AppCore?.isReceptionistRole?.(role));
-      if (isReceptionist) {
-        window.location.replace("booking.html");
-      } else {
+      var roleNorm = String(role || "").trim().toLowerCase();
+      
+
+      if (String(roleNorm || '')
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9]/gi, '')
+        .toLowerCase() === 'admin' || isReceptionistRoleValue(role) || Boolean(window.AppCore?.isReceptionistRole?.(role))) {
         window.location.replace("dashboard.html");
+      } else {
+        window.location.replace("index.html");
       }
     } catch (e) {
-      window.location.replace("dashboard.html");
+      window.location.replace("index.html");
     }
   } catch (error) {
     errorMsg.innerText = error.message;

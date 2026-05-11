@@ -35,7 +35,7 @@ function showToast(message, variant) {
     window.AppCore.toast(message, variant);
     return;
   }
-  console.warn(message);
+
 }
 
 function getPurposeFromRoomType(roomType) {
@@ -322,6 +322,43 @@ async function fetchAiRecommendations(input) {
 
 document.getElementById('searchForm').addEventListener('submit', async function(e) {
   e.preventDefault();
+  var validation = window.AppCore && window.AppCore.Validation;
+  if (validation && !validation.validateFields(e.target, [
+    {
+      input: '#budget',
+      validate: function(value) {
+        if (!validation.normalizeText(value)) return '';
+        return validation.isPositiveNumber(value) ? '' : 'Ngân sách phải lớn hơn 0.';
+      }
+    },
+    {
+      input: '#guestCount',
+      validate: function(value) {
+        var count = Number(value);
+        return Number.isInteger(count) && count >= 1 && count <= 20 ? '' : 'Số lượng khách phải từ 1 đến 20.';
+      }
+    },
+    {
+      input: '#checkIn',
+      validate: function(value) {
+        if (!value) return '';
+        return validation.parseFlexibleDate(value) ? '' : 'Ngày nhận phòng không hợp lệ.';
+      }
+    },
+    {
+      input: '#checkOut',
+      validate: function(value) {
+        if (!value) return '';
+        var inDate = validation.parseFlexibleDate(document.getElementById('checkIn').value);
+        var outDate = validation.parseFlexibleDate(value);
+        if (!outDate) return 'Ngày trả phòng không hợp lệ.';
+        if (inDate && outDate <= inDate) return 'Ngày trả phòng phải sau ngày nhận phòng.';
+        return '';
+      }
+    }
+  ])) {
+    return;
+  }
   const budget = parseFloat(document.getElementById('budget').value) || 0;
   const guestCountInput = parseInt(document.getElementById('guestCount').value, 10);
   const type = document.getElementById('roomType').value;

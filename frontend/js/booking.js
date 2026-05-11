@@ -215,7 +215,7 @@ async function initBookingRealtime() {
     await bookingRealtimeConnection.start();
   } catch (error) {
     bookingRealtimeConnection = null;
-    console.warn('Booking realtime connection failed', error);
+
   }
 }
 
@@ -1400,6 +1400,47 @@ window.handleBookingInvoiceLookup = function () {
 
 async function saveBookingInvoice(event) {
   event.preventDefault();
+  var validation = window.AppCore && window.AppCore.Validation;
+  if (validation && !validation.validateFields(event.target, [
+    {
+      input: '#bookingInvoiceCustomer',
+      validate: function(value) {
+        return validation.normalizeText(value).length >= 2 ? '' : 'Tên khách hàng phải có ít nhất 2 ký tự.';
+      }
+    },
+    {
+      input: '#bookingInvoiceCccd',
+      validate: function(value) {
+        return validation.isValidIdentityCard(value) ? '' : 'CCCD phải gồm 9 hoặc 12 chữ số.';
+      }
+    },
+    {
+      input: '#bookingInvoiceRoom',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng nhập phòng lưu trú.';
+      }
+    },
+    {
+      input: '#bookingInvoiceDate',
+      validate: function(value) {
+        return validation.parseFlexibleDate(value) ? '' : 'Ngày lập hóa đơn không hợp lệ.';
+      }
+    },
+    {
+      input: '#bookingInvoiceAmount',
+      validate: function(value) {
+        return validation.isPositiveNumber(value) ? '' : 'Tổng tiền phải lớn hơn 0.';
+      }
+    },
+    {
+      input: '#bookingInvoiceStatus',
+      validate: function(value) {
+        return validation.normalizeText(value) ? '' : 'Vui lòng chọn trạng thái.';
+      }
+    }
+  ])) {
+    return;
+  }
 
   const booking = localConfirmedBookings.concat(confirmedBookings).find(function (item) {
     return String(item.bookingCode || '') === String(activeInvoiceBookingCode || '');
@@ -1893,6 +1934,42 @@ document.addEventListener('DOMContentLoaded', async function () {
   if (searchForm) {
     searchForm.addEventListener('submit', function (e) {
       e.preventDefault();
+      var validation = window.AppCore && window.AppCore.Validation;
+      if (validation && !validation.validateFields(searchForm, [
+        {
+          input: '#customerSearchInput',
+          validate: function(value) {
+            return validation.normalizeText(value) ? '' : 'Vui lòng nhập CCCD khách hàng.';
+          }
+        },
+        {
+          input: '#budgetLimit',
+          validate: function(value) {
+            if (!validation.normalizeText(value)) return '';
+            return validation.isPositiveNumber(value) ? '' : 'Ngân sách phải lớn hơn 0.';
+          }
+        },
+        {
+          input: '#checkInDate',
+          validate: function(value) {
+            if (!value) return '';
+            return validation.parseFlexibleDate(value) ? '' : 'Ngày nhận không hợp lệ.';
+          }
+        },
+        {
+          input: '#checkOutDate',
+          validate: function(value) {
+            if (!value) return '';
+            var inDate = validation.parseFlexibleDate(document.getElementById('checkInDate').value);
+            var outDate = validation.parseFlexibleDate(value);
+            if (!outDate) return 'Ngày trả không hợp lệ.';
+            if (inDate && outDate <= inDate) return 'Ngày trả phải sau ngày nhận.';
+            return '';
+          }
+        }
+      ])) {
+        return;
+      }
       const customerSearch = document.getElementById('customerSearchInput') ? document.getElementById('customerSearchInput').value : 'Seraphina Vance';
       const aiPrompt = document.getElementById('aiAdminPrompt') ? document.getElementById('aiAdminPrompt').value : '';
       const budgetValue = document.getElementById('budgetLimit') ? document.getElementById('budgetLimit').value : '';

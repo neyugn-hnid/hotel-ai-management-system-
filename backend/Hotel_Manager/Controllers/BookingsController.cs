@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,7 +35,7 @@ namespace Hotel_Manager.Controllers
 
         
         [HttpGet]
-        [Authorize(Roles = "Admin,Lễ tân")]
+        [Authorize(Roles = "Admin,Receptionist")]
         public ActionResult<object> GetBooking(
             [FromQuery] string? q,
             [FromQuery] string? status,
@@ -134,7 +134,7 @@ namespace Hotel_Manager.Controllers
 
         
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin,Lễ tân")]
+        [Authorize(Roles = "Admin,Receptionist")]
         public async Task<ActionResult<object>> GetBooking(int id)
         {
             var booking = await _context.Booking
@@ -155,7 +155,7 @@ namespace Hotel_Manager.Controllers
         
         
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin,Lễ tân")]
+        [Authorize(Roles = "Admin,Receptionist")]
         public async Task<IActionResult> PutBooking(int id, Booking booking)
         {
             if (id != booking.Id)
@@ -309,7 +309,7 @@ namespace Hotel_Manager.Controllers
         }
 
         [HttpPatch("{id}/status")]
-        [Authorize(Roles = "Admin,Lễ tân")]
+        [Authorize(Roles = "Admin,Receptionist")]
         public async Task<IActionResult> UpdateBookingStatus(int id, UpdateBookingStatusRequest request)
         {
             var booking = await _context.Booking.FindAsync(id);

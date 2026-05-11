@@ -567,4 +567,11 @@ C:\tmp\hotel_manager_room_status_build\Hotel_Manager.deps.json
 C:\tmp\hotel_manager_room_status_build\Hotel_Manager.runtimeconfig.json
 C:\tmp\hotel_manager_room_status_build\Hotel_Manager.dll
 C:\tmp\hotel_manager_room_status_build\Hotel_Manager.pdb
+C:\tmp\hotel-build-check\appsettings.Development.json
+C:\tmp\hotel-build-check\appsettings.json
+C:\tmp\hotel-build-check\Hotel_Manager.staticwebassets.endpoints.json
+C:\tmp\hotel-build-check\Hotel_Manager.deps.json
+C:\tmp\hotel-build-check\Hotel_Manager.runtimeconfig.json
+C:\tmp\hotel-build-check\Hotel_Manager.dll
+C:\tmp\hotel-build-check\Hotel_Manager.pdb
 C:\Users\VanDinh\OneDrive\Máy tính\hotel-ai-management-system-\backend\Hotel_Manager\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

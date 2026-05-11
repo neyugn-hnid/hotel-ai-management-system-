@@ -364,6 +364,41 @@
 
      function handleManualBooking(e) {
         e.preventDefault();
+        const validation = window.AppCore && window.AppCore.Validation;
+        const form = e.target;
+        if (validation && !validation.validateFields(form, [
+          {
+            input: '#manualCustomer',
+            validate: function(value) {
+              return validation.normalizeText(value) ? '' : 'Vui lòng nhập khách hàng.';
+            }
+          },
+          {
+            input: '#manualCheckIn',
+            validate: function(value) {
+              return validation.parseFlexibleDate(value) ? '' : 'Vui lòng chọn ngày nhận.';
+            }
+          },
+          {
+            input: '#manualCheckOut',
+            validate: function(value) {
+              const inDate = validation.parseFlexibleDate(document.getElementById('manualCheckIn').value);
+              const outDate = validation.parseFlexibleDate(value);
+              if (!outDate) return 'Vui lòng chọn ngày trả.';
+              if (inDate && outDate < inDate) return 'Ngày trả không được trước ngày nhận.';
+              return '';
+            }
+          },
+          {
+            input: '#manualRoomType',
+            validate: function(value) {
+              return validation.normalizeText(value) ? '' : 'Vui lòng chọn phòng.';
+            }
+          }
+        ])) {
+          return;
+        }
+
         const customer = document.getElementById('manualCustomer').value;
         const room = document.getElementById('manualRoomType').value;
         

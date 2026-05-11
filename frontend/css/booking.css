@@ -624,6 +624,34 @@
 
 
 @media (max-width: 768px) {
+  .booking-search-grid--top,
+  .booking-search-grid--bottom,
+  .booking-toolbar,
+  .booking-ai-grid,
+  .booking-services-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .booking-section-header {
+    padding: 20px 16px 16px;
+  }
+
+  .booking-toolbar {
+    padding: 0 16px 16px;
+  }
+
+  .booking-ai-results-card,
+  .notion-ai-box,
+  .booking-manual-modal {
+    padding: 20px !important;
+    border-radius: 18px;
+  }
+
+  .booking-invoice-lookup,
+  .booking-invoice-lookup__row {
+    flex-direction: column;
+  }
+
   #bookingSearchForm { display: flex !important; flex-direction: column !important; gap: 12px !important; }
   #bookingSearchForm > * { width: 100% !important; }
   #aiGridContainer { display: flex !important; flex-direction: column !important; gap: 12px !important; }
@@ -639,4 +667,8 @@
 }
 @media (max-width: 480px) {
   #pendingBookingCount, #confirmedCount { display: inline-flex; width: auto; }
+  .booking-modal-header {
+    gap: 12px;
+    align-items: flex-start;
+  }
 }

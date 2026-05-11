@@ -9,7 +9,7 @@ namespace Hotel_Manager.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin,Lễ tân")]
+    [Authorize(Roles = "Admin,Receptionist")]
     public class LookupsController : ControllerBase
     {
         private readonly Hotel_ManagerContext _context;
@@ -70,6 +70,13 @@ namespace Hotel_Manager.Controllers
                 .OrderBy(r => r)
                 .ToListAsync();
 
+            accountRoles = accountRoles
+                .Select(NormalizeAccountRole)
+                .Where(r => !string.IsNullOrWhiteSpace(r))
+                .Distinct()
+                .OrderBy(r => r)
+                .ToList();
+
             var accountStatuses = await _context.Account
                 .AsNoTracking()
                 .Select(a => a.Status)
@@ -97,6 +104,43 @@ namespace Hotel_Manager.Controllers
                 AccountStatuses = accountStatuses!,
                 BookingStatuses = bookingStatuses!
             });
+        }
+
+        private static string NormalizeAccountRole(string? role)
+        {
+            var normalized = (role ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(normalized))
+            {
+                return string.Empty;
+            }
+
+            var compact = normalized
+                .Normalize(System.Text.NormalizationForm.FormD)
+                .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                .Select(c => c == 'đ' ? 'd' : c == 'Đ' ? 'D' : c)
+                .ToArray();
+
+            var key = new string(compact)
+                .Normalize(System.Text.NormalizationForm.FormC)
+                .ToLowerInvariant()
+                .Replace(" ", string.Empty);
+
+            if (key == "admin")
+            {
+                return "Admin";
+            }
+
+            if (key == "letan" || key == "receptionist" || key == "staff" || key == "employee" || key == "nhanvien")
+            {
+                return "Receptionist";
+            }
+
+            if (key == "khach" || key == "customer" || key == "guest")
+            {
+                return "Customer";
+            }
+
+            return normalized;
         }
     }
 

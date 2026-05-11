@@ -3,25 +3,34 @@
   "WorkspaceRootPath": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.rooms.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.accounts.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|c:\\users\\vandinh\\onedrive\\m\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\hotel_manager\\controllers\\accountscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|solutionrelative:hotel_manager\\controllers\\accountscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|c:\\users\\vandinh\\onedrive\\m\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\hotel_manager\\modal\\account.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|solutionrelative:hotel_manager\\modal\\account.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|c:\\users\\vandinh\\onedrive\\m\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\hotel_manager\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|solutionrelative:hotel_manager\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.customers.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.accounts.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
+      "AbsoluteMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|c:\\users\\vandinh\\onedrive\\m\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\hotel_manager\\hubs\\bookinghub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|solutionrelative:hotel_manager\\hubs\\bookinghub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.invoices.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
+      "AbsoluteMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|c:\\users\\vandinh\\onedrive\\m\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\hotel_manager\\modal\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|solutionrelative:hotel_manager\\modal\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.bookings.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.booking_services.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.services.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
+      "AbsoluteMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|c:\\users\\vandinh\\onedrive\\m\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\hotel_manager\\modal\\bookingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C47A5D51-87A1-4C25-B2D9-31548E1FA8AE}|Hotel_Manager\\Hotel_Manager.csproj|solutionrelative:hotel_manager\\modal\\bookingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -31,76 +40,104 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AccountsController.cs",
+              "DocumentMoniker": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Controllers\\AccountsController.cs",
+              "RelativeDocumentMoniker": "Hotel_Manager\\Controllers\\AccountsController.cs",
+              "ToolTip": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Controllers\\AccountsController.cs",
+              "RelativeToolTip": "Hotel_Manager\\Controllers\\AccountsController.cs",
+              "ViewState": "AgIAAMkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-11T10:22:42.428Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "dbo.invoices [Data]",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.invoices.sql",
-              "ToolTip": "dbo.invoices [Data]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-08T17:27:45.016Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "dbo.bookings [Data]",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.bookings.sql",
-              "ToolTip": "dbo.bookings [Data]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-08T17:27:26.313Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "dbo.booking_services [Data]",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.booking_services.sql",
-              "ToolTip": "dbo.booking_services [Data]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-08T17:27:19.537Z",
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Hotel_Manager\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Hotel_Manager\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAPgAAAAAAAAAAAAzwA8BAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-11T10:16:26.934Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "dbo.rooms [Data]",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.rooms.sql",
-              "ToolTip": "dbo.rooms [Data]",
+              "Title": "dbo.accounts [Data]",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.accounts.sql",
+              "ToolTip": "dbo.accounts [Data]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-08T17:27:09.473Z",
+              "WhenOpened": "2026-05-11T09:22:05.604Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "dbo.customers [Data]",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.customers.sql",
+              "ToolTip": "dbo.customers [Data]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-05-11T09:15:23.227Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "BookingHub.cs",
+              "DocumentMoniker": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Hubs\\BookingHub.cs",
+              "RelativeDocumentMoniker": "Hotel_Manager\\Hubs\\BookingHub.cs",
+              "ToolTip": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Hubs\\BookingHub.cs",
+              "RelativeToolTip": "Hotel_Manager\\Hubs\\BookingHub.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-11T09:05:12.421Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "dbo.services [Data]",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.services.sql",
-              "ToolTip": "dbo.services [Data]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-08T17:26:53.832Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "dbo.customers [Data]",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.customers.sql",
-              "ToolTip": "dbo.customers [Data]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-08T17:25:48.158Z",
+              "Title": "Customer.cs",
+              "DocumentMoniker": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Modal\\Customer.cs",
+              "RelativeDocumentMoniker": "Hotel_Manager\\Modal\\Customer.cs",
+              "ToolTip": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Modal\\Customer.cs",
+              "RelativeToolTip": "Hotel_Manager\\Modal\\Customer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-11T09:04:49.97Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "dbo.accounts [Data]",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Hotel_Manager/True/SqlTable/dbo.accounts.sql",
-              "ToolTip": "dbo.accounts [Data]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-09T02:42:17.346Z",
+              "Title": "Account.cs",
+              "DocumentMoniker": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Modal\\Account.cs",
+              "RelativeDocumentMoniker": "Hotel_Manager\\Modal\\Account.cs",
+              "ToolTip": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Modal\\Account.cs",
+              "RelativeToolTip": "Hotel_Manager\\Modal\\Account.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAA0wCAAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-11T09:04:40.7Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "BookingService.cs",
+              "DocumentMoniker": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Modal\\BookingService.cs",
+              "RelativeDocumentMoniker": "Hotel_Manager\\Modal\\BookingService.cs",
+              "ToolTip": "C:\\Users\\VanDinh\\OneDrive\\M\u00E1y t\u00EDnh\\hotel-ai-management-system-\\backend\\Hotel_Manager\\Modal\\BookingService.cs",
+              "RelativeToolTip": "Hotel_Manager\\Modal\\BookingService.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAA4wBIAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-11T08:53:45.877Z",
               "EditorCaption": ""
             }
           ]

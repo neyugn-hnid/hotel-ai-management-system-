@@ -26,7 +26,7 @@
     if (window.AppCore && typeof window.AppCore.toast === "function") {
       window.AppCore.toast(message, variant);
     } else {
-      console.log(message);
+
     }
   }
 
@@ -87,7 +87,7 @@
 
       return await res.json();
     } catch (err) {
-      console.error("Dashboard fetch failed:", err);
+
       toast("Không thể tải dữ liệu tổng quan", "error");
       return null;
     }
@@ -558,7 +558,7 @@
   document.addEventListener("DOMContentLoaded", function () {
     const init = function () {
       initDashboard().catch(function (err) {
-        console.error("Dashboard init failed:", err);
+
       });
     };
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,7 +25,7 @@ namespace Hotel_Manager.Controllers
 
         
         [HttpGet]
-        [Authorize(Roles = "Admin,Lễ tân")]
+        [Authorize(Roles = "Admin,Receptionist")]
         public ActionResult<object> GetService(
             [FromQuery] string? q,
             [FromQuery] string? category,
@@ -102,7 +102,7 @@ namespace Hotel_Manager.Controllers
 
         
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin,Lễ tân")]
+        [Authorize(Roles = "Admin,Receptionist")]
         public async Task<ActionResult<Service>> GetService(int id)
         {
             var service = await _context.Service.FindAsync(id);

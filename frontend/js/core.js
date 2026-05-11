@@ -43,6 +43,195 @@
     };
   }
 
+  function ensureValidationMessage(input) {
+    if (!input || !input.parentNode) return null;
+
+    var next = input.nextElementSibling;
+    if (next && next.classList && next.classList.contains("app-field-error")) {
+      return next;
+    }
+
+    var message = document.createElement("div");
+    message.className = "app-field-error";
+    message.style.color = "#dc2626";
+    message.style.fontSize = "0.8rem";
+    message.style.marginTop = "0.35rem";
+    message.style.lineHeight = "1.4";
+    input.insertAdjacentElement("afterend", message);
+    return message;
+  }
+
+  function clearFieldError(input) {
+    if (!input) return;
+    input.style.borderColor = "";
+    input.removeAttribute("aria-invalid");
+    var next = input.nextElementSibling;
+    if (next && next.classList && next.classList.contains("app-field-error")) {
+      next.textContent = "";
+    }
+  }
+
+  function setFieldError(input, message) {
+    if (!input) return false;
+    input.style.borderColor = "#dc2626";
+    input.setAttribute("aria-invalid", "true");
+    var holder = ensureValidationMessage(input);
+    if (holder) {
+      holder.textContent = message;
+    }
+    return false;
+  }
+
+  function clearFormErrors(form) {
+    if (!form) return;
+    qsa("input, select, textarea", form).forEach(clearFieldError);
+  }
+
+  function normalizeDigits(value) {
+    return String(value || "").replace(/\D/g, "");
+  }
+
+  function normalizeText(value) {
+    return String(value || "").trim();
+  }
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeText(value));
+  }
+
+  function isValidPhone(value) {
+    var digits = normalizeDigits(value);
+    return digits.length >= 9 && digits.length <= 11;
+  }
+
+  function isValidIdentityCard(value) {
+    var digits = normalizeDigits(value);
+    return digits.length === 9 || digits.length === 12;
+  }
+
+  function isPositiveNumber(value) {
+    return Number.isFinite(Number(value)) && Number(value) > 0;
+  }
+
+  function parseFlexibleDate(value) {
+    var normalized = normalizeText(value);
+    if (!normalized) return null;
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+      var isoDate = new Date(normalized + "T00:00:00");
+      return Number.isNaN(isoDate.getTime()) ? null : isoDate;
+    }
+
+    var match = normalized.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (match) {
+      var ddmmyyyy = new Date(match[3] + "-" + match[2] + "-" + match[1] + "T00:00:00");
+      return Number.isNaN(ddmmyyyy.getTime()) ? null : ddmmyyyy;
+    }
+
+    var parsed = new Date(normalized);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  function validateFields(form, rules) {
+    if (!form || !Array.isArray(rules)) return true;
+
+    clearFormErrors(form);
+
+    for (var i = 0; i < rules.length; i += 1) {
+      var rule = rules[i];
+      var input = typeof rule.input === "string" ? form.querySelector(rule.input) || document.getElementById(rule.input) : rule.input;
+      if (!input) continue;
+
+      var value = "value" in input ? input.value : "";
+      var message = rule.validate(value, input, form);
+      if (message) {
+        setFieldError(input, message);
+        if (typeof input.focus === "function") {
+          input.focus();
+        }
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function getNativeValidationMessage(input) {
+    if (!input || !input.validity) return "Giá trị không hợp lệ.";
+
+    if (input.validity.valueMissing) {
+      return "Trường này không được để trống.";
+    }
+    if (input.validity.typeMismatch) {
+      if (String(input.type || "").toLowerCase() === "email") {
+        return "Email không đúng định dạng.";
+      }
+      return "Giá trị không đúng định dạng.";
+    }
+    if (input.validity.patternMismatch) {
+      return "Giá trị không đúng định dạng.";
+    }
+    if (input.validity.tooShort) {
+      return "Giá trị nhập vào quá ngắn.";
+    }
+    if (input.validity.tooLong) {
+      return "Giá trị nhập vào quá dài.";
+    }
+    if (input.validity.rangeUnderflow || input.validity.rangeOverflow || input.validity.stepMismatch) {
+      return "Giá trị số không hợp lệ.";
+    }
+
+    return "Giá trị không hợp lệ.";
+  }
+
+  function initFormValidation() {
+    qsa("form").forEach(function(form) {
+      form.noValidate = true;
+    });
+
+    document.addEventListener("invalid", function(event) {
+      var input = event.target;
+      if (!input || !(input instanceof HTMLInputElement || input instanceof HTMLSelectElement || input instanceof HTMLTextAreaElement)) {
+        return;
+      }
+
+      event.preventDefault();
+      setFieldError(input, getNativeValidationMessage(input));
+    }, true);
+
+    document.addEventListener("input", function(event) {
+      var input = event.target;
+      if (!input || !(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement)) {
+        return;
+      }
+      clearFieldError(input);
+    }, true);
+
+    document.addEventListener("change", function(event) {
+      var input = event.target;
+      if (!input || !(input instanceof HTMLInputElement || input instanceof HTMLSelectElement || input instanceof HTMLTextAreaElement)) {
+        return;
+      }
+      clearFieldError(input);
+    }, true);
+  }
+
+  var Validation = {
+    clearFieldError: clearFieldError,
+    clearFormErrors: clearFormErrors,
+    setFieldError: setFieldError,
+    normalizeDigits: normalizeDigits,
+    normalizeText: normalizeText,
+    isValidEmail: isValidEmail,
+    isValidPhone: isValidPhone,
+    isValidIdentityCard: isValidIdentityCard,
+    isPositiveNumber: isPositiveNumber,
+    parseFlexibleDate: parseFlexibleDate,
+    validateFields: validateFields,
+    getNativeValidationMessage: getNativeValidationMessage,
+    initFormValidation: initFormValidation
+  };
+
   function createToastContainer() {
     var container = qs("#app-toast-container");
     if (container) return container;
@@ -125,7 +314,7 @@
         emailEls.forEach(function(el) { el.textContent = globalSettings.email; });
       }
     } catch (e) {
-      console.warn("Failed to apply settings", e);
+
     }
   }
 
@@ -141,7 +330,7 @@
 
       return JSON.parse(atob(payload));
     } catch (error) {
-      console.warn("Failed to decode JWT payload", error);
+
       return null;
     }
   }
@@ -180,17 +369,26 @@
   }
 
   function isAdminRole(role) {
-    return String(role || "").trim().toLowerCase() === "admin";
+    return normalizeRoleKey(role) === "admin";
+  }
+
+  function normalizeRoleKey(role) {
+    return String(role || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9]/g, "");
   }
 
   function isReceptionistRole(role) {
-    var normalized = String(role || "").trim().toLowerCase();
-    return normalized === "lễ tân"
-      || normalized === "le tan"
-      || normalized === "letan"
+    var normalized = normalizeRoleKey(role);
+    return normalized === "letan"
       || normalized === "receptionist"
       || normalized === "staff"
-      || normalized === "employee";
+      || normalized === "employee"
+      || normalized === "nhanvien";
   }
 
   function getResolvedRole() {
@@ -229,7 +427,7 @@
       localStorage.removeItem(USER_EMAIL_KEY);
       localStorage.removeItem("pending_invoice_booking");
     } catch (error) {
-      console.warn("Failed to clear auth session", error);
+
     }
   }
 
@@ -340,7 +538,7 @@
           })
         });
       } catch (error) {
-        console.warn("Logout API request failed", error);
+
       }
     }
 
@@ -348,13 +546,133 @@
     window.location.replace("index.html");
   }
 
+  function encodeHtml(text) {
+    return String(text || "").replace(/[&<>"']/g, function(char) {
+      return ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char];
+    });
+  }
+
+  function getUserInitials(fullName, email) {
+    var source = String(fullName || email || "").trim();
+    if (!source) return "U";
+
+    var parts = source.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 1).toUpperCase();
+    }
+
+    return (parts[0].slice(0, 1) + parts[parts.length - 1].slice(0, 1)).toUpperCase();
+  }
+
+  function buildPublicUserMenu(auth) {
+    var fullName = String(auth && auth.fullName || "").trim();
+    var email = String(auth && auth.email || "").trim();
+    var label = fullName || email || "Tài khoản";
+    var initials = getUserInitials(fullName, email);
+
+    return (
+      '<div class="public-user-menu" data-public-user-menu>' +
+        '<button type="button" class="public-user-menu__trigger" data-public-user-trigger aria-expanded="false" aria-label="Mo menu tai khoan">' +
+          '<span class="public-user-menu__avatar">' + initials + '</span>' +
+        '</button>' +
+        '<div class="public-user-menu__dropdown" data-public-user-dropdown>' +
+          '<div class="public-user-menu__meta">' +
+            '<div class="public-user-menu__name">' + encodeHtml(label) + '</div>' +
+            (email ? '<div class="public-user-menu__email">' + encodeHtml(email) + '</div>' : '') +
+          '</div>' +
+          '<button type="button" class="public-user-menu__logout" data-public-logout>' +
+            '<span class="material-symbols-outlined">logout</span>' +
+            '<span>Đăng xuất</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function bindPublicUserMenus(root) {
+    qsa("[data-public-user-menu]", root || document).forEach(function(menu) {
+      if (menu.__boundPublicUserMenu) return;
+      menu.__boundPublicUserMenu = true;
+
+      var trigger = qs("[data-public-user-trigger]", menu);
+      var logoutBtn = qs("[data-public-logout]", menu);
+
+      if (trigger) {
+        trigger.addEventListener("click", function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          var isOpen = menu.classList.contains("is-open");
+          qsa("[data-public-user-menu].is-open").forEach(function(item) {
+            item.classList.remove("is-open");
+            var btn = qs("[data-public-user-trigger]", item);
+            if (btn) btn.setAttribute("aria-expanded", "false");
+          });
+
+          if (!isOpen) {
+            menu.classList.add("is-open");
+            trigger.setAttribute("aria-expanded", "true");
+          }
+        });
+      }
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          void logout();
+        });
+      }
+    });
+  }
+
+  function initPublicUserMenu() {
+    if (qs(".admin-layout")) return;
+
+    var auth = getAuthContext();
+    var isLoggedIn = Boolean(auth && auth.token);
+
+    qsa(".navbar .navbar__actions").forEach(function(actions) {
+      if (!actions) return;
+
+      qsa('[onclick*="openLoginModal"], [data-auth-login-trigger]', actions).forEach(function(el) {
+        el.style.display = isLoggedIn ? "none" : "";
+      });
+
+      var existing = qs("[data-public-user-menu]", actions);
+      if (!isLoggedIn) {
+        if (existing) existing.remove();
+        return;
+      }
+
+      if (existing) existing.remove();
+      actions.insertAdjacentHTML("beforeend", buildPublicUserMenu(auth));
+    });
+
+    bindPublicUserMenus(document);
+  }
+
+  function applyPublicAuthVisibility() {
+    var isLoggedIn = Boolean(localStorage.getItem(TOKEN_KEY));
+    qsa('button[onclick*="openLoginModal"], [data-auth-login-trigger]').forEach(function(el) {
+      el.style.display = isLoggedIn ? "none" : "";
+    });
+    initPublicUserMenu();
+  }
+
   function applyRoleAccess() {
     var auth = getAuthContext();
     var resolvedRole = getResolvedRole();
     var pathname = (window.location.pathname || "").toLowerCase();
     var pageName = pathname.split("/").pop();
-    var adminOnlyPages = ["account.html", "dashboard.html"];
-    var adminOnlyLinks = ['a.sidebar-item[href="account.html"]', 'a.sidebar-item[href="dashboard.html"]'];
+    var adminOnlyPages = ["account.html"];
+    var adminOnlyLinks = ['a.sidebar-item[href="account.html"]'];
 
     if (!isAdminRole(resolvedRole)) {
       adminOnlyLinks.forEach(function(selector) {
@@ -364,11 +682,7 @@
       });
 
       if (adminOnlyPages.indexOf(pageName) >= 0) {
-        if (isReceptionistRole(resolvedRole)) {
-          window.location.replace("booking.html");
-        } else {
-          window.location.replace("dashboard.html");
-        }
+        window.location.replace("index.html");
       }
     }
 
@@ -379,7 +693,7 @@
         var el = qs(id);
         if (el) el.style.display = 'none';
       });
-      qsa('a.sidebar-item[href="account.html"], a.sidebar-item[href="dashboard.html"]').forEach(function(link) { link.style.display = 'none'; });
+      qsa('a.sidebar-item[href="account.html"]').forEach(function(link) { link.style.display = 'none'; });
     }
   }
 
@@ -397,6 +711,151 @@
         event.preventDefault();
         void logout();
       });
+    });
+  }
+
+  function initPublicNavbarToggle() {
+    var navbar = qs(".navbar");
+    var links = navbar ? qs(".navbar__links", navbar) : null;
+    if (!navbar || !links || qs(".admin-layout")) return;
+
+    var toggleBtn = qs("#public-menu-toggle");
+    var panel = qs("#public-nav-panel");
+
+    function isMobile() {
+      return window.matchMedia("(max-width: 1024px)").matches;
+    }
+
+    function getActionsMarkup() {
+      var actions = qs(".navbar__actions", navbar);
+      return actions ? actions.innerHTML : "";
+    }
+
+    function ensurePanel() {
+      if (panel) return panel;
+
+      panel = document.createElement("div");
+      panel.id = "public-nav-panel";
+      panel.className = "public-nav-panel";
+      document.body.appendChild(panel);
+      return panel;
+    }
+
+    function ensureToggle() {
+      if (toggleBtn) return toggleBtn;
+
+      toggleBtn = document.createElement("button");
+      toggleBtn.type = "button";
+      toggleBtn.id = "public-menu-toggle";
+      toggleBtn.className = "public-menu-toggle";
+      toggleBtn.setAttribute("aria-label", "Mo menu dieu huong");
+      toggleBtn.setAttribute("aria-expanded", "false");
+      toggleBtn.innerHTML = '<span class="material-symbols-outlined">menu</span>';
+      navbar.appendChild(toggleBtn);
+      return toggleBtn;
+    }
+
+    function setToggleState(isOpen) {
+      if (!toggleBtn) return;
+      toggleBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      toggleBtn.setAttribute("aria-label", isOpen ? "Dong menu dieu huong" : "Mo menu dieu huong");
+
+      var icon = toggleBtn.querySelector(".material-symbols-outlined");
+      if (icon) {
+        icon.textContent = isOpen ? "close" : "menu";
+      }
+    }
+
+    function renderPanel() {
+      var menuPanel = ensurePanel();
+      menuPanel.innerHTML =
+        '<div class="public-nav-panel__inner">' +
+          '<div class="public-nav-panel__links">' + links.innerHTML + '</div>' +
+          '<div class="public-nav-panel__actions">' + getActionsMarkup() + '</div>' +
+        '</div>';
+
+      qsa("a", menuPanel).forEach(function(link) {
+        link.addEventListener("click", closePanel);
+      });
+
+      qsa("button", menuPanel).forEach(function(button) {
+        if (button.id === "public-menu-toggle") return;
+        button.addEventListener("click", function() {
+          setTimeout(closePanel, 60);
+        });
+      });
+
+      bindPublicUserMenus(menuPanel);
+    }
+
+    function closePanel() {
+      if (panel) {
+        panel.classList.remove("active");
+      }
+      document.body.classList.remove("public-menu-open");
+      if (navbar) {
+        navbar.classList.remove("navbar--mobile-open");
+      }
+      setToggleState(false);
+    }
+
+    function openPanel() {
+      renderPanel();
+      if (panel) {
+        panel.classList.add("active");
+      }
+      document.body.classList.add("public-menu-open");
+      if (navbar) {
+        navbar.classList.add("navbar--mobile-open");
+      }
+      setToggleState(true);
+    }
+
+    ensureToggle();
+    ensurePanel();
+    renderPanel();
+    setToggleState(false);
+
+    toggleBtn.addEventListener("click", function(event) {
+      event.preventDefault();
+      if (!isMobile()) return;
+
+      if (panel && panel.classList.contains("active")) {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    });
+
+    document.addEventListener("click", function(event) {
+      qsa("[data-public-user-menu].is-open").forEach(function(item) {
+        if (!event.target || item.contains(event.target)) return;
+        item.classList.remove("is-open");
+        var btn = qs("[data-public-user-trigger]", item);
+        if (btn) btn.setAttribute("aria-expanded", "false");
+      });
+
+      if (!isMobile()) return;
+      if (!panel || !panel.classList.contains("active")) return;
+
+      var target = event.target;
+      if (!target) return;
+      if (target.closest("#public-menu-toggle")) return;
+      if (target.closest("#public-nav-panel")) return;
+      closePanel();
+    });
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") {
+        closePanel();
+      }
+    });
+
+    window.addEventListener("resize", function() {
+      renderPanel();
+      if (!isMobile()) {
+        closePanel();
+      }
     });
   }
 
@@ -503,8 +962,11 @@
 
   document.addEventListener("DOMContentLoaded", function() {
       patchGlobalFetch();
+      initFormValidation();
       initAnimations();
       initSettings();
+      applyPublicAuthVisibility();
+      initPublicNavbarToggle();
       initAdminSidebarToggle();
       initLogoutActions();
       applyRoleAccess();
@@ -536,6 +998,9 @@
     isReceptionistRole: isReceptionistRole,
     clearAuthSession: clearAuthSession,
     logout: logout,
+    applyPublicAuthVisibility: applyPublicAuthVisibility,
+    initPublicUserMenu: initPublicUserMenu,
+    Validation: Validation,
     applyRoleAccess: applyRoleAccess,
     initAnimations: initAnimations,
     initAdminSidebarToggle: initAdminSidebarToggle
