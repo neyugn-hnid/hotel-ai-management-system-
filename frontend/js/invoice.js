@@ -12,9 +12,15 @@ let checkoutBasePrice = 0;
 let customersData = [];
 let bookingsData = [];
 let servicesCatalog = [];
+let currentPaymentInvoiceId = null;
 
 function canEditInvoices() {
-  return Boolean(localStorage.getItem('token'));
+  return Boolean(window.AppCore
+    && typeof window.AppCore.getAuthContext === 'function'
+    && (
+      window.AppCore.isAdminRole(window.AppCore.getAuthContext().role)
+      || window.AppCore.isReceptionistRole(window.AppCore.getAuthContext().role)
+    ));
 }
 
 function canDeleteInvoices() {
@@ -189,6 +195,7 @@ function normalizeCustomer(raw) {
 function normalizeInvoice(raw, customersById, bookingsById) {
   const customer = customersById.get(raw.customerId) || null;
   const booking = bookingsById.get(raw.bookingId) || null;
+  const services = Array.isArray(raw.services) ? raw.services : [];
   return {
     id: raw.invoiceCode || ('INV-' + raw.id),
     sourceInvoiceId: raw.id,
@@ -200,7 +207,15 @@ function normalizeInvoice(raw, customersById, bookingsById) {
     date: formatDate(raw.issuedAt),
     amount: Number(raw.totalAmount || 0),
     status: toUiStatus(raw.paymentStatus),
-    services: []
+    services: services.map(function (service) {
+      return service.serviceName || '';
+    }).filter(Boolean),
+    serviceIds: services.map(function (service) {
+      return Number(service.serviceId || 0);
+    }).filter(function (serviceId) {
+      return serviceId > 0;
+    }),
+    paymentMethod: raw.paymentMethod || 'Tiền mặt'
   };
 }
 
@@ -281,12 +296,19 @@ function findBookingByIntent(intent) {
 }
 
 function buildInvoicePayload(formData, customerId, bookingId) {
-  const servicesTotal = formData.services.reduce(function (sum, serviceName) {
-    const service = servicesCatalog.find(function (item) {
-      return item.name === serviceName;
-    });
-    return sum + Number((service && service.price) || 0);
+  const selectedServices = servicesCatalog.filter(function (service) {
+    return formData.services.includes(service.name);
+  });
+
+  const servicesTotal = selectedServices.reduce(function (sum, service) {
+    return sum + Number(service.price || 0);
   }, 0);
+
+  const serviceIds = selectedServices.map(function (service) {
+    return Number(service.id || 0);
+  }).filter(function (id) {
+    return id > 0;
+  });
 
   const subtotalRoom = Math.max(0, Number(formData.amount) - servicesTotal);
   return {
@@ -301,7 +323,8 @@ function buildInvoicePayload(formData, customerId, bookingId) {
     totalAmount: Number(formData.amount),
     paymentMethod: 'Tiền mặt',
     paymentStatus: toApiPaymentStatus(formData.status),
-    issuedAt: parseUiDateToIso(formData.date)
+    issuedAt: parseUiDateToIso(formData.date),
+    serviceIds: serviceIds
   };
 }
 
@@ -395,33 +418,29 @@ function renderInvoices(filters = {}) {
   
   tbody.innerHTML = filteredData.map(inv => {
     const statusStyle = getStatusStyle(inv.status);
-    const avatarColor = getAvatarColor(inv.customer);
-    const initials = getInitials(inv.customer);
     
     return `
       <tr>
-        <td style="padding-left: 24px;"><span class="invoice-id-badge">${inv.id}</span></td>
-        <td>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div>
-              <p style="font-weight:600; font-size: 14px;">${inv.customer}</p>
-            </div>
+        <td class="invoice-cell-id"><span class="invoice-id-badge">${inv.id}</span></td>
+        <td class="invoice-cell-customer">
+          <div class="invoice-customer-name-wrap">
+            <p class="invoice-customer-name">${inv.customer}</p>
           </div>
         </td>
-        <td><span >${inv.room}</span></td>
-        <td style="font-size: 13px; color: var(--notion-gray-500);">${inv.date}</td>
-        <td style="font-weight:700; font-size: 14px;">${formatCurrency(inv.amount)}</td>
-        <td style="text-align:center;"><span class="notion-pill" style="background:${statusStyle.bg}; color:${statusStyle.color};">${inv.status}</span></td>
-        <td style="text-align:right; padding-right: 24px;">
-          <div style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: var(--notion-blue);" onclick="openPaymentModal('${inv.id}')" title="Chi tiết & QR">
-              <span class="material-symbols-outlined" style="font-size:18px;">qr_code_2</span>
+        <td class="invoice-cell-room"><span>${inv.room}</span></td>
+        <td class="invoice-cell-date">${inv.date}</td>
+        <td class="invoice-cell-amount">${formatCurrency(inv.amount)}</td>
+        <td class="invoice-cell-status"><span class="notion-pill" style="background:${statusStyle.bg}; color:${statusStyle.color};">${inv.status}</span></td>
+        <td class="invoice-cell-actions">
+          <div class="invoice-action-group">
+            <button class="btn-notion-sec invoice-action-btn invoice-action-btn--qr" onclick="openPaymentModal('${inv.id}')" title="Chi tiết & QR">
+              <span class="material-symbols-outlined invoice-action-icon">qr_code_2</span>
             </button>
-            ${canEdit ? `<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" onclick="openInvoiceModal('${inv.id}')">
-              <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+            ${canEdit ? `<button class="btn-notion-sec invoice-action-btn" onclick="openInvoiceModal('${inv.id}')">
+              <span class="material-symbols-outlined invoice-action-icon">edit</span>
             </button>` : ''}
-            ${canDelete ? `<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" onclick="confirmDeleteInvoice('${inv.id}')">
-              <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+            ${canDelete ? `<button class="btn-notion-sec invoice-action-btn invoice-action-btn--delete" onclick="confirmDeleteInvoice('${inv.id}')">
+              <span class="material-symbols-outlined invoice-action-icon">delete</span>
             </button>` : ''}
           </div>
         </td>
@@ -720,7 +739,8 @@ async function saveInvoice(e) {
           totalAmount: payload.totalAmount,
           paymentMethod: payload.paymentMethod,
           paymentStatus: payload.paymentStatus,
-          issuedAt: payload.issuedAt
+          issuedAt: payload.issuedAt,
+          serviceIds: payload.serviceIds
         })
       });
 
@@ -750,16 +770,19 @@ async function saveInvoice(e) {
 
 function closePaymentModal() {
   const modal = document.getElementById('paymentDetailsModal');
+  currentPaymentInvoiceId = null;
   if (modal) modal.style.display = 'none';
 }
 
 function openPaymentModal(id) {
   const inv = invoicesData.find(i => i.id === id);
   if (!inv) return;
+  currentPaymentInvoiceId = id;
 
   const content = document.getElementById('paymentDetailsContent');
   const qrImg = document.getElementById('qrImage');
   const modal = document.getElementById('paymentDetailsModal');
+  const markPaidBtn = document.getElementById('paymentMarkPaidButton');
 
   
   content.innerHTML = `
@@ -785,8 +808,26 @@ function openPaymentModal(id) {
           <span style="font-weight: 700; font-size: 15px;">Tổng cộng:</span>
           <span style="font-weight: 800; font-size: 18px; color: var(--notion-black);">${formatCurrency(inv.amount)}</span>
        </div>
+       <div style="display: flex; justify-content: space-between; margin-top: 12px;">
+          <span style="color: var(--notion-gray-500); font-size: 13px;">Trạng thái:</span>
+          <span class="notion-pill" style="background:${getStatusStyle(inv.status).bg}; color:${getStatusStyle(inv.status).color};">${inv.status}</span>
+       </div>
     </div>
   `;
+
+  if (markPaidBtn) {
+    if (inv.status === 'Đã thanh toán') {
+      markPaidBtn.disabled = true;
+      markPaidBtn.textContent = 'Đã thanh toán';
+      markPaidBtn.style.opacity = '0.6';
+      markPaidBtn.style.cursor = 'not-allowed';
+    } else {
+      markPaidBtn.disabled = false;
+      markPaidBtn.textContent = 'Đã thanh toán';
+      markPaidBtn.style.opacity = '';
+      markPaidBtn.style.cursor = '';
+    }
+  }
 
   
   const bankSettings = JSON.parse(localStorage.getItem('luxe_bank_settings') || '{"bankId":"970436","accountNo":"123456789","accountName":"LUXE CONCIERGE"}');
@@ -822,6 +863,80 @@ function openPaymentModal(id) {
 
   };
 }
+
+async function markInvoicePaidFromModal() {
+  if (!canEditInvoices()) {
+    showToast('Bạn không có quyền cập nhật hóa đơn.', 'error');
+    return;
+  }
+
+  const invoiceId = currentPaymentInvoiceId;
+  const inv = invoicesData.find(function (item) { return item.id === invoiceId; });
+  if (!inv || !inv.sourceInvoiceId) {
+    showToast('Không tìm thấy hóa đơn để cập nhật.', 'error');
+    return;
+  }
+
+  if (inv.status === 'Đã thanh toán') {
+    showToast('Hóa đơn này đã được thanh toán.', 'success');
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers.Authorization = 'Bearer ' + token;
+  }
+
+  try {
+    const payload = buildInvoicePayload({
+      id: inv.id,
+      customer: inv.customer,
+      cccd: inv.cccd,
+      room: inv.room,
+      date: inv.date,
+      amount: inv.amount,
+      status: 'Đã thanh toán',
+      services: Array.isArray(inv.services) ? inv.services : []
+    }, inv.customerId, inv.bookingId);
+
+    payload.paymentMethod = inv.paymentMethod || 'Chuyển khoản';
+
+    const response = await fetch(INVOICES_API + '/' + inv.sourceInvoiceId, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify({
+        id: inv.sourceInvoiceId,
+        invoiceCode: payload.invoiceCode,
+        bookingId: payload.bookingId,
+        customerId: payload.customerId,
+        accountId: payload.accountId,
+        subtotalRoom: payload.subtotalRoom,
+        subtotalServices: payload.subtotalServices,
+        taxAmount: payload.taxAmount,
+        discountAmount: payload.discountAmount,
+        totalAmount: payload.totalAmount,
+        paymentMethod: payload.paymentMethod,
+        paymentStatus: payload.paymentStatus,
+        issuedAt: payload.issuedAt,
+        serviceIds: payload.serviceIds
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(await extractApiError(response, 'Không thể cập nhật trạng thái thanh toán.'));
+    }
+
+    await loadApiData();
+    renderInvoices();
+    closePaymentModal();
+    showToast('Đã cập nhật hóa đơn sang trạng thái đã thanh toán.', 'success');
+  } catch (error) {
+    showToast(error.message || 'Không thể cập nhật thanh toán.', 'error');
+  }
+}
+
+window.markInvoicePaidFromModal = markInvoicePaidFromModal;
 
 function confirmDeleteInvoice(id) {
   if (!canDeleteInvoices()) {

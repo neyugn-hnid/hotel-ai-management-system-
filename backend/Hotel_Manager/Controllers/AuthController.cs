@@ -39,6 +39,10 @@ namespace Hotel_Manager.Controllers
                 return Unauthorized(new { message = "Email hoặc mật khẩu không đúng" });
             }
 
+            user.LastLoginAt = DateTime.UtcNow;
+            user.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
             var accessToken = GenerateJwtToken(user);
             var refreshToken = _refreshTokenStore.IssueToken(user.Id, TimeSpan.FromDays(7));
             return Ok(new { token = accessToken, accessToken, refreshToken });

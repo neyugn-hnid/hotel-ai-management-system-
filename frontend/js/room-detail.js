@@ -21,6 +21,19 @@ function getQueryParam(name) {
   return params.get(name);
 }
 
+function buildRoomAiReturnUrl() {
+  var params = new URLSearchParams();
+  var checkIn = getQueryParam('checkIn');
+  var checkOut = getQueryParam('checkOut');
+  if (checkIn) params.set('checkIn', checkIn);
+  if (checkOut) params.set('checkOut', checkOut);
+  return 'room-ai.html' + (params.toString() ? '?' + params.toString() : '');
+}
+
+window.returnToRoomAi = function () {
+  window.location.href = buildRoomAiReturnUrl();
+};
+
 function sanitizePhone(value) {
   return String(value || '').replace(/[^\d+]/g, '').trim();
 }
@@ -44,7 +57,15 @@ async function fetchRoom(roomId) {
     throw new Error('Không tìm thấy ID phòng trong URL.');
   }
 
-  const response = await fetch(ROOMS_API_URL + '/' + encodeURIComponent(roomId), {
+  const params = new URLSearchParams({
+    publicOnly: 'true'
+  });
+  var checkIn = getQueryParam('checkIn');
+  var checkOut = getQueryParam('checkOut');
+  if (checkIn) params.set('checkInDate', checkIn);
+  if (checkOut) params.set('checkOutDate', checkOut);
+
+  const response = await fetch(ROOMS_API_URL + '/' + encodeURIComponent(roomId) + '?' + params.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'

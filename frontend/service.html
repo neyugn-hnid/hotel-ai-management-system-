@@ -112,12 +112,12 @@
   </div>
 
   <div class="modal-overlay" id="serviceModal">
-     <div class="notion-modal">
-        <div class="modal-header">
-           <h2 class="admin-modal-title admin-modal-title-row">
-             <span id="serviceModalTitle">Thêm dịch vụ</span>
-             <span class="material-symbols-outlined admin-modal-close" onclick="closeServiceModal()">close</span>
-           </h2>
+     <div class="notion-modal service-editor-modal">
+        <div class="service-modal-header">
+           <h2 class="admin-modal-title" id="serviceModalTitle">Thêm dịch vụ</h2>
+           <button type="button" class="service-modal-close-btn" onclick="closeServiceModal()">
+             <span class="material-symbols-outlined">close</span>
+           </button>
         </div>
         <form id="serviceForm">
            <div class="form-row">
@@ -159,8 +159,10 @@
   </div>
 
   <div class="modal-overlay" id="deleteConfirmModal">
-     <div class="luxury-card admin-delete-card">
-        <span class="material-symbols-outlined admin-delete-icon">warning</span>
+     <div class="luxury-card admin-delete-card service-delete-modal">
+        <div class="admin-delete-icon-wrap">
+           <span class="material-symbols-outlined admin-delete-icon--sm">warning</span>
+        </div>
         <h3 class="admin-delete-title">Gỡ bỏ dịch vụ?</h3>
         <p class="admin-delete-text">Bạn có chắc chắn muốn ngừng cung cấp dịch vụ này vĩnh viễn không?</p>
         <div class="admin-delete-actions">

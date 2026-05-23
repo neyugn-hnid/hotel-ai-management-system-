@@ -110,8 +110,17 @@ async function fetchRooms() {
     sortBy: 'name',
     sortDir: 'asc',
     pageNumber: '1',
-    pageSize: '100'
+    pageSize: '100',
+    publicOnly: 'true',
+    availableOnly: 'true'
   });
+
+  if (currentSearchContext.checkIn) {
+    params.set('checkInDate', currentSearchContext.checkIn);
+  }
+  if (currentSearchContext.checkOut) {
+    params.set('checkOutDate', currentSearchContext.checkOut);
+  }
 
   const response = await fetch(ROOMS_API_URL + '?' + params.toString(), {
     method: 'GET',
@@ -379,6 +388,17 @@ document.getElementById('searchForm').addEventListener('submit', async function(
   if (checkInDate && checkOutDate && new Date(checkOutDate) <= new Date(checkInDate)) {
     showToast('Ngày trả phòng phải sau ngày nhận phòng.', 'error');
     return;
+  }
+
+  try {
+    await fetchRooms();
+    renderAllRooms(1);
+    var countEl = document.getElementById('roomResultCount');
+    if (countEl) {
+      countEl.textContent = 'Hiển thị ' + roomsData.length + ' kết quả';
+    }
+  } catch (error) {
+    showToast(error.message || 'Không thể cập nhật danh sách phòng khả dụng.', 'error');
   }
 
   document.getElementById('aiRecommendations').style.display = 'block';

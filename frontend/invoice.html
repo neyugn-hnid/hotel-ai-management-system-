@@ -72,7 +72,7 @@
        </div>
 
       <div class="luxury-card admin-card-reset">
-         <table class="notion-table">
+         <table class="notion-table invoice-data-table">
             <thead>
                <tr class="admin-table-head-row">
                   <th>Mã</th>
@@ -202,9 +202,12 @@
            <p class="invoice-qr-note">Mã QR được tạo tự động dựa trên giá trị hóa đơn.</p>
         </div>
 
-        <div class="booking-invoice-actions">
+        <div class="booking-invoice-actions invoice-payment-actions">
+           <button id="paymentMarkPaidButton" type="button" class="gold-border-btn booking-invoice-actions__save" onclick="markInvoicePaidFromModal()">
+              Đã thanh toán
+           </button>
            <button class="gold-border-btn booking-invoice-actions__cancel invoice-print-btn" onclick="window.print()">
-              <span class="material-symbols-outlined invoice-filter-icon"></span> In hóa đơn
+              In hóa đơn
            </button>
            <button class="gold-cancel-btn booking-invoice-actions__cancel" onclick="closePaymentModal()">Đóng</button>
         </div>

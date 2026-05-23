@@ -126,11 +126,15 @@
            <div class="form-row">
               <label>Email</label>
               <input type="email" id="accEmail" class="notion-input" placeholder="nva@hotel.com" required />
-           </div>
-           <div class="form-row">
-              <label>Mật khẩu <span id="passwordHelp" class="account-password-help"></span></label>
-              <input type="password" id="accPassword" class="notion-input" placeholder="Nhập mật khẩu" required />
-           </div>
+            </div>
+            <div class="form-row">
+               <label>Số điện thoại</label>
+               <input type="tel" id="accPhone" class="notion-input" placeholder="0901234567" />
+            </div>
+            <div class="form-row">
+               <label>Mật khẩu <span id="passwordHelp" class="account-password-help"></span></label>
+               <input type="password" id="accPassword" class="notion-input" placeholder="Nhập mật khẩu" required />
+            </div>
            <div class="form-row">
               <label>Vai trò</label>
               <select id="accRole" class="notion-input" required>
@@ -151,8 +155,11 @@
   </div>
 
   <div id="deleteModal" class="modal-overlay">
-     <div class="luxury-card account-delete-card">
-        <div class="modal-header account-delete-header">
+     <div class="luxury-card account-delete-card account-delete-card--fixed">
+        <div class="admin-delete-icon-wrap">
+           <span class="material-symbols-outlined admin-delete-icon--sm">warning</span>
+        </div>
+        <div class="account-delete-header">
            <h3 class="account-delete-title">Xóa tài khoản</h3>
         </div>
         <p class="account-delete-text">

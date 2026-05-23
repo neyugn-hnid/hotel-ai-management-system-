@@ -8,6 +8,12 @@
   var USER_EMAIL_KEY = "userEmail";
   var refreshPromise = null;
   var originalFetch = global.fetch ? global.fetch.bind(global) : null;
+  var adminBookingBadgeTimer = null;
+  var adminBookingBadgeRefreshInFlight = null;
+  var adminBookingRealtimeConnection = null;
+  var adminBookingRealtimeScriptPromise = null;
+  var adminWebsiteBookingAlertTimer = null;
+  var adminWebsiteBookingLastCount = null;
 
   function qs(selector, root) {
     return (root || document).querySelector(selector);
@@ -284,6 +290,196 @@
     }, 2400);
   }
 
+  function playAdminWebsiteBookingSound() {
+    try {
+      var AudioContextCtor = global.AudioContext || global.webkitAudioContext;
+      if (!AudioContextCtor) return;
+      var ctx = new AudioContextCtor();
+      var now = ctx.currentTime;
+      var gain = ctx.createGain();
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.12, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.8);
+
+      [880, 1174].forEach(function(freq, index) {
+        var osc = ctx.createOscillator();
+        osc.type = index === 0 ? "sine" : "triangle";
+        osc.frequency.setValueAtTime(freq, now + index * 0.09);
+        osc.connect(gain);
+        osc.start(now + index * 0.09);
+        osc.stop(now + 0.28 + index * 0.09);
+      });
+    } catch (_) {
+    }
+  }
+
+  function ensureAdminWebsiteBookingAlertStyles() {
+    if (qs("#admin-website-booking-alert-style")) return;
+    var style = document.createElement("style");
+    style.id = "admin-website-booking-alert-style";
+    style.textContent =
+      ".admin-website-booking-alert-overlay{position:fixed;inset:0;background:rgba(15,23,42,.32);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:1200;padding:16px;}" +
+      ".admin-website-booking-alert-modal{background:#fff;width:min(480px,100%);border-radius:24px;box-shadow:0 40px 100px rgba(0,0,0,.2);padding:28px;}" +
+      ".admin-website-booking-alert-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;}" +
+      ".admin-website-booking-alert-icon{width:54px;height:54px;border-radius:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:linear-gradient(135deg,#f97316,#dc2626);color:#fff;}" +
+      ".admin-website-booking-alert-icon .material-symbols-outlined{font-size:28px;}" +
+      ".admin-website-booking-alert-copy{min-width:0;flex:1;}" +
+      ".admin-website-booking-alert-title{margin:0 0 4px;font-size:24px;font-weight:800;letter-spacing:-0.03em;color:#111827;}" +
+      ".admin-website-booking-alert-code{margin:0;color:#6b7280;font-size:14px;line-height:1.5;}" +
+      ".admin-website-booking-alert-message{margin:0 0 24px;color:#111827;font-size:14px;line-height:1.7;}" +
+      ".admin-website-booking-alert-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}" +
+      ".admin-website-booking-alert-btn{width:100%;min-width:0;height:46px;border-radius:12px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;}" +
+      ".admin-website-booking-alert-btn--secondary{background:#fff;border:1px solid rgba(0,0,0,.08);color:#111827;}" +
+      ".admin-website-booking-alert-btn--primary{background:#007bff;border:1px solid #007bff;color:#fff;}" +
+      "@media (max-width:768px){.admin-website-booking-alert-actions{grid-template-columns:1fr;}}";
+    document.head.appendChild(style);
+  }
+
+  function ensureAdminWebsiteBookingAlertModal() {
+    var modal = qs("#adminWebsiteBookingAlert");
+    if (modal) return modal;
+    ensureAdminWebsiteBookingAlertStyles();
+    modal = document.createElement("div");
+    modal.id = "adminWebsiteBookingAlert";
+    modal.className = "admin-website-booking-alert-overlay";
+    modal.innerHTML =
+      '<div class="admin-website-booking-alert-modal">' +
+        '<div class="admin-website-booking-alert-header">' +
+          '<div class="admin-website-booking-alert-icon"><span class="material-symbols-outlined">notifications_active</span></div>' +
+          '<div class="admin-website-booking-alert-copy">' +
+            '<h3 class="admin-website-booking-alert-title">Có booking mới từ web</h3>' +
+            '<p id="adminWebsiteBookingAlertCode" class="admin-website-booking-alert-code">Đang cập nhật...</p>' +
+          '</div>' +
+        '</div>' +
+        '<p id="adminWebsiteBookingAlertMessage" class="admin-website-booking-alert-message">Khách vừa gửi yêu cầu đặt phòng từ website. Hãy kiểm tra khu vực chờ xử lý để xác nhận nhanh.</p>' +
+        '<div class="admin-website-booking-alert-actions">' +
+          '<button type="button" class="admin-website-booking-alert-btn admin-website-booking-alert-btn--secondary" data-admin-booking-alert-close>Đóng</button>' +
+          '<button type="button" class="admin-website-booking-alert-btn admin-website-booking-alert-btn--primary" data-admin-booking-alert-open>Xem ngay</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    qs("[data-admin-booking-alert-close]", modal).addEventListener("click", function() {
+      closeAdminWebsiteBookingAlert();
+    });
+    qs("[data-admin-booking-alert-open]", modal).addEventListener("click", function() {
+      focusAdminPendingWebsiteBookings();
+    });
+    return modal;
+  }
+
+  function showAdminWebsiteBookingAlert(payload) {
+    var modal = ensureAdminWebsiteBookingAlertModal();
+    var codeEl = qs("#adminWebsiteBookingAlertCode", modal);
+    var msgEl = qs("#adminWebsiteBookingAlertMessage", modal);
+    var bookingCode = payload && payload.bookingCode ? payload.bookingCode : "booking mới";
+    if (codeEl) {
+      codeEl.textContent = "Mã phiếu: " + bookingCode;
+    }
+    if (msgEl) {
+      msgEl.textContent = "Khách vừa gửi yêu cầu đặt phòng từ website. Hãy kiểm tra khu vực chờ xử lý để xác nhận nhanh.";
+    }
+    modal.style.display = "flex";
+    if (adminWebsiteBookingAlertTimer) {
+      clearTimeout(adminWebsiteBookingAlertTimer);
+    }
+    adminWebsiteBookingAlertTimer = setTimeout(function() {
+      closeAdminWebsiteBookingAlert();
+    }, 9000);
+  }
+
+  function closeAdminWebsiteBookingAlert() {
+    var modal = qs("#adminWebsiteBookingAlert");
+    if (modal) modal.style.display = "none";
+  }
+
+  function focusAdminPendingWebsiteBookings() {
+    closeAdminWebsiteBookingAlert();
+    var pageName = ((global.location && global.location.pathname) || "").toLowerCase().split("/").pop();
+    if (pageName === "booking.html") {
+      var section = qs("#bookingRequestsBody");
+      if (section && typeof section.scrollIntoView === "function") {
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      return;
+    }
+    global.location.href = "booking.html";
+  }
+
+  function getAdminBookingSource(raw) {
+    var source = String((raw && raw.source) || "").trim().toLowerCase();
+    if (source === "website" || source === "web") return "website";
+    if (source === "internal") return "internal";
+    var bookingCode = String((raw && raw.bookingCode) || "").trim().toUpperCase();
+    var notes = String((raw && raw.notes) || "").trim().toLowerCase();
+    var accountId = Number((raw && raw.accountId) || 0);
+    if (bookingCode.indexOf("BKG-WEB") === 0 || notes.indexOf("website") >= 0 || notes.indexOf("đặt qua web") >= 0 || notes.indexOf("dat qua web") >= 0) {
+      return "website";
+    }
+    return accountId > 0 ? "internal" : "website";
+  }
+
+  function loadSignalRScript() {
+    if (global.signalR) {
+      return Promise.resolve();
+    }
+    if (adminBookingRealtimeScriptPromise) {
+      return adminBookingRealtimeScriptPromise;
+    }
+    adminBookingRealtimeScriptPromise = new Promise(function(resolve, reject) {
+      var script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js";
+      script.onload = function() { resolve(); };
+      script.onerror = function() { reject(new Error("Không thể tải SignalR.")); };
+      document.head.appendChild(script);
+    });
+    return adminBookingRealtimeScriptPromise;
+  }
+
+  async function initAdminBookingRealtime() {
+    if (!qs(".admin-layout")) return;
+    if (adminBookingRealtimeConnection) return;
+    var token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return;
+    try {
+      await loadSignalRScript();
+    } catch (_) {
+      return;
+    }
+    if (!global.signalR) return;
+
+    adminBookingRealtimeConnection = new global.signalR.HubConnectionBuilder()
+      .withUrl(API_BASE_URL.replace(/\/api$/, "") + "/bookingHub", {
+        accessTokenFactory: function() {
+          return localStorage.getItem(TOKEN_KEY) || "";
+        }
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    adminBookingRealtimeConnection.on("bookingCreated", function(payload) {
+      var bookingCode = payload && payload.bookingCode ? payload.bookingCode : "booking mới";
+      if (getAdminBookingSource(payload) === "website") {
+        toast("Có phiếu đặt phòng mới từ website: " + bookingCode, "success");
+        playAdminWebsiteBookingSound();
+        showAdminWebsiteBookingAlert(payload);
+      } else {
+        toast("Có booking mới: " + bookingCode, "success");
+      }
+      void refreshAdminBookingBadge();
+    });
+
+    adminBookingRealtimeConnection.on("bookingUpdated", function() {
+      void refreshAdminBookingBadge();
+    });
+
+    try {
+      await adminBookingRealtimeConnection.start();
+    } catch (_) {
+      adminBookingRealtimeConnection = null;
+    }
+  }
+
   function initAnimations() {
     
   }
@@ -328,7 +524,12 @@
         payload += "=";
       }
 
-      return JSON.parse(atob(payload));
+      var binary = atob(payload);
+      var bytes = Uint8Array.from(binary, function(char) {
+        return char.charCodeAt(0);
+      });
+      var json = new TextDecoder("utf-8").decode(bytes);
+      return JSON.parse(json);
     } catch (error) {
 
       return null;
@@ -425,6 +626,10 @@
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
       localStorage.removeItem(USER_EMAIL_KEY);
+      localStorage.removeItem("accountId");
+      localStorage.removeItem("customerId");
+      localStorage.removeItem("customerName");
+      localStorage.removeItem("customerPhone");
       localStorage.removeItem("pending_invoice_booking");
     } catch (error) {
 
@@ -673,6 +878,8 @@
     var pageName = pathname.split("/").pop();
     var adminOnlyPages = ["account.html"];
     var adminOnlyLinks = ['a.sidebar-item[href="account.html"]'];
+    var receptionistHiddenLinks = ['a.sidebar-item[href="dashboard.html"]'];
+    var receptionistRedirectPages = ["dashboard.html"];
 
     if (!isAdminRole(resolvedRole)) {
       adminOnlyLinks.forEach(function(selector) {
@@ -694,6 +901,14 @@
         if (el) el.style.display = 'none';
       });
       qsa('a.sidebar-item[href="account.html"]').forEach(function(link) { link.style.display = 'none'; });
+      receptionistHiddenLinks.forEach(function(selector) {
+        qsa(selector).forEach(function(link) {
+          link.style.display = "none";
+        });
+      });
+      if (receptionistRedirectPages.indexOf(pageName) >= 0) {
+        window.location.replace("booking.html");
+      }
     }
   }
 
@@ -959,6 +1174,125 @@
     });
   }
 
+  function ensureAdminBookingBadge() {
+    var link = qs('a.sidebar-item[href="booking.html"]');
+    if (!link) return null;
+
+    link.id = link.id || "sidebarBookingLink";
+
+    var badge = qs("#sidebarBookingBadge", link);
+    if (badge) return badge;
+
+    badge = document.createElement("span");
+    badge.id = "sidebarBookingBadge";
+    badge.textContent = "0";
+    badge.style.display = "none";
+    badge.style.marginLeft = "auto";
+    badge.style.minWidth = "22px";
+    badge.style.height = "22px";
+    badge.style.padding = "0 6px";
+    badge.style.borderRadius = "999px";
+    badge.style.background = "#dc2626";
+    badge.style.color = "#fff";
+    badge.style.fontSize = "12px";
+    badge.style.fontWeight = "700";
+    badge.style.alignItems = "center";
+    badge.style.justifyContent = "center";
+    badge.style.lineHeight = "1";
+    link.appendChild(badge);
+    return badge;
+  }
+
+  function updateAdminBookingBadge(count) {
+    var badge = ensureAdminBookingBadge();
+    if (!badge) return;
+
+    var safeCount = Math.max(0, Number(count || 0));
+    if (safeCount <= 0) {
+      badge.style.display = "none";
+      badge.textContent = "0";
+      return;
+    }
+
+    badge.style.display = "inline-flex";
+    badge.textContent = safeCount > 99 ? "99+" : String(safeCount);
+  }
+
+  async function refreshAdminBookingBadge() {
+    if (adminBookingBadgeRefreshInFlight) {
+      return adminBookingBadgeRefreshInFlight;
+    }
+
+    var token = localStorage.getItem(TOKEN_KEY);
+    if (!token) {
+      adminWebsiteBookingLastCount = null;
+      updateAdminBookingBadge(0);
+      return 0;
+    }
+
+    adminBookingBadgeRefreshInFlight = (async function() {
+      try {
+        var response = await fetch(API_BASE_URL + "/Bookings?status=" + encodeURIComponent("Chờ xác nhận") + "&source=website&pageNumber=1&pageSize=1", {
+          headers: {
+            Authorization: "Bearer " + token
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Không thể tải số lượng booking chờ xử lý.");
+        }
+
+        var data = await response.json().catch(function() {
+          return {};
+        });
+        var totalCount = Number(data && data.totalCount || 0);
+        updateAdminBookingBadge(totalCount);
+        if (adminWebsiteBookingLastCount !== null && totalCount > adminWebsiteBookingLastCount) {
+          var diff = totalCount - adminWebsiteBookingLastCount;
+          var message = diff > 1
+            ? "Có " + diff + " booking mới từ website."
+            : "Có booking mới từ website.";
+          toast(message, "success");
+          playAdminWebsiteBookingSound();
+          showAdminWebsiteBookingAlert({
+            bookingCode: diff > 1 ? ("+" + diff + " booking mới") : "booking mới"
+          });
+        }
+        adminWebsiteBookingLastCount = totalCount;
+        return totalCount;
+      } catch (_) {
+        return 0;
+      } finally {
+        adminBookingBadgeRefreshInFlight = null;
+      }
+    })();
+
+    return adminBookingBadgeRefreshInFlight;
+  }
+
+  function initAdminBookingBadge() {
+    if (!qs(".admin-layout")) return;
+    if (!qs('a.sidebar-item[href="booking.html"]')) return;
+
+    ensureAdminBookingBadge();
+    void refreshAdminBookingBadge();
+
+    if (adminBookingBadgeTimer) {
+      clearInterval(adminBookingBadgeTimer);
+    }
+
+    adminBookingBadgeTimer = setInterval(function() {
+      if (document.hidden) return;
+      void refreshAdminBookingBadge();
+    }, 5000);
+
+    document.addEventListener("visibilitychange", function() {
+      if (!document.hidden) {
+        void refreshAdminBookingBadge();
+      }
+    });
+  }
+
 
   document.addEventListener("DOMContentLoaded", function() {
       patchGlobalFetch();
@@ -970,6 +1304,8 @@
       initAdminSidebarToggle();
       initLogoutActions();
       applyRoleAccess();
+      initAdminBookingBadge();
+      void initAdminBookingRealtime();
 
       
       try {
@@ -1003,6 +1339,7 @@
     Validation: Validation,
     applyRoleAccess: applyRoleAccess,
     initAnimations: initAnimations,
-    initAdminSidebarToggle: initAdminSidebarToggle
+    initAdminSidebarToggle: initAdminSidebarToggle,
+    refreshAdminBookingBadge: refreshAdminBookingBadge
   };
 })(window);

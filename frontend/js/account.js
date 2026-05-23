@@ -99,6 +99,7 @@ function normalizeAccount(raw) {
     id: String(raw.id ?? ''),
     name: raw.fullName || 'Chưa có tên',
     email: raw.email || '',
+    phoneNumber: raw.phoneNumber || '',
     role: String(raw.role || 'Customer').trim(),
     status: normalizeStatus(raw.status),
     lastLogin: formatLastLogin(raw.lastLoginAt),
@@ -240,6 +241,7 @@ function renderAccounts() {
       } else {
         actionsHtml += '<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #16a34a;" title="Mở khóa" onclick="toggleStatus(\'' + acc.id + '\')"><span class="material-symbols-outlined" style="font-size:18px; color:#16a34a;">lock_open</span></button>';
       }
+      actionsHtml += '<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" title="Xóa tài khoản" onclick="openDeleteModal(\'' + acc.id + '\')"><span class="material-symbols-outlined" style="font-size:18px; color:#ef4444;">delete</span></button>';
     }
 
     tr.innerHTML = '\
@@ -376,6 +378,7 @@ function editAccount(id) {
   document.getElementById('accId').value = acc.id;
   document.getElementById('accName').value = acc.name;
   document.getElementById('accEmail').value = acc.email;
+  document.getElementById('accPhone').value = acc.phoneNumber || '';
   document.getElementById('accRole').value = acc.role;
   document.getElementById('accStatus').value = acc.status;
 
@@ -438,6 +441,13 @@ async function handleFormSubmit(event) {
       }
     },
     {
+      input: '#accPhone',
+      validate: function(value) {
+        if (!String(value || '').trim()) return '';
+        return validation.isValidPhone(value) ? '' : 'Số điện thoại không hợp lệ.';
+      }
+    },
+    {
       input: '#accPassword',
       validate: function(value) {
         if (!id && String(value || '').trim().length < 6) {
@@ -467,6 +477,7 @@ async function handleFormSubmit(event) {
 
   const name = document.getElementById('accName').value.trim();
   const email = document.getElementById('accEmail').value.trim();
+  const phoneNumber = document.getElementById('accPhone').value.trim();
   const password = document.getElementById('accPassword').value;
   const role = document.getElementById('accRole').value;
   const status = id ? document.getElementById('accStatus').value : 'Hoạt động';
@@ -481,6 +492,7 @@ async function handleFormSubmit(event) {
     const payload = {
       fullName: name,
       email: email,
+      phoneNumber: phoneNumber,
       password: password,
       role: role,
       status: status

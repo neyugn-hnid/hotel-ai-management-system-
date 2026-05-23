@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Hotel_Manager.Hubs
 {
-    [Authorize(Roles = "Admin,Lễ tân")]
+    [Authorize(Roles = "Admin,Receptionist,Lễ tân")]
     public class BookingHub : Hub
     {
     }

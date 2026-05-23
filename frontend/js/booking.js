@@ -19,6 +19,8 @@ let invoiceBaseAmount = 0;
 let invoicedBookingIds = new Set();
 let bookingRealtimeConnection = null;
 let bookingRealtimeRefreshTimer = null;
+let websiteRealtimeAlertTimer = null;
+let lastWebsiteRealtimeBookingCode = '';
 
 const pendingQueryState = {
   q: '',
@@ -97,6 +99,64 @@ function showToast(message, variant) {
     return;
   }
   alert(message);
+}
+
+function playWebsiteBookingSound() {
+  try {
+    var AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return;
+    var ctx = new AudioContextCtor();
+    var now = ctx.currentTime;
+    var gain = ctx.createGain();
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.12, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.8);
+
+    [880, 1174].forEach(function(freq, index) {
+      var osc = ctx.createOscillator();
+      osc.type = index === 0 ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime(freq, now + index * 0.09);
+      osc.connect(gain);
+      osc.start(now + index * 0.09);
+      osc.stop(now + 0.28 + index * 0.09);
+    });
+  } catch (_) {
+  }
+}
+
+function updateSidebarWebsiteBadge(count) {
+  var badge = document.getElementById('sidebarBookingBadge');
+  if (!badge) return;
+  var safeCount = Math.max(0, Number(count || 0));
+  if (safeCount <= 0) {
+    badge.style.display = 'none';
+    badge.textContent = '0';
+    return;
+  }
+  badge.style.display = 'inline-flex';
+  badge.textContent = safeCount > 99 ? '99+' : String(safeCount);
+}
+
+function getBookingSource(raw) {
+  var source = String((raw && raw.source) || '').trim().toLowerCase();
+  if (source === 'website' || source === 'web') return 'website';
+  if (source === 'internal') return 'internal';
+
+  var bookingCode = String((raw && raw.bookingCode) || '').trim().toUpperCase();
+  var notes = String((raw && raw.notes) || '').trim().toLowerCase();
+  var accountId = Number((raw && raw.accountId) || 0);
+  if (bookingCode.indexOf('BKG-WEB') === 0 || notes.indexOf('website') >= 0 || notes.indexOf('đặt qua web') >= 0 || notes.indexOf('dat qua web') >= 0) {
+    return 'website';
+  }
+  return accountId > 0 ? 'internal' : 'website';
+}
+
+function getSourcePill(source) {
+  if (source === 'website') {
+    return '<span class="notion-pill" style="background:#fee2e2; color:#b91c1c;">Web</span>';
+  }
+  return '<span class="notion-pill" style="background:#e0f2fe; color:#0c4a6e;">Nội bộ</span>';
 }
 
 function decodeJwtPayload(token) {
@@ -202,8 +262,6 @@ async function initBookingRealtime() {
     .build();
 
   bookingRealtimeConnection.on('bookingCreated', function (payload) {
-    const bookingCode = payload && payload.bookingCode ? payload.bookingCode : 'booking mới';
-    showToast('Có phiếu đặt phòng mới từ website: ' + bookingCode, 'success');
     scheduleRealtimeBookingRefresh();
   });
 
@@ -230,6 +288,7 @@ function normalizeBooking(raw) {
     customerName: raw.customerName || 'Khách chưa rõ',
     customerEmail: raw.customerEmail || '--',
     roomName: raw.roomName || raw.roomType || 'Không xác định',
+    source: getBookingSource(raw),
     status: raw.status || 'Chờ xác nhận',
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
@@ -266,6 +325,16 @@ function normalizeWorkflowStatus(status) {
   return String(status || '').trim().toLowerCase();
 }
 
+function ensureBookingInvoicePaymentStatusOptions() {
+  var statusEl = document.getElementById('bookingInvoiceStatus');
+  if (!statusEl) return;
+
+  var statuses = ['Chưa thanh toán', 'Đã thanh toán', 'Quá hạn'];
+  statusEl.innerHTML = statuses.map(function(status) {
+    return '<option value="' + status + '">' + status + '</option>';
+  }).join('');
+}
+
 function isPendingWorkflowStatus(status) {
   const normalized = normalizeWorkflowStatus(status);
   return normalized === 'chờ xác nhận' || normalized === 'cho xac nhan';
@@ -273,7 +342,7 @@ function isPendingWorkflowStatus(status) {
 
 function isConfirmedWorkflowStatus(status) {
   const normalized = normalizeWorkflowStatus(status);
-  return normalized === 'đã xác nhận giữ chỗ'
+  return normalized === 'đã đặt'
     || normalized === 'da xac nhan giu cho'
     || normalized === 'đã check-in'
     || normalized === 'da check-in';
@@ -284,8 +353,8 @@ function getWorkflowStatusLabel(status) {
   if (normalized === 'chờ xác nhận' || normalized === 'cho xac nhan') {
     return 'Chờ xác nhận';
   }
-  if (normalized === 'đã xác nhận giữ chỗ' || normalized === 'da xac nhan giu cho') {
-    return 'Đã xác nhận giữ chỗ';
+  if (normalized === 'đã đặt' || normalized === 'da xac nhan giu cho') {
+    return 'Đã đặt';
   }
   if (normalized === 'đã check-in' || normalized === 'da check-in') {
     return 'Đã check-in';
@@ -298,7 +367,7 @@ function getWorkflowStatusPillStyle(status) {
   if (normalized === 'chờ xác nhận' || normalized === 'cho xac nhan') {
     return 'background: #fff2e0; color: #d97706;';
   }
-  if (normalized === 'đã xác nhận giữ chỗ' || normalized === 'da xac nhan giu cho') {
+  if (normalized === 'đã đặt' || normalized === 'da xac nhan giu cho') {
     return 'background: #e0f2fe; color: #0369a1;';
   }
   if (normalized === 'đã check-in' || normalized === 'da check-in') {
@@ -346,6 +415,59 @@ async function extractApiError(response, fallbackMessage) {
   } catch (_) {
     return fallbackMessage;
   }
+}
+
+async function syncCustomerIdentityCard(customerId, identityCard) {
+  const normalizedIdentityCard = String(identityCard || '').trim();
+  if (!customerId || !normalizedIdentityCard) {
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+  if (token) {
+    headers.Authorization = 'Bearer ' + token;
+  }
+
+  const getResponse = await fetch(CUSTOMERS_API_URL + '/' + customerId, {
+    method: 'GET',
+    headers: headers
+  });
+
+  if (!getResponse.ok) {
+    throw new Error(await extractApiError(getResponse, 'Không thể tải hồ sơ khách hàng để cập nhật CCCD.'));
+  }
+
+  const customer = await getResponse.json();
+  const payload = {
+    id: Number(customer.id || customerId),
+    fullName: customer.fullName || '',
+    email: customer.email || '',
+    phoneNumber: customer.phoneNumber || '',
+    identityCard: normalizedIdentityCard,
+    loyaltyTier: customer.loyaltyTier || customer.LoyaltyTier || null,
+    status: customer.status || '',
+    aiPreferences: customer.aiPreferences || ''
+  };
+
+  const putResponse = await fetch(CUSTOMERS_API_URL + '/' + customerId, {
+    method: 'PUT',
+    headers: headers,
+    body: JSON.stringify(payload)
+  });
+
+  if (!putResponse.ok) {
+    throw new Error(await extractApiError(putResponse, 'Không thể cập nhật CCCD cho khách hàng.'));
+  }
+
+  customerDirectory = customerDirectory.map(function(item) {
+    if (Number(item.id || 0) !== Number(customerId || 0)) {
+      return item;
+    }
+    return Object.assign({}, item, { identityCard: normalizedIdentityCard });
+  });
 }
 
 async function fetchBookingList(state, pagingState) {
@@ -464,18 +586,10 @@ async function fetchLookupData() {
   const roomData = await roomResponse.json();
 
   if (lookupsResponse.ok) {
-    const lookupsData = await lookupsResponse.json();
-    const statusEl = document.getElementById('bookingInvoiceStatus');
-    if (statusEl && lookupsData.bookingStatuses) {
-      statusEl.innerHTML = '';
-      lookupsData.bookingStatuses.forEach(function(s) {
-        var opt = document.createElement('option');
-        opt.value = s;
-        opt.textContent = s;
-        statusEl.appendChild(opt);
-      });
-    }
+    await lookupsResponse.json().catch(function () { return {}; });
   }
+
+  ensureBookingInvoicePaymentStatusOptions();
 
   const customerItems = Array.isArray(customerData)
     ? customerData
@@ -1141,32 +1255,35 @@ function renderBookingRequests() {
   }
 
   const pendingItems = pendingBookings.filter(function (booking) {
-    return isPendingWorkflowStatus(booking.status);
+    return isPendingWorkflowStatus(booking.status) && booking.source === 'website';
   });
 
   if (pendingCountBadge) {
     pendingCountBadge.innerText = String(pendingItems.length) + ' yêu cầu mới';
     pendingCountBadge.style.display = pendingItems.length > 0 ? 'inline-block' : 'none';
   }
+  updateSidebarWebsiteBadge(pendingItems.length);
   if (totalPending) {
     totalPending.innerText = String(pendingItems.length);
   }
 
   if (pendingItems.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--dash-muted); padding: 40px 0;">Không còn yêu cầu chờ xử lý.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--dash-muted); padding: 40px 0;">Không còn yêu cầu chờ xử lý từ website.</td></tr>';
   } else {
     tbody.innerHTML = pendingItems.map(function (req) {
       return '\
         <tr>\
-          <td style="font-family: var(--f-mono); font-weight: 600; color: #2563eb; padding-left: 32px;">' + req.bookingCode + '</td>\
-          <td>\
-            <div style="font-weight: 600;">' + req.customerName + '</div>\
-          </td>\
-          <td>' + req.roomName + '</td>\
-          <td>' + formatDateTime(req.createdAt) + '</td>\
-          <td><span class="notion-pill" style="' + getWorkflowStatusPillStyle(req.status) + '">' + getWorkflowStatusLabel(req.status) + '</span></td>\
-          <td style="text-align: right; padding-right: 32px;">\
-            <button class="btn-luxe-primary" style="padding: 4px 16px; height: 32px; font-size: 12px; justify-content: center; display: flex;" onclick="processBooking(' + req.id + ')">Xác nhận</button>\
+          <td class="booking-cell-code">' + req.bookingCode + '</td>\
+          <td class="booking-cell-customer">' + req.customerName + '</td>\
+          <td class="booking-cell-source">' + getSourcePill(req.source) + '</td>\
+          <td class="booking-cell-room">' + req.roomName + '</td>\
+          <td class="booking-cell-time">' + formatDateTime(req.createdAt) + '</td>\
+          <td class="booking-cell-status"><span class="notion-pill" style="' + getWorkflowStatusPillStyle(req.status) + '">' + getWorkflowStatusLabel(req.status) + '</span></td>\
+          <td class="booking-cell-actions">\
+            <div class="booking-action-group">\
+              <button class="btn-luxe-sec" style="padding: 4px 14px; height: 32px; font-size: 12px; justify-content: center; display: inline-flex; color: #dc2626; border-color: #fecaca;" onclick="cancelPendingBooking(' + req.id + ')">Hủy</button>\
+              <button class="btn-luxe-primary" style="padding: 4px 16px; height: 32px; font-size: 12px; justify-content: center; display: inline-flex;" onclick="processBooking(' + req.id + ')">Xác nhận</button>\
+            </div>\
           </td>\
         </tr>';
     }).join('');
@@ -1193,35 +1310,40 @@ function renderConfirmedBookings() {
   const mergedConfirmed = localConfirmedBookings.concat(confirmedBookings).filter(function (booking) {
     return isConfirmedWorkflowStatus(booking.status);
   });
+  const websiteConfirmedCount = mergedConfirmed.filter(function (booking) {
+    return booking.source === 'website';
+  }).length;
 
   if (countEl) {
-    countEl.innerText = String(mergedConfirmed.length) + ' đã xử lý';
+    countEl.innerText = String(mergedConfirmed.length) + ' đã xử lý • ' + String(websiteConfirmedCount) + ' từ web';
   }
   if (totalConfirmedEl) {
     totalConfirmedEl.innerText = String(mergedConfirmed.length);
   }
 
   if (mergedConfirmed.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--dash-muted); padding: 48px 0;">Chưa có giao dịch nào được xác nhận trong phiên làm việc này.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--dash-muted); padding: 48px 0;">Chưa có giao dịch nào được xác nhận trong phiên làm việc này.</td></tr>';
   } else {
     tbody.innerHTML = mergedConfirmed.map(function (b) {
       const isInvoiced = Number(b.id || 0) > 0 && invoicedBookingIds.has(Number(b.id || 0));
       const isCheckedIn = normalizeWorkflowStatus(b.status) === 'đã check-in' || normalizeWorkflowStatus(b.status) === 'da check-in';
-      const isReserved = normalizeWorkflowStatus(b.status) === 'đã xác nhận giữ chỗ' || normalizeWorkflowStatus(b.status) === 'da xac nhan giu cho';
+      const isReserved = normalizeWorkflowStatus(b.status) === 'đã đặt' || normalizeWorkflowStatus(b.status) === 'da xac nhan giu cho';
+      const canCreateInvoice = isCheckedIn && !isInvoiced;
       return '\
         <tr>\
-          <td style="font-family: var(--f-mono); font-weight: 600; color: #2563eb; padding-left: 32px;">' + b.bookingCode + '</td>\
-          <td><div style="font-weight: 600;">' + b.customerName + '</div></td>\
-          <td>' + b.roomName + '</td>\
-          <td>' + formatDateTime(b.updatedAt || b.createdAt) + '</td>\
-          <td style="font-family: var(--f-mono); font-weight: 600; color: #0d7350;">' + formatCurrency(b.totalRoomAmount) + '</td>\
-          <td><span class="notion-pill" style="' + getWorkflowStatusPillStyle(b.status) + '">' + getWorkflowStatusLabel(b.status) + '</span></td>\
-          <td style="text-align: right; padding-right: 32px;">\
-            <div style="display:flex; justify-content:flex-end; gap:8px;">\
+          <td class="booking-cell-code">' + b.bookingCode + '</td>\
+          <td class="booking-cell-customer">' + b.customerName + '</td>\
+          <td class="booking-cell-source">' + getSourcePill(b.source) + '</td>\
+          <td class="booking-cell-room">' + b.roomName + '</td>\
+          <td class="booking-cell-time">' + formatDateTime(b.updatedAt || b.createdAt) + '</td>\
+          <td class="booking-cell-amount">' + formatCurrency(b.totalRoomAmount) + '</td>\
+          <td class="booking-cell-status"><span class="notion-pill" style="' + getWorkflowStatusPillStyle(b.status) + '">' + getWorkflowStatusLabel(b.status) + '</span></td>\
+          <td class="booking-cell-actions">\
+            <div class="booking-action-group">\
               ' + (isReserved
                 ? '<button class="btn-luxe-primary" style="padding: 4px 12px; height: 32px; font-size: 12px; justify-content: center; display: inline-flex;" onclick="markBookingCheckedIn(' + Number(b.id || 0) + ')">Check-in</button>'
                 : '') + '\
-              <button class="btn-luxe-sec" style="padding: 4px 12px; height: 32px; font-size: 12px; justify-content: center; display: inline-flex; ' + (isInvoiced ? 'opacity:0.55; cursor:not-allowed;' : '') + '" ' + (isInvoiced ? 'disabled' : 'onclick="openInvoiceForBooking(\'' + escapeJsString(b.bookingCode || '') + '\')"') + '>' + (isInvoiced ? 'Đã có hóa đơn' : 'Tạo hóa đơn') + '</button>\
+              <button class="btn-luxe-sec" style="padding: 4px 12px; height: 32px; font-size: 12px; justify-content: center; display: inline-flex; ' + (!canCreateInvoice ? 'opacity:0.55; cursor:not-allowed;' : '') + '" ' + (!canCreateInvoice ? 'disabled' : 'onclick="openInvoiceForBooking(\'' + escapeJsString(b.bookingCode || '') + '\')"') + '>' + (isInvoiced ? 'Đã có hóa đơn' : 'Tạo hóa đơn') + '</button>\
             </div>\
           </td>\
         </tr>';
@@ -1471,6 +1593,17 @@ async function saveBookingInvoice(event) {
     return;
   }
 
+  const customerIdentityCard = String(matchedCustomer.identityCard || '').trim();
+  if (cccd && !customerIdentityCard) {
+    try {
+      await syncCustomerIdentityCard(Number(matchedCustomer.id || 0), cccd);
+      matchedCustomer.identityCard = cccd;
+    } catch (error) {
+      showToast(error.message || 'Không thể cập nhật CCCD cho khách hàng.', 'error');
+      return;
+    }
+  }
+
   const subtotalServices = selectedServices.reduce(function (sum, serviceName) {
     const service = invoiceServicesCatalog.find(function (item) {
       return item.name === serviceName;
@@ -1490,7 +1623,15 @@ async function saveBookingInvoice(event) {
     totalAmount: totalAmount,
     paymentMethod: 'Tiền mặt',
     paymentStatus: toApiPaymentStatus(paymentStatus),
-    issuedAt: parseUiDateToIso(invoiceDate)
+    issuedAt: parseUiDateToIso(invoiceDate),
+    serviceIds: selectedServices.map(function (serviceName) {
+      var service = invoiceServicesCatalog.find(function (item) {
+        return item.name === serviceName;
+      });
+      return Number((service && service.id) || 0);
+    }).filter(function (serviceId) {
+      return serviceId > 0;
+    })
   };
 
   const token = localStorage.getItem('token');
@@ -1518,7 +1659,7 @@ async function saveBookingInvoice(event) {
   showToast('Tạo hóa đơn thành công.', 'success');
 };
 
-window.processBooking = async function (id) {
+async function updateBookingWorkflowStatus(id, status, successMessage, fallbackMessage) {
   const token = localStorage.getItem('token');
   const headers = {
     'Content-Type': 'application/json'
@@ -1532,20 +1673,38 @@ window.processBooking = async function (id) {
       method: 'PATCH',
       headers: headers,
       body: JSON.stringify({
-        status: 'Đã xác nhận giữ chỗ',
+        status: status,
         accountId: getCurrentAccountId()
       })
     });
 
     if (!response.ok) {
-      throw new Error(await extractApiError(response, 'Không thể cập nhật trạng thái booking.'));
+      throw new Error(await extractApiError(response, fallbackMessage || 'Không thể cập nhật trạng thái booking.'));
     }
 
-    showToast('Đã xác nhận giữ chỗ cho booking.');
+    showToast(successMessage || 'Cập nhật trạng thái booking thành công.');
     await Promise.all([loadAndRenderPendingBookings(), loadAndRenderConfirmedBookings()]);
   } catch (error) {
-    showToast(error.message || 'Lỗi xử lý booking.', 'error');
+    showToast(error.message || fallbackMessage || 'Lỗi xử lý booking.', 'error');
   }
+}
+
+window.processBooking = async function (id) {
+  await updateBookingWorkflowStatus(
+    id,
+    'Đã đặt',
+    'Đã xác nhận booking từ website.',
+    'Không thể xác nhận booking.'
+  );
+};
+
+window.cancelPendingBooking = async function (id) {
+  await updateBookingWorkflowStatus(
+    id,
+    'Đã hủy',
+    'Đã hủy booking từ website.',
+    'Không thể hủy booking.'
+  );
 };
 
 window.markBookingCheckedIn = async function (id) {
@@ -1767,7 +1926,7 @@ window.bookNow = async function (roomName, priceValue, customerName) {
     accountId: getCurrentAccountId(),
     checkInDate: checkInRaw + 'T00:00:00',
     checkOutDate: checkOutRaw + 'T00:00:00',
-    status: 'Đã xác nhận giữ chỗ',
+    status: 'Đã đặt',
     totalRoomAmount: Number(priceValue || 0),
     notes: 'Tạo từ Booking AI cho ' + resolvedName
   };

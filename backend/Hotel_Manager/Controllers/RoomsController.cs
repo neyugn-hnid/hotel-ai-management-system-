@@ -31,6 +31,10 @@ namespace Hotel_Manager.Controllers
             [FromQuery] string? q,
             [FromQuery] string? roomType,
             [FromQuery] string? status,
+            [FromQuery] bool publicOnly = false,
+            [FromQuery] bool availableOnly = false,
+            [FromQuery] DateTime? checkInDate = null,
+            [FromQuery] DateTime? checkOutDate = null,
             [FromQuery] string? sortBy = "updatedAt",
             [FromQuery] string? sortDir = "desc",
             [FromQuery] int pageNumber = 1,
@@ -64,6 +68,43 @@ namespace Hotel_Manager.Controllers
             {
                 string statusFilter = status.Trim().ToLower();
                 query = query.Where(r => r.Status != null && r.Status.ToLower() == statusFilter);
+            }
+
+            if (publicOnly || availableOnly)
+            {
+                query = query.Where(r =>
+                    r.Status == null ||
+                    r.Status.ToLower() == "trống" ||
+                    r.Status.ToLower() == "phòng trống" ||
+                    r.Status.ToLower() == "available" ||
+                    r.Status.ToLower() == "hoạt động" ||
+                    r.Status.ToLower() == "hoat dong" ||
+                    r.Status.ToLower() == "sẵn sàng" ||
+                    r.Status.ToLower() == "san sang");
+            }
+
+            if (checkInDate.HasValue && checkOutDate.HasValue && checkOutDate.Value.Date > checkInDate.Value.Date)
+            {
+                var blockedRoomIds = _context.Booking
+                    .AsNoTracking()
+                    .Where(b =>
+                        b.CheckInDate < checkOutDate.Value.Date &&
+                        b.CheckOutDate > checkInDate.Value.Date &&
+                        b.Status != null &&
+                        b.Status.ToLower() != "đã hủy" &&
+                        b.Status.ToLower() != "da huy" &&
+                        b.Status.ToLower() != "cancelled" &&
+                        b.Status.ToLower() != "hủy" &&
+                        b.Status.ToLower() != "đã check-out" &&
+                        b.Status.ToLower() != "da check-out")
+                    .Select(b => b.RoomId)
+                    .Distinct()
+                    .ToList();
+
+                if (blockedRoomIds.Count > 0)
+                {
+                    query = query.Where(r => !blockedRoomIds.Contains(r.Id));
+                }
             }
 
             string normalizedSortBy = (sortBy ?? "updatedAt").Trim().ToLower();
@@ -106,7 +147,11 @@ namespace Hotel_Manager.Controllers
         
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<ActionResult<Room>> GetRoom(int id)
+        public async Task<ActionResult<Room>> GetRoom(
+            int id,
+            [FromQuery] bool publicOnly = false,
+            [FromQuery] DateTime? checkInDate = null,
+            [FromQuery] DateTime? checkOutDate = null)
         {
             var room = await _context.Room
                 .AsNoTracking()
@@ -118,6 +163,36 @@ namespace Hotel_Manager.Controllers
                 return NotFound();
             }
 
+            if (publicOnly && !IsRoomPubliclyAvailableStatus(room.Status))
+            {
+                return NotFound(new { message = "Phòng này hiện không còn khả dụng." });
+            }
+
+            if (publicOnly
+                && checkInDate.HasValue
+                && checkOutDate.HasValue
+                && checkOutDate.Value.Date > checkInDate.Value.Date)
+            {
+                bool hasConflict = await _context.Booking
+                    .AsNoTracking()
+                    .AnyAsync(b =>
+                        b.RoomId == id &&
+                        b.CheckInDate < checkOutDate.Value.Date &&
+                        b.CheckOutDate > checkInDate.Value.Date &&
+                        b.Status != null &&
+                        b.Status.ToLower() != "đã hủy" &&
+                        b.Status.ToLower() != "da huy" &&
+                        b.Status.ToLower() != "cancelled" &&
+                        b.Status.ToLower() != "hủy" &&
+                        b.Status.ToLower() != "đã check-out" &&
+                        b.Status.ToLower() != "da check-out");
+
+                if (hasConflict)
+                {
+                    return NotFound(new { message = "Phòng này đã được đặt trong khoảng ngày bạn chọn." });
+                }
+            }
+
             return room;
         }
 
@@ -125,14 +200,44 @@ namespace Hotel_Manager.Controllers
         
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> PutRoom(int id, Room room)
+        public async Task<IActionResult> PutRoom(int id, UpdateRoomRequest request)
         {
-            if (id != room.Id)
+            if (id != request.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(room).State = EntityState.Modified;
+            var room = await _context.Room
+                .Include(r => r.Images)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (room == null)
+            {
+                return NotFound();
+            }
+
+            room.CardName = request.CardName?.Trim() ?? room.CardName;
+            room.RoomType = request.RoomType?.Trim() ?? room.RoomType;
+            room.PricePerNight = request.PricePerNight;
+            room.Status = string.IsNullOrWhiteSpace(request.Status) ? room.Status : request.Status.Trim();
+            room.Description = request.Description;
+            room.UpdatedAt = DateTime.UtcNow;
+
+            if (request.Images != null)
+            {
+                var normalizedImages = request.Images
+                    .Where(url => !string.IsNullOrWhiteSpace(url))
+                    .Select(url => url.Trim())
+                    .Distinct()
+                    .ToList();
+
+                _context.RoomImages.RemoveRange(room.Images);
+                room.Images = normalizedImages.Select(url => new RoomImage
+                {
+                    RoomId = room.Id,
+                    ImageUrl = url
+                }).ToList();
+            }
 
             try
             {
@@ -164,7 +269,10 @@ namespace Hotel_Manager.Controllers
                 CardName = request.Name,
                 RoomType = request.RoomType,
                 PricePerNight = request.PricePerNight,
-                Description = request.Description
+                Status = string.IsNullOrWhiteSpace(request.Status) ? "Trống" : request.Status.Trim(),
+                Description = request.Description,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             _context.Room.Add(room);
@@ -208,13 +316,49 @@ namespace Hotel_Manager.Controllers
             return _context.Room.Any(e => e.Id == id);
         }
 
+        private static bool IsRoomPubliclyAvailableStatus(string? status)
+        {
+            string normalized = (status ?? string.Empty).Trim().ToLower();
+            return normalized == string.Empty
+                || normalized == "trống"
+                || normalized == "phòng trống"
+                || normalized == "available"
+                || normalized == "hoạt động"
+                || normalized == "hoat dong"
+                || normalized == "sẵn sàng"
+                || normalized == "san sang";
+        }
+
+        private static bool IsInactiveBookingStatus(string? status)
+        {
+            string normalized = (status ?? string.Empty).Trim().ToLower();
+            return normalized == "đã hủy"
+                || normalized == "da huy"
+                || normalized == "cancelled"
+                || normalized == "hủy"
+                || normalized == "đã check-out"
+                || normalized == "da check-out";
+        }
+
         public class CreateRoomRequest
         {
             public string? Name { get; set; }
             public string? RoomType { get; set; }
             public decimal PricePerNight { get; set; }
+            public string? Status { get; set; }
             public string? Description { get; set; }
             public List<string> Images { get; set; } = new();
+        }
+
+        public class UpdateRoomRequest
+        {
+            public int Id { get; set; }
+            public string? CardName { get; set; }
+            public string? RoomType { get; set; }
+            public decimal PricePerNight { get; set; }
+            public string? Status { get; set; }
+            public string? Description { get; set; }
+            public List<string>? Images { get; set; }
         }
     }
 }

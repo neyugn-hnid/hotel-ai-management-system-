@@ -135,6 +135,15 @@ public class BookingRecommendationService : IBookingRecommendationService
 
         var allRooms = await _context.Room
             .AsNoTracking()
+            .Where(r =>
+                r.Status == null ||
+                r.Status.ToLower() == "trống" ||
+                r.Status.ToLower() == "phòng trống" ||
+                r.Status.ToLower() == "available" ||
+                r.Status.ToLower() == "hoạt động" ||
+                r.Status.ToLower() == "hoat dong" ||
+                r.Status.ToLower() == "sẵn sàng" ||
+                r.Status.ToLower() == "san sang")
             .ToListAsync(cancellationToken);
 
         if (allRooms.Count == 0)

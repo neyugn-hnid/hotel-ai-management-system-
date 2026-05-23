@@ -111,13 +111,12 @@
   </div>
 
   <div class="modal-overlay" id="roomModal">
-     <div class="notion-modal">
-
-        <div class="modal-header">
-           <h2 class="admin-modal-title admin-modal-title-row">
-              <span id="roomModalTitle">Thêm phòng mới</span>
-              <span class="material-symbols-outlined admin-modal-close" onclick="closeRoomModal()">close</span>
-           </h2>
+     <div class="notion-modal room-editor-modal">
+        <div class="room-modal-header">
+           <h2 class="admin-modal-title" id="roomModalTitle">Thêm phòng mới</h2>
+           <button type="button" class="room-modal-close-btn" onclick="closeRoomModal()">
+              <span class="material-symbols-outlined">close</span>
+           </button>
         </div>
         <form id="roomForm">
            <div class="form-row">
@@ -161,7 +160,7 @@
   </div>
 
   <div class="modal-overlay" id="deleteConfirmModal">
-     <div class="luxury-card admin-delete-card admin-delete-card--fixed">
+     <div class="luxury-card admin-delete-card admin-delete-card--fixed room-delete-modal">
         <div class="admin-delete-icon-wrap">
            <span class="material-symbols-outlined admin-delete-icon--sm">warning</span>
         </div>

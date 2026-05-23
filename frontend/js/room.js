@@ -407,7 +407,8 @@ async function saveRoom(e) {
         roomType: type,
         pricePerNight: price,
         status: mapStatusToBackend(status),
-        description: description
+        description: description,
+        images: selectedImages
       };
 
       const response = await fetch(ROOMS_API_URL + '/' + currentEditId, {
@@ -426,6 +427,7 @@ async function saveRoom(e) {
         name: name,
         roomType: type,
         pricePerNight: price,
+        status: mapStatusToBackend(status),
         description: description,
         images: selectedImages
       };

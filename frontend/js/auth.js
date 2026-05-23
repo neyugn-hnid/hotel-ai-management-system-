@@ -105,8 +105,25 @@ async function handleRegister(e) {
     }).catch(() => {});
 
     setTimeout(() => {
+      const registerForm = document.getElementById("registerForm") || form;
+      const loginEmailInput = document.getElementById("loginEmail");
+      const loginPasswordInput = document.getElementById("loginPassword");
       closeRegisterModal();
       openLoginModal();
+      if (registerForm && typeof registerForm.reset === "function") {
+        registerForm.reset();
+      }
+      if (errorMsg) {
+        errorMsg.innerText = "";
+        errorMsg.style.display = "none";
+      }
+      if (loginEmailInput) {
+        loginEmailInput.value = email;
+      }
+      if (loginPasswordInput) {
+        loginPasswordInput.value = "";
+        loginPasswordInput.focus();
+      }
     }, 300);
   } catch (error) {
     errorMsg.innerText = error.message;
@@ -131,7 +148,11 @@ function extractRoleFromToken(token) {
     if (parts.length < 2) return "";
     const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
     const normalized = payload.padEnd(payload.length + ((4 - (payload.length % 4)) % 4), "=");
-    const decoded = JSON.parse(atob(normalized));
+    const binary = atob(normalized);
+    const bytes = Uint8Array.from(binary, function(char) {
+      return char.charCodeAt(0);
+    });
+    const decoded = JSON.parse(new TextDecoder("utf-8").decode(bytes));
     
     const role = String(
       decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
@@ -315,8 +336,10 @@ async function handleLogin(e) {
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/đ/g, 'd')
         .replace(/[^a-z0-9]/gi, '')
-        .toLowerCase() === 'admin' || isReceptionistRoleValue(role) || Boolean(window.AppCore?.isReceptionistRole?.(role))) {
+        .toLowerCase() === 'admin') {
         window.location.replace("dashboard.html");
+      } else if (isReceptionistRoleValue(role) || Boolean(window.AppCore?.isReceptionistRole?.(role))) {
+        window.location.replace("booking.html");
       } else {
         window.location.replace("index.html");
       }

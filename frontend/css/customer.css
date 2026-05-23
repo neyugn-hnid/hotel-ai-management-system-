@@ -107,6 +107,69 @@
     }
     .notion-table tr:hover { background: var(--dash-bg); }
 
+    .customer-data-table {
+      table-layout: fixed;
+    }
+
+    .customer-data-table th:nth-child(1),
+    .customer-data-table td:nth-child(1) {
+      width: 46%;
+    }
+
+    .customer-data-table th:nth-child(2),
+    .customer-data-table td:nth-child(2) {
+      width: 26%;
+    }
+
+    .customer-data-table th:nth-child(3),
+    .customer-data-table td:nth-child(3) {
+      width: 16%;
+    }
+
+    .customer-data-table th:nth-child(4),
+    .customer-data-table td:nth-child(4) {
+      width: 12%;
+    }
+
+    .customer-data-table th,
+    .customer-data-table td {
+      vertical-align: middle;
+    }
+
+    .customer-data-table th:first-child,
+    .customer-data-table td:first-child {
+      padding-left: 24px;
+    }
+
+    .customer-data-table th:last-child,
+    .customer-data-table td:last-child {
+      padding-right: 24px;
+    }
+
+    .customer-cell-profile,
+    .customer-cell-contact {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .customer-cell-contact p {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .customer-cell-status {
+      white-space: nowrap;
+    }
+
+    .customer-cell-actions {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    #customerActionsHeader {
+      text-align: right;
+    }
+
     .notion-pill {
       padding: 4px 12px;
       border-radius: 20px;

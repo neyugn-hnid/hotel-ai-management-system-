@@ -300,6 +300,129 @@
     }
     .notion-table tr:hover { background: var(--dash-bg); }
 
+    .booking-data-table {
+      table-layout: auto;
+    }
+
+    .booking-data-table th,
+    .booking-data-table td {
+      vertical-align: middle;
+    }
+
+    .booking-data-table th:first-child,
+    .booking-data-table td:first-child {
+      padding-left: 24px;
+    }
+
+    .booking-data-table th:last-child,
+    .booking-data-table td:last-child {
+      padding-right: 24px;
+    }
+
+    .booking-data-table th:last-child {
+      text-align: right;
+    }
+
+    .booking-data-table:not(.booking-data-table--confirmed) th:nth-child(3),
+    .booking-data-table:not(.booking-data-table--confirmed) td:nth-child(3) {
+      width: 110px;
+    }
+
+    .booking-data-table:not(.booking-data-table--confirmed) th:nth-child(5),
+    .booking-data-table:not(.booking-data-table--confirmed) td:nth-child(5) {
+      width: 170px;
+    }
+
+    .booking-data-table:not(.booking-data-table--confirmed) th:nth-child(6),
+    .booking-data-table:not(.booking-data-table--confirmed) td:nth-child(6) {
+      width: 150px;
+    }
+
+    .booking-data-table:not(.booking-data-table--confirmed) th:nth-child(7),
+    .booking-data-table:not(.booking-data-table--confirmed) td:nth-child(7) {
+      width: 150px;
+    }
+
+    .booking-data-table--confirmed th:nth-child(3),
+    .booking-data-table--confirmed td:nth-child(3) {
+      width: 110px;
+    }
+
+    .booking-data-table--confirmed th:nth-child(5),
+    .booking-data-table--confirmed td:nth-child(5) {
+      width: 170px;
+    }
+
+    .booking-data-table--confirmed th:nth-child(6),
+    .booking-data-table--confirmed td:nth-child(6) {
+      width: 140px;
+    }
+
+    .booking-data-table--confirmed th:nth-child(7),
+    .booking-data-table--confirmed td:nth-child(7) {
+      width: 160px;
+    }
+
+    .booking-data-table--confirmed th:nth-child(8),
+    .booking-data-table--confirmed td:nth-child(8) {
+      width: 128px;
+    }
+
+    .booking-cell-code {
+      font-family: var(--f-mono);
+      font-weight: 600;
+      color: #2563eb;
+      white-space: nowrap;
+    }
+
+    .booking-cell-customer,
+    .booking-cell-room {
+      white-space: nowrap;
+    }
+
+    .booking-cell-customer {
+      font-weight: 600;
+    }
+
+    .booking-cell-source,
+    .booking-cell-status {
+      white-space: nowrap;
+    }
+
+    .booking-cell-time {
+      color: var(--dash-muted);
+      white-space: nowrap;
+    }
+
+    .booking-cell-amount {
+      font-family: var(--f-mono);
+      font-weight: 600;
+      color: #0d7350;
+      white-space: nowrap;
+    }
+
+    .booking-cell-actions {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+
+    .booking-action-group {
+      display: flex;
+      width: 100%;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+    .booking-data-table--confirmed .booking-cell-status {
+      padding-right: 6px;
+    }
+
+    .booking-data-table--confirmed .booking-cell-actions {
+      padding-left: 6px;
+    }
+
     .notion-pill {
       padding: 4px 12px;
       border-radius: 20px;
@@ -539,6 +662,12 @@
   padding: 40px;
 }
 
+.booking-invoice-modal {
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
 .booking-modal-header {
   display: flex;
   justify-content: space-between;
@@ -555,6 +684,24 @@
   border: none;
   cursor: pointer;
   color: var(--dash-muted);
+}
+
+.booking-invoice-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #f3f4f6;
+  color: var(--dash-muted);
+  transition: all 0.2s ease;
+}
+
+.booking-invoice-close-btn:hover {
+  background: #e5e7eb;
+  color: var(--dash-text);
 }
 
 .booking-form-block {
@@ -606,18 +753,26 @@
 }
 
 .booking-invoice-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 40px;
 }
 
+.booking-invoice-actions > button {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .booking-invoice-actions__save {
-  flex: 2;
   justify-content: center;
 }
 
 .booking-invoice-actions__cancel {
-  flex: 1;
   justify-content: center;
 }
   
@@ -650,6 +805,10 @@
   .booking-invoice-lookup,
   .booking-invoice-lookup__row {
     flex-direction: column;
+  }
+
+  .booking-invoice-actions {
+    grid-template-columns: 1fr;
   }
 
   #bookingSearchForm { display: flex !important; flex-direction: column !important; gap: 12px !important; }

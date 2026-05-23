@@ -207,11 +207,12 @@ namespace Hotel_Manager.Controllers
                 return NotFound(new { message = "Không tìm thấy tài khoản" });
             }
 
-            account.FullName = request.FullName;
-            account.Email = request.Email;
-            account.PhoneNumber = request.PhoneNumber;
-            account.Role = NormalizeRole(request.Role);
-            account.Status = request.Status;
+            account.FullName = string.IsNullOrWhiteSpace(request.FullName) ? account.FullName : request.FullName.Trim();
+            account.Email = string.IsNullOrWhiteSpace(request.Email) ? account.Email : request.Email.Trim();
+            account.PhoneNumber = request.PhoneNumber != null ? request.PhoneNumber.Trim() : account.PhoneNumber;
+            account.Role = string.IsNullOrWhiteSpace(request.Role) ? account.Role : NormalizeRole(request.Role);
+            account.Status = string.IsNullOrWhiteSpace(request.Status) ? account.Status : request.Status.Trim();
+            account.UpdatedAt = DateTime.UtcNow;
 
             if (!string.IsNullOrWhiteSpace(request.Password))
             {
@@ -343,12 +344,14 @@ namespace Hotel_Manager.Controllers
         {
             var acc = new Account
             {
-                FullName = request.FullName,
-                Email = request.Email,
-                PhoneNumber = request.PhoneNumber,
+                FullName = request.FullName?.Trim(),
+                Email = request.Email?.Trim(),
+                PhoneNumber = request.PhoneNumber?.Trim(),
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 Role = NormalizeRole(request.Role),
-                Status = request.Status
+                Status = request.Status?.Trim(),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
 
             };
 

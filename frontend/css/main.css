@@ -206,16 +206,31 @@
 .admin-form-submit {
     flex: 1;
     background: var(--dash-accent);
+    border: 1px solid var(--dash-accent);
     color: white;
-    border: none;
     height: 46px;
     justify-content: center;
 }
 
+.admin-form-submit:hover {
+    background: #005ec4;
+    border-color: #005ec4;
+    color: white;
+}
+
 .admin-form-cancel {
     flex: 1;
+    background: #eef2f7;
+    border: 1px solid #d7dee7;
+    color: #475569;
     height: 46px;
     justify-content: center;
+}
+
+.admin-form-cancel:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+    color: #334155;
 }
 
 .admin-stat-value--green {
@@ -302,16 +317,31 @@
 .admin-delete-confirm {
     background: #ef4444;
     color: white;
-    border: none;
+    border: 1px solid #ef4444;
     height: 46px;
     flex: 1;
     justify-content: center;
 }
 
+.admin-delete-confirm:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: white;
+}
+
 .admin-delete-cancel {
     flex: 1;
+    background: #eef2f7;
+    border: 1px solid #d7dee7;
+    color: #475569;
     height: 46px;
     justify-content: center;
+}
+
+.admin-delete-cancel:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+    color: #334155;
 }
 
 .admin-note-muted {
@@ -1190,13 +1220,13 @@ h1, h2, h3, h4 {
 
 .gold-border-btn {
     border: 1px solid var(--c-blue);
-    color: var(--c-blue);
+    color: white;
     padding: 12px 24px;
     text-transform: uppercase;
     font-size: 11px;
     letter-spacing: 0.2em;
     font-weight: 700;
-    background: transparent;
+    background: var(--c-blue);
     border-radius: 8px;
     cursor: pointer;
     transition: var(--transition);
@@ -1217,6 +1247,22 @@ h1, h2, h3, h4 {
 }
 
 .gold-border-btn:hover {
+    background: var(--notion-blue-active);
+    border-color: var(--notion-blue-active);
+    color: white;
+}
+
+.gold-border-btn.admin-delete-confirm,
+.gold-border-btn.account-delete-confirm-btn {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+.gold-border-btn.admin-delete-confirm:hover,
+.gold-border-btn.account-delete-confirm-btn:hover {
+    background: #dc2626;
+    border-color: #dc2626;
     color: white;
 }
 

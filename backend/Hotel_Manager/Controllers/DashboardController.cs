@@ -54,6 +54,10 @@ namespace Hotel_Manager.Controllers
                 ? Math.Round((double)(occupiedRooms + bookedRooms) / totalRooms * 100, 1)
                 : 0;
 
+            var averageRevenuePerRoom = totalRooms > 0
+                ? Math.Round((await _context.Booking.SumAsync(b => (decimal?)b.TotalRoomAmount) ?? 0m) / totalRooms, 0)
+                : 0m;
+
             
             
             
@@ -62,7 +66,7 @@ namespace Hotel_Manager.Controllers
 
             
             var guestsStaying = await _context.Booking
-                .CountAsync(b => b.Status == "Đang ở" || b.Status == "Check-in");
+                .CountAsync(b => b.Status == "Đang ở" || b.Status == "Check-in" || b.Status == "Đã check-in");
 
             
             var newBookingsToday = await _context.Booking
@@ -91,7 +95,7 @@ namespace Hotel_Manager.Controllers
                 
                 var dayGuests = await _context.Booking
                     .Where(b => b.CheckInDate <= dayEnd && b.CheckOutDate >= dayStart
-                        && (b.Status == "Đang ở" || b.Status == "Check-in" || b.Status == "Check-out"))
+                        && (b.Status == "Đang ở" || b.Status == "Check-in" || b.Status == "Đã check-in" || b.Status == "Check-out" || b.Status == "Đã check-out"))
                     .CountAsync();
 
                 dailyStats.Add(new DailyStats
@@ -112,7 +116,7 @@ namespace Hotel_Manager.Controllers
 
                 var activeBookings = await _context.Booking
                     .Where(b => b.CheckInDate <= dayEnd && b.CheckOutDate >= dayStart
-                        && (b.Status == "Đang ở" || b.Status == "Check-in" || b.Status == "Đã xác nhận"))
+                        && (b.Status == "Đang ở" || b.Status == "Check-in" || b.Status == "Đã check-in" || b.Status == "Đã xác nhận" || b.Status == "Đã xác nhận giữ chỗ"))
                     .Select(b => b.RoomId)
                     .Distinct()
                     .CountAsync();
@@ -152,6 +156,7 @@ namespace Hotel_Manager.Controllers
                 CleaningRooms = cleaningRooms,
                 MaintenanceRooms = maintenanceRooms,
                 OccupancyRate = occupancyRate,
+                AvgRevenuePerRoom = averageRevenuePerRoom,
                 GuestsStaying = guestsStaying,
                 NewBookingsToday = newBookingsToday,
                 BookingTrend = bookingTrend,

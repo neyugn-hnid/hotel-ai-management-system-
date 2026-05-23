@@ -285,6 +285,11 @@
         "IsRequired": false
       },
       {
+        "Name": "source",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
         "Name": "sortBy",
         "Type": "System.String",
         "IsRequired": false
@@ -353,8 +358,8 @@
         "IsRequired": true
       },
       {
-        "Name": "booking",
-        "Type": "Hotel_Manager.Modal.Booking",
+        "Name": "request",
+        "Type": "Hotel_Manager.Controllers.BookingsController\u002BUpdateBookingRequest",
         "IsRequired": true
       }
     ],
@@ -718,7 +723,7 @@
     "Parameters": [],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[Hotel_Manager.Modal.Invoice, Hotel_Manager, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -768,17 +773,7 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "Hotel_Manager.Modal.Invoice",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "Hotel_Manager.Controllers.InvoicesController",
@@ -861,6 +856,26 @@
         "IsRequired": false
       },
       {
+        "Name": "publicOnly",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "availableOnly",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "checkInDate",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "checkOutDate",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
         "Name": "sortBy",
         "Type": "System.String",
         "IsRequired": false
@@ -911,6 +926,21 @@
         "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
+      },
+      {
+        "Name": "publicOnly",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "checkInDate",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "checkOutDate",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": [
@@ -939,8 +969,8 @@
         "IsRequired": true
       },
       {
-        "Name": "room",
-        "Type": "Hotel_Manager.Modal.Room",
+        "Name": "request",
+        "Type": "Hotel_Manager.Controllers.RoomsController\u002BUpdateRoomRequest",
         "IsRequired": true
       }
     ],
@@ -1017,8 +1047,8 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "service",
-        "Type": "Hotel_Manager.Modal.Service",
+        "Name": "request",
+        "Type": "Hotel_Manager.Controllers.ServicesController\u002BUpsertServiceRequest",
         "IsRequired": true
       }
     ],
@@ -1074,8 +1104,8 @@
         "IsRequired": true
       },
       {
-        "Name": "service",
-        "Type": "Hotel_Manager.Modal.Service",
+        "Name": "request",
+        "Type": "Hotel_Manager.Controllers.ServicesController\u002BUpsertServiceRequest",
         "IsRequired": true
       }
     ],

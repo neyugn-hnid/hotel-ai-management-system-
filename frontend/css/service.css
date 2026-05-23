@@ -164,8 +164,42 @@
       padding: 40px;
     }
 
-    .modal-header {
-      margin-bottom: 30px;
+    .service-editor-modal {
+      width: min(720px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+    }
+
+    .service-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .service-modal-header .admin-modal-title {
+      margin: 0;
+    }
+
+    .service-modal-close-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: #f3f4f6;
+      color: var(--dash-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .service-modal-close-btn:hover {
+      background: #e5e7eb;
+      color: var(--dash-text);
     }
 
     .form-row {
@@ -231,12 +265,59 @@
 .service-desc-textarea {
   resize: none;
 }
+
+.service-delete-modal {
+  width: min(420px, calc(100vw - 32px));
+}
+
+.admin-form-actions,
+.admin-delete-actions {
+  display: grid;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.admin-form-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-delete-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-form-actions > button,
+.admin-delete-actions > button {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
   
 
 
 @media (max-width: 768px) {
   .stat-bar { grid-template-columns: 1fr !important; gap: 12px !important; }
   #serviceTableBody td { white-space: nowrap; }
-  #serviceModal .notion-modal { max-height: calc(100dvh - 24px); overflow: auto; }
+  .service-editor-modal,
+  .service-delete-modal {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+  }
+  .admin-form-actions,
+  .admin-delete-actions {
+    grid-template-columns: 1fr;
+  }
   #imgPreview { max-width: 100%; height: auto !important; }
+}
+@media (max-width: 480px) {
+  .service-editor-modal,
+  .service-delete-modal {
+    padding: 24px;
+  }
 }

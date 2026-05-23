@@ -149,7 +149,7 @@
 
   
   function loadFeaturedRooms() {
-    var ROOMS_API = "https://localhost:7082/api/Rooms?pageNumber=1&pageSize=3&sortBy=createdAt&sortDir=asc";
+    var ROOMS_API = "https://localhost:7082/api/Rooms?pageNumber=1&pageSize=3&sortBy=createdAt&sortDir=asc&publicOnly=true&availableOnly=true";
 
     fetch(ROOMS_API)
       .then(function(res) { return res.json(); })

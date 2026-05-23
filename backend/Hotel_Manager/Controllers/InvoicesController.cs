@@ -25,23 +25,35 @@ namespace Hotel_Manager.Controllers
 
         
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Invoice>>> GetInvoice()
+        public async Task<ActionResult<IEnumerable<object>>> GetInvoice()
         {
-            return await _context.Invoice.ToListAsync();
+            var invoices = await _context.Invoice
+                .AsNoTracking()
+                .Include(i => i.Booking)
+                    .ThenInclude(b => b.BookingServices)
+                        .ThenInclude(bs => bs.Service)
+                .ToListAsync();
+
+            return Ok(invoices.Select(ToInvoiceResponse));
         }
 
         
         [HttpGet("{id}")]
-        public async Task<ActionResult<Invoice>> GetInvoice(int id)
+        public async Task<ActionResult<object>> GetInvoice(int id)
         {
-            var invoice = await _context.Invoice.FindAsync(id);
+            var invoice = await _context.Invoice
+                .AsNoTracking()
+                .Include(i => i.Booking)
+                    .ThenInclude(b => b.BookingServices)
+                        .ThenInclude(bs => bs.Service)
+                .FirstOrDefaultAsync(i => i.Id == id);
 
             if (invoice == null)
             {
                 return NotFound();
             }
 
-            return invoice;
+            return Ok(ToInvoiceResponse(invoice));
         }
 
         
@@ -77,6 +89,8 @@ namespace Hotel_Manager.Controllers
             invoice.PaymentMethod = request.PaymentMethod;
             invoice.PaymentStatus = string.IsNullOrWhiteSpace(request.PaymentStatus) ? invoice.PaymentStatus : request.PaymentStatus.Trim();
             invoice.IssuedAt = request.IssuedAt ?? invoice.IssuedAt;
+            await SyncBookingServicesAsync(request.BookingId, request.ServiceIds);
+            await ApplyPaidInvoiceEffectsAsync(request.BookingId, invoice.PaymentStatus);
 
             try
             {
@@ -141,6 +155,8 @@ namespace Hotel_Manager.Controllers
             };
 
             _context.Invoice.Add(invoice);
+            await SyncBookingServicesAsync(request.BookingId, request.ServiceIds);
+            await ApplyPaidInvoiceEffectsAsync(request.BookingId, invoice.PaymentStatus);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetInvoice", new { id = invoice.Id }, invoice);
@@ -168,6 +184,119 @@ namespace Hotel_Manager.Controllers
             return _context.Invoice.Any(e => e.Id == id);
         }
 
+        private async Task SyncBookingServicesAsync(int bookingId, List<int>? serviceIds)
+        {
+            if (bookingId <= 0)
+            {
+                return;
+            }
+
+            var normalizedServiceIds = (serviceIds ?? new List<int>())
+                .Where(id => id > 0)
+                .Distinct()
+                .ToList();
+
+            var existingRows = await _context.BookingService
+                .Where(bs => bs.BookingId == bookingId)
+                .ToListAsync();
+
+            if (existingRows.Count > 0)
+            {
+                _context.BookingService.RemoveRange(existingRows);
+            }
+
+            if (normalizedServiceIds.Count == 0)
+            {
+                return;
+            }
+
+            var services = await _context.Service
+                .Where(s => normalizedServiceIds.Contains(s.Id))
+                .ToListAsync();
+
+            var bookingServices = services.Select(service => new BookingService
+            {
+                BookingId = bookingId,
+                ServiceId = service.Id,
+                Quantity = 1,
+                UnitPrice = service.Price,
+                TotalPrice = service.Price,
+                ProvidedAt = DateTime.UtcNow
+            });
+
+            _context.BookingService.AddRange(bookingServices);
+        }
+
+        private async Task ApplyPaidInvoiceEffectsAsync(int bookingId, string? paymentStatus)
+        {
+            if (bookingId <= 0 || !IsPaidStatus(paymentStatus))
+            {
+                return;
+            }
+
+            var booking = await _context.Booking
+                .Include(b => b.Room)
+                .FirstOrDefaultAsync(b => b.Id == bookingId);
+
+            if (booking == null)
+            {
+                return;
+            }
+
+            booking.Status = "Đã check-out";
+            booking.UpdatedAt = DateTime.UtcNow;
+
+            if (booking.Room != null)
+            {
+                booking.Room.Status = "Trống";
+                booking.Room.UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
+        private static bool IsPaidStatus(string? paymentStatus)
+        {
+            var normalized = (paymentStatus ?? string.Empty).Trim().ToLower();
+            return normalized == "đã thanh toán"
+                || normalized == "da thanh toan"
+                || normalized == "hoàn tất thanh toán"
+                || normalized == "hoan tat thanh toan"
+                || normalized == "paid";
+        }
+
+        private static object ToInvoiceResponse(Invoice invoice)
+        {
+            var bookingServices = (invoice.Booking?.BookingServices ?? Enumerable.Empty<BookingService>())
+                .Where(bs => bs.Service != null)
+                .Select(bs => new
+                {
+                    id = bs.Id,
+                    serviceId = bs.ServiceId,
+                    serviceName = bs.Service.ServiceName,
+                    quantity = bs.Quantity,
+                    unitPrice = bs.UnitPrice,
+                    totalPrice = bs.TotalPrice
+                })
+                .ToList();
+
+            return new
+            {
+                id = invoice.Id,
+                invoiceCode = invoice.InvoiceCode,
+                bookingId = invoice.BookingId,
+                customerId = invoice.CustomerId,
+                accountId = invoice.AccountId,
+                subtotalRoom = invoice.SubtotalRoom,
+                subtotalServices = invoice.SubtotalServices,
+                taxAmount = invoice.TaxAmount,
+                discountAmount = invoice.DiscountAmount,
+                totalAmount = invoice.TotalAmount,
+                paymentMethod = invoice.PaymentMethod,
+                paymentStatus = invoice.PaymentStatus,
+                issuedAt = invoice.IssuedAt,
+                services = bookingServices
+            };
+        }
+
         public class InvoiceUpsertRequest
         {
             public string InvoiceCode { get; set; } = string.Empty;
@@ -182,6 +311,7 @@ namespace Hotel_Manager.Controllers
             public string? PaymentMethod { get; set; }
             public string? PaymentStatus { get; set; }
             public DateTime? IssuedAt { get; set; }
+            public List<int>? ServiceIds { get; set; }
         }
     }
 }

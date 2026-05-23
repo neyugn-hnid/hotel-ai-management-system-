@@ -283,7 +283,122 @@
 
 .invoice-col-status {
   width: 150px;
-  text-align: center;
+  text-align: left;
+}
+
+.invoice-data-table {
+  table-layout: fixed;
+}
+
+.invoice-data-table th,
+.invoice-data-table td {
+  vertical-align: middle;
+}
+
+.invoice-data-table th:first-child,
+.invoice-data-table td:first-child {
+  padding-left: 24px;
+}
+
+.invoice-data-table th:last-child,
+.invoice-data-table td:last-child {
+  padding-right: 24px;
+}
+
+.invoice-data-table th:nth-child(1),
+.invoice-data-table td:nth-child(1) {
+  width: 20%;
+}
+
+.invoice-data-table th:nth-child(2),
+.invoice-data-table td:nth-child(2) {
+  width: 18%;
+}
+
+.invoice-data-table th:nth-child(3),
+.invoice-data-table td:nth-child(3) {
+  width: 16%;
+}
+
+.invoice-data-table th:nth-child(4),
+.invoice-data-table td:nth-child(4) {
+  width: 12%;
+}
+
+.invoice-data-table th:nth-child(5),
+.invoice-data-table td:nth-child(5) {
+  width: 13%;
+}
+
+.invoice-data-table th:nth-child(6),
+.invoice-data-table td:nth-child(6) {
+  width: 13%;
+}
+
+.invoice-data-table th:nth-child(7),
+.invoice-data-table td:nth-child(7) {
+  width: 14%;
+}
+
+#invoiceActionsHeader {
+  text-align: right;
+}
+
+.invoice-cell-id,
+.invoice-cell-customer,
+.invoice-cell-room {
+  overflow-wrap: anywhere;
+}
+
+.invoice-customer-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.invoice-cell-date {
+  font-size: 13px;
+  color: var(--notion-gray-500);
+}
+
+.invoice-cell-amount {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.invoice-cell-status {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.invoice-cell-actions {
+  text-align: right;
+}
+
+.invoice-action-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.invoice-action-btn {
+  min-width: 32px;
+  justify-content: center;
+  padding: 4px;
+}
+
+.invoice-action-btn--qr {
+  color: var(--notion-blue);
+}
+
+.invoice-action-btn--delete {
+  color: #ef4444;
+}
+
+.invoice-action-icon {
+  font-size: 18px;
 }
 
 .invoice-form-block {
@@ -294,12 +409,39 @@
   margin-bottom: 32px;
 }
 
+.booking-invoice-actions,
+.admin-delete-actions {
+  display: grid;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.booking-invoice-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-delete-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.booking-invoice-actions > button,
+.admin-delete-actions > button {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
 .invoice-submit-btn {
   background: var(--dash-accent);
   color: white;
   border: none;
-  height: 46px;
-  justify-content: center;
 }
 
 .invoice-delete-icon-wrap {
@@ -329,13 +471,77 @@
   background: #ff4d4f;
   color: white;
   border: none;
-  height: 46px;
-  flex: 1;
-  justify-content: center;
 }
 
 .invoice-payment-modal {
-  width: 540px;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+#invoiceModal .notion-modal {
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+#invoiceModal .booking-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+#invoiceModal .admin-modal-title {
+  margin: 0;
+}
+
+#invoiceModal .admin-modal-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.72;
+  background: #f3f4f6;
+  transition: all 0.2s ease;
+}
+
+#invoiceModal .admin-modal-close:hover {
+  opacity: 1;
+  background: #e5e7eb;
+}
+
+.invoice-payment-modal .booking-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.invoice-payment-modal .admin-modal-title {
+  margin: 0;
+}
+
+.invoice-payment-modal .admin-modal-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.72;
+  background: #f3f4f6;
+  transition: all 0.2s ease;
+}
+
+.invoice-payment-modal .admin-modal-close:hover {
+  opacity: 1;
+  background: #e5e7eb;
 }
 
 .invoice-qr-section {
@@ -379,12 +585,46 @@
 }
 
 .invoice-print-btn {
-  flex: 1;
   background: var(--dash-accent);
   color: white;
   border: none;
   height: 46px;
   justify-content: center;
+}
+
+.invoice-payment-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.invoice-payment-actions > button {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.invoice-payment-actions .gold-border-btn,
+.invoice-payment-actions .gold-cancel-btn {
+  padding: 12px 16px;
+  letter-spacing: 0.12em;
+}
+
+#paymentMarkPaidButton {
+  background: #0d7350;
+  border-color: #0d7350;
+  color: white;
+}
+
+#paymentMarkPaidButton:hover {
+  background: #0b5f42;
+  border-color: #0b5f42;
+  color: white;
 }
   
 
@@ -405,6 +645,12 @@
     align-items: stretch;
   }
 
+  .booking-invoice-actions,
+  .admin-delete-actions,
+  .invoice-payment-actions {
+    grid-template-columns: 1fr;
+  }
+
   .invoice-qr-container {
     width: 100%;
   }
@@ -423,4 +669,8 @@
   }
 
   #paymentDetailsModal .luxury-card { padding: 14px !important; }
+  .invoice-payment-modal {
+    width: calc(100vw - 20px);
+    padding: 24px;
+  }
 }

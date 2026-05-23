@@ -119,14 +119,25 @@ namespace Hotel_Manager.Controllers
         
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> PutService(int id, Service service)
+        public async Task<IActionResult> PutService(int id, UpsertServiceRequest request)
         {
-            if (id != service.Id)
+            if (id != request.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(service).State = EntityState.Modified;
+            var service = await _context.Service.FindAsync(id);
+            if (service == null)
+            {
+                return NotFound();
+            }
+
+            service.ServiceName = request.ServiceName?.Trim() ?? service.ServiceName;
+            service.Category = request.Category?.Trim() ?? service.Category;
+            service.Price = request.Price;
+            service.Description = request.Description;
+            service.Status = string.IsNullOrWhiteSpace(request.Status) ? service.Status : request.Status.Trim();
+            service.UpdatedAt = DateTime.UtcNow;
 
             try
             {
@@ -151,8 +162,19 @@ namespace Hotel_Manager.Controllers
         
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Service>> PostService(Service service)
+        public async Task<ActionResult<Service>> PostService(UpsertServiceRequest request)
         {
+            var service = new Service
+            {
+                ServiceName = request.ServiceName?.Trim() ?? string.Empty,
+                Category = request.Category?.Trim() ?? string.Empty,
+                Price = request.Price,
+                Description = request.Description,
+                Status = string.IsNullOrWhiteSpace(request.Status) ? "Hoạt động" : request.Status.Trim(),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
             _context.Service.Add(service);
             await _context.SaveChangesAsync();
 
@@ -179,6 +201,16 @@ namespace Hotel_Manager.Controllers
         private bool ServiceExists(int id)
         {
             return _context.Service.Any(e => e.Id == id);
+        }
+
+        public class UpsertServiceRequest
+        {
+            public int Id { get; set; }
+            public string? ServiceName { get; set; }
+            public string? Category { get; set; }
+            public decimal Price { get; set; }
+            public string? Description { get; set; }
+            public string? Status { get; set; }
         }
     }
 }

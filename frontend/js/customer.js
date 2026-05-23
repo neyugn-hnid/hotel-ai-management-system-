@@ -75,7 +75,8 @@ function isReceptionistCustomerRole(role) {
 }
 
 function canEditCustomers() {
-  return Boolean(localStorage.getItem('token'));
+  const role = getCurrentRole();
+  return isAdminCustomerRole(role) || isReceptionistCustomerRole(role);
 }
 
 function canDeleteCustomers() {
@@ -242,11 +243,10 @@ function renderCustomers() {
 
   tbody.innerHTML = customersData.map(function (customer) {
     const statusStyle = getStatusStyle(customer.status);
-    const bookingsHtml = '<span style="font-weight: 600;">' + customer.bookings + '</span>';
 
     return '\
       <tr>\
-        <td style="padding-left: 24px;">\
+        <td class="customer-cell-profile">\
           <div style="display:flex; align-items:center; gap:12px;">\
             <div style="width:36px; height:36px; border-radius:50%; overflow:hidden; background:#f1f5f9; flex-shrink:0; border: var(--notion-whisper);">\
               <img src="' + customer.avatar + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover;"/>\
@@ -256,16 +256,11 @@ function renderCustomers() {
             </div>\
           </div>\
         </td>\
-        <td>\
+        <td class="customer-cell-contact">\
           <p style="font-size:13px; font-weight:600; color: var(--notion-blue); font-family: var(--f-mono);">' + customer.phone + '</p>\
         </td>\
-        <td>\
-          <div style="display:flex; align-items:center;">\
-            ' + bookingsHtml + '\
-          </div>\
-        </td>\
-        <td><span class="notion-pill" style="background:' + statusStyle.bg + '; color:' + statusStyle.color + ';">' + customer.status + '</span></td>\
-        ' + (canEdit ? '<td style="text-align:right; padding-right: 24px;">\
+        <td class="customer-cell-status"><span class="notion-pill" style="background:' + statusStyle.bg + '; color:' + statusStyle.color + ';">' + customer.status + '</span></td>\
+        ' + (canEdit ? '<td class="customer-cell-actions">\
           <div style="display: flex; justify-content: flex-end; gap: 8px;">\
             <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" onclick="openCustomerModal(' + customer.id + ')">\
               <span class="material-symbols-outlined" style="font-size:18px;">edit</span>\

@@ -39,6 +39,7 @@ namespace Hotel_Manager.Controllers
         public ActionResult<object> GetBooking(
             [FromQuery] string? q,
             [FromQuery] string? status,
+            [FromQuery] string? source,
             [FromQuery] string? sortBy = "createdAt",
             [FromQuery] string? sortDir = "desc",
             [FromQuery] int pageNumber = 1,
@@ -68,6 +69,37 @@ namespace Hotel_Manager.Controllers
             {
                 string statusFilter = status.Trim().ToLower();
                 query = query.Where(b => b.Status != null && b.Status.ToLower() == statusFilter);
+            }
+
+            if (!string.IsNullOrWhiteSpace(source))
+            {
+                string sourceFilter = source.Trim().ToLower();
+                if (sourceFilter == "website" || sourceFilter == "web")
+                {
+                    query = query.Where(b =>
+                        (b.BookingCode != null && b.BookingCode.ToUpper().StartsWith("BKG-WEB")) ||
+                        (b.Notes != null && (
+                            b.Notes.ToLower().Contains("website") ||
+                            b.Notes.ToLower().Contains("đặt qua web") ||
+                            b.Notes.ToLower().Contains("dat qua web")
+                        )) ||
+                        !b.AccountId.HasValue ||
+                        b.AccountId.Value <= 0
+                    );
+                }
+                else if (sourceFilter == "internal")
+                {
+                    query = query.Where(b =>
+                        b.AccountId.HasValue &&
+                        b.AccountId.Value > 0 &&
+                        (b.BookingCode == null || !b.BookingCode.ToUpper().StartsWith("BKG-WEB")) &&
+                        (b.Notes == null || (
+                            !b.Notes.ToLower().Contains("website") &&
+                            !b.Notes.ToLower().Contains("đặt qua web") &&
+                            !b.Notes.ToLower().Contains("dat qua web")
+                        ))
+                    );
+                }
             }
 
             string normalizedSortBy = (sortBy ?? "createdAt").Trim().ToLower();
@@ -109,6 +141,7 @@ namespace Hotel_Manager.Controllers
                 totalRoomAmount = b.TotalRoomAmount,
                 aiMatchScore = b.AiMatchScore,
                 notes = b.Notes,
+                source = ResolveBookingSource(b.BookingCode, b.Notes, b.AccountId),
                 createdAt = b.CreatedAt,
                 updatedAt = b.UpdatedAt
             }).ToList();
@@ -156,18 +189,44 @@ namespace Hotel_Manager.Controllers
         
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Receptionist")]
-        public async Task<IActionResult> PutBooking(int id, Booking booking)
+        public async Task<IActionResult> PutBooking(int id, UpdateBookingRequest request)
         {
-            if (id != booking.Id)
+            if (id != request.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(booking).State = EntityState.Modified;
+            var booking = await _context.Booking.FindAsync(id);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            if (request.CustomerId <= 0 || request.RoomId <= 0)
+            {
+                return BadRequest(new { message = "Khách hàng hoặc phòng không hợp lệ" });
+            }
+
+            if (request.CheckOutDate <= request.CheckInDate)
+            {
+                return BadRequest(new { message = "Ngày trả phòng phải sau ngày nhận phòng" });
+            }
+
+            booking.BookingCode = string.IsNullOrWhiteSpace(request.BookingCode) ? booking.BookingCode : request.BookingCode.Trim();
+            booking.CustomerId = request.CustomerId;
+            booking.RoomId = request.RoomId;
+            booking.AccountId = request.AccountId;
+            booking.CheckInDate = request.CheckInDate;
+            booking.CheckOutDate = request.CheckOutDate;
+            booking.Status = string.IsNullOrWhiteSpace(request.Status) ? booking.Status : request.Status.Trim();
+            booking.TotalRoomAmount = request.TotalRoomAmount;
+            booking.Notes = request.Notes;
+            booking.UpdatedAt = DateTime.UtcNow;
 
             try
             {
                 await _context.SaveChangesAsync();
+                await SyncRoomStatusForBookingAsync(booking.RoomId, booking.Status);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -273,7 +332,7 @@ namespace Hotel_Manager.Controllers
                 bookingCode = booking.BookingCode,
                 status = booking.Status,
                 createdAt = booking.CreatedAt,
-                source = "website"
+                source = ResolveBookingSource(booking.BookingCode, booking.Notes, booking.AccountId)
             });
 
             var createdBooking = await _context.Booking
@@ -430,6 +489,20 @@ namespace Hotel_Manager.Controllers
             public int? AccountId { get; set; }
         }
 
+        public class UpdateBookingRequest
+        {
+            public int Id { get; set; }
+            public string BookingCode { get; set; } = string.Empty;
+            public int CustomerId { get; set; }
+            public int RoomId { get; set; }
+            public int? AccountId { get; set; }
+            public DateTime CheckInDate { get; set; }
+            public DateTime CheckOutDate { get; set; }
+            public string? Status { get; set; }
+            public decimal TotalRoomAmount { get; set; }
+            public string? Notes { get; set; }
+        }
+
         public class CreateBookingRequest
         {
             public string BookingCode { get; set; } = string.Empty;
@@ -463,9 +536,26 @@ namespace Hotel_Manager.Controllers
                 totalRoomAmount = b.TotalRoomAmount,
                 aiMatchScore = b.AiMatchScore,
                 notes = b.Notes,
+                source = ResolveBookingSource(b.BookingCode, b.Notes, b.AccountId),
                 createdAt = b.CreatedAt,
                 updatedAt = b.UpdatedAt
             };
+        }
+
+        private static string ResolveBookingSource(string? bookingCode, string? notes, int? accountId)
+        {
+            var normalizedCode = (bookingCode ?? string.Empty).Trim().ToUpperInvariant();
+            var normalizedNotes = (notes ?? string.Empty).Trim().ToLowerInvariant();
+
+            if (normalizedCode.StartsWith("BKG-WEB", StringComparison.OrdinalIgnoreCase)
+                || normalizedNotes.Contains("website")
+                || normalizedNotes.Contains("đặt qua web")
+                || normalizedNotes.Contains("dat qua web"))
+            {
+                return "website";
+            }
+
+            return accountId.HasValue && accountId.Value > 0 ? "internal" : "website";
         }
 
     }

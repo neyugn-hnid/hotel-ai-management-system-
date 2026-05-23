@@ -33,6 +33,10 @@ public class Customer
     [Column("status")]
     public string? Status { get; set; }
 
+    [MaxLength(50)]
+    [Column("loyalty_tier")]
+    public string? LoyaltyTier { get; set; }
+
     [Column("ai_preferences")]
     public string? AiPreferences { get; set; }
 

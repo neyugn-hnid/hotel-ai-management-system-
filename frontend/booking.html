@@ -24,7 +24,7 @@
           <a href="room.html" class="sidebar-item"><span class="material-symbols-outlined">bed</span><span>Phòng nghỉ</span></a>
           <a href="customer.html" class="sidebar-item"><span class="material-symbols-outlined">group</span><span>Khách hàng</span></a>
 
-          <a href="booking.html" class="sidebar-item active"><span class="material-symbols-outlined">auto_awesome</span><span>Đặt phòng</span></a>
+          <a href="booking.html" class="sidebar-item active" id="sidebarBookingLink"><span class="material-symbols-outlined">auto_awesome</span><span>Đặt phòng</span><span id="sidebarBookingBadge" style="display:none; margin-left:auto; min-width:22px; height:22px; padding:0 6px; border-radius:999px; background:#dc2626; color:#fff; font-size:12px; font-weight:700; align-items:center; justify-content:center;">0</span></a>
           <a href="invoice.html" class="sidebar-item"><span class="material-symbols-outlined">receipt_long</span><span>Hóa đơn</span></a>
           <a href="service.html" class="sidebar-item"><span class="material-symbols-outlined">concierge</span><span>Dịch vụ</span></a>
           <a href="account.html" class="sidebar-item"><span class="material-symbols-outlined">manage_accounts</span><span>Tài khoản</span></a>
@@ -123,11 +123,12 @@
             <button id="btnRefreshPending" class="btn-luxe-sec booking-toolbar__btn">Làm mới</button>
          </div>
 
-           <table class="notion-table">
+           <table class="notion-table booking-data-table">
             <thead>
                <tr class="admin-table-head-row">
                   <th>Mã phiếu</th>
                   <th>Khách hàng</th>
+                  <th>Nguồn</th>
                   <th>Loại phòng yêu cầu</th>
                   <th>Thời gian đặt</th>
                   <th>Trạng thái</th>
@@ -170,21 +171,22 @@
             <button id="btnRefreshConfirmed" class="btn-luxe-sec booking-toolbar__btn">Làm mới</button>
          </div>
 
-         <table class="notion-table">
+         <table class="notion-table booking-data-table booking-data-table--confirmed">
             <thead>
                <tr class="admin-table-head-row">
                   <th>Mã phiếu</th>
                   <th>Khách hàng</th>
+                  <th>Nguồn</th>
                   <th>Hạng phòng</th>
                   <th>Thời gian xử lý</th>
                   <th>Thanh toán</th>
-                  <th>Trạng thái lưu trú</th>
+                  <th>Trạng thái</th>
                   <th class="admin-table-head-cell--right-32">Thao tác</th>
                </tr>
             </thead>
             <tbody id="confirmedBookingsBody">
                <tr>
-                  <td colspan="7" class="booking-empty-state">Chưa có giao dịch nào được xác nhận trong phiên làm việc này.</td>
+                  <td colspan="8" class="booking-empty-state">Chưa có giao dịch nào được xác nhận trong phiên làm việc này.</td>
                </tr>
             </tbody>
          </table>
@@ -281,10 +283,10 @@
   </div>
 
   <div class="modal-overlay" id="bookingInvoiceModal">
-     <div class="notion-modal">
+     <div class="notion-modal booking-invoice-modal">
         <div class="booking-modal-header booking-modal-header--lg">
            <h2 id="bookingInvoiceModalTitle" class="admin-modal-title">Tạo hóa đơn từ booking</h2>
-           <span class="material-symbols-outlined admin-modal-close" onclick="closeBookingInvoiceModal()">close</span>
+           <button type="button" class="booking-close-btn booking-invoice-close-btn" onclick="closeBookingInvoiceModal()"><span class="material-symbols-outlined">close</span></button>
         </div>
 
         <form id="bookingInvoiceForm">
