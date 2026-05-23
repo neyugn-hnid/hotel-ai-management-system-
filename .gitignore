@@ -1,2 +1,12 @@
 .vs
 ./Migrations
+**/.vs/
+**/bin/
+**/obj/
+backend/_verify_build*/
+backend/Hotel_Manager/backend/_verify_build*/
+backend/_temp_build/
+backend/_verify_build_*/
+backend/*.log
+backend/*.err.log
+backend/*.out.log
