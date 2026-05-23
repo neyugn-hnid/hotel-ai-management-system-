@@ -213,52 +213,52 @@ function renderAccounts() {
 
     let avatarHtml = '';
     if (acc.avatar) {
-      avatarHtml = '<img src="' + acc.avatar + '" alt="Avatar" style="width:2.5rem; height:2.5rem; border-radius:50%; object-fit:cover;"/>';
+      avatarHtml = '<img src="' + acc.avatar + '" alt="Avatar" class="account-avatar-image"/>';
     } else {
-      avatarHtml = '<div class="avatar-circle" style="background:' + acc.color + ';">' + getInitials(acc.name) + '</div>';
+      avatarHtml = '<div class="avatar-circle account-avatar-fallback" style="background:' + acc.color + ';">' + getInitials(acc.name) + '</div>';
     }
 
     let roleBadge = '';
     const roleLabel = translateRole(acc.role);
     const isAdmin = String(acc.role || '').toLowerCase() === 'admin';
     if (isAdmin) {
-      roleBadge = '<span style="background:#eff6ff; color:#1e40af; padding:.25rem .75rem; border-radius:.5rem; font-size:.75rem; font-weight:700;">' + encodeHtmlText(roleLabel) + '</span>';
+      roleBadge = '<span class="account-role-badge account-role-badge--admin">' + encodeHtmlText(roleLabel) + '</span>';
     } else {
-      roleBadge = '<span style="background:#f1f5f9; color:#334155; padding:.25rem .75rem; border-radius:.5rem; font-size:.75rem; font-weight:700;">' + encodeHtmlText(roleLabel) + '</span>';
+      roleBadge = '<span class="account-role-badge account-role-badge--default">' + encodeHtmlText(roleLabel) + '</span>';
     }
 
     let statusBadge = '';
     if (acc.status === 'Hoạt động') {
-      statusBadge = '<span style="background:#dcfce7; color:#166534; padding:.25rem .75rem; border-radius:9999px; font-size:.75rem; font-weight:700; display:inline-flex; align-items:center; gap:.25rem;"><span class="dot" style="background:#166534;"></span> Hoạt động</span>';
+      statusBadge = '<span class="account-status-badge account-status-badge--active"><span class="dot account-status-badge__dot account-status-badge__dot--active"></span> Hoạt động</span>';
     } else {
-      statusBadge = '<span style="background:#fee2e2; color:#991b1b; padding:.25rem .75rem; border-radius:9999px; font-size:.75rem; font-weight:700; display:inline-flex; align-items:center; gap:.25rem;"><span class="dot" style="background:#991b1b;"></span> Khóa</span>';
+      statusBadge = '<span class="account-status-badge account-status-badge--locked"><span class="dot account-status-badge__dot account-status-badge__dot--locked"></span> Khóa</span>';
     }
 
-    let actionsHtml = '<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" title="Chỉnh sửa" onclick="editAccount(\'' + acc.id + '\')"><span class="material-symbols-outlined" style="font-size:18px; color:var(--dash-muted);">edit</span></button>';
+    let actionsHtml = '<button class="btn-notion-sec account-action-btn" title="Chỉnh sửa" onclick="editAccount(\'' + acc.id + '\')"><span class="material-symbols-outlined account-action-btn__icon account-action-btn__icon--edit">edit</span></button>';
     if (!isAdmin) {
       if (acc.status === 'Hoạt động') {
-        actionsHtml += '<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" title="Khóa tài khoản" onclick="toggleStatus(\'' + acc.id + '\')"><span class="material-symbols-outlined" style="font-size:18px;">lock</span></button>';
+        actionsHtml += '<button class="btn-notion-sec account-action-btn account-action-btn--danger" title="Khóa tài khoản" onclick="toggleStatus(\'' + acc.id + '\')"><span class="material-symbols-outlined account-action-btn__icon account-action-btn__icon--danger">lock</span></button>';
       } else {
-        actionsHtml += '<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #16a34a;" title="Mở khóa" onclick="toggleStatus(\'' + acc.id + '\')"><span class="material-symbols-outlined" style="font-size:18px; color:#16a34a;">lock_open</span></button>';
+        actionsHtml += '<button class="btn-notion-sec account-action-btn account-action-btn--success" title="Mở khóa" onclick="toggleStatus(\'' + acc.id + '\')"><span class="material-symbols-outlined account-action-btn__icon account-action-btn__icon--success">lock_open</span></button>';
       }
-      actionsHtml += '<button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" title="Xóa tài khoản" onclick="openDeleteModal(\'' + acc.id + '\')"><span class="material-symbols-outlined" style="font-size:18px; color:#ef4444;">delete</span></button>';
+      actionsHtml += '<button class="btn-notion-sec account-action-btn account-action-btn--danger" title="Xóa tài khoản" onclick="openDeleteModal(\'' + acc.id + '\')"><span class="material-symbols-outlined account-action-btn__icon account-action-btn__icon--danger">delete</span></button>';
     }
 
     tr.innerHTML = '\
-      <td style="padding:1rem 1.5rem;">\
-        <div style="display:flex; align-items:center; gap:1rem;">\
+      <td class="account-cell account-cell--profile">\
+        <div class="account-profile-cell">\
           ' + avatarHtml + '\
-          <div>\
-            <p style="font-weight:700; color:var(--color-on-surface);">' + encodeHtmlText(acc.name) + '</p>\
-            <p style="font-size:.875rem; color:var(--color-on-surface-variant); font-weight:500;">' + encodeHtmlText(acc.email) + '</p>\
+          <div class="account-profile-copy">\
+            <p class="account-profile-name">' + encodeHtmlText(acc.name) + '</p>\
+            <p class="account-profile-email">' + encodeHtmlText(acc.email) + '</p>\
           </div>\
         </div>\
       </td>\
-      <td style="padding:1rem 1.5rem;">' + roleBadge + '</td>\
-      <td style="padding:1rem 1.5rem;">' + statusBadge + '</td>\
-      <td style="padding:1rem 1.5rem; font-size:.875rem; font-weight:500; color:var(--color-on-surface-variant);">' + encodeHtmlText(acc.lastLogin) + '</td>\
-      <td style="padding:1rem 1.5rem; text-align:right;">\
-        <div style="display:flex; gap:4px; justify-content:flex-end;">\
+      <td class="account-cell account-cell--role">' + roleBadge + '</td>\
+      <td class="account-cell account-cell--status">' + statusBadge + '</td>\
+      <td class="account-cell account-cell--last-login">' + encodeHtmlText(acc.lastLogin) + '</td>\
+      <td class="account-cell account-cell--actions">\
+        <div class="account-action-group">\
           ' + actionsHtml + '\
         </div>\
       </td>';

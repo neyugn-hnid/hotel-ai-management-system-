@@ -106,6 +106,116 @@
     }
     .notion-table tr:hover { background: var(--dash-bg); }
 
+    .service-data-table {
+      table-layout: fixed;
+    }
+
+    .service-data-table th,
+    .service-data-table td {
+      vertical-align: middle;
+    }
+
+    .service-data-table th:first-child,
+    .service-data-table td:first-child {
+      padding-left: 24px;
+    }
+
+    .service-data-table th:last-child,
+    .service-data-table td:last-child {
+      padding-right: 24px;
+    }
+
+    .service-data-table th:nth-child(1),
+    .service-data-table td:nth-child(1) {
+      width: 29%;
+    }
+
+    .service-data-table th:nth-child(2),
+    .service-data-table td:nth-child(2) {
+      width: 24%;
+    }
+
+    .service-data-table th:nth-child(3),
+    .service-data-table td:nth-child(3) {
+      width: 18%;
+    }
+
+    .service-data-table th:nth-child(4),
+    .service-data-table td:nth-child(4) {
+      width: 17%;
+    }
+
+    .service-data-table th:nth-child(5),
+    .service-data-table td:nth-child(5) {
+      width: 12%;
+    }
+
+    #serviceActionsHeader {
+      text-align: right;
+    }
+
+    .service-cell-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .service-cell-title {
+      margin: 0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .service-cell-category {
+      margin: 0;
+      font-size: 12px;
+      color: var(--notion-gray-500);
+    }
+
+    .service-cell-description {
+      margin: 0;
+      font-size: 13px;
+      color: var(--notion-gray-500);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .service-cell-price-value {
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .service-cell-status {
+      white-space: nowrap;
+    }
+
+    .service-cell-actions {
+      text-align: right;
+    }
+
+    .service-action-group {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .service-action-btn {
+      min-width: 32px;
+      padding: 4px;
+      justify-content: center;
+    }
+
+    .service-action-btn--delete {
+      color: #ef4444;
+    }
+
+    .service-action-icon {
+      font-size: 18px;
+    }
+
     .filter-bar {
       display: flex;
       gap: 12px;

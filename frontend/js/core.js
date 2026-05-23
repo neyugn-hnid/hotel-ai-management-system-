@@ -15,6 +15,27 @@
   var adminWebsiteBookingAlertTimer = null;
   var adminWebsiteBookingLastCount = null;
 
+  function markMaterialIconsReady() {
+    if (!document || !document.documentElement) return;
+    document.documentElement.classList.add("material-icons-ready");
+  }
+
+  function initMaterialIconFont() {
+    if (!document || !document.documentElement) return;
+
+    if (!("fonts" in document) || !document.fonts || typeof document.fonts.load !== "function") {
+      markMaterialIconsReady();
+      return;
+    }
+
+    Promise.race([
+      document.fonts.load("24px 'Material Symbols Outlined'"),
+      new Promise(function(resolve) {
+        setTimeout(resolve, 2500);
+      })
+    ]).finally(markMaterialIconsReady);
+  }
+
   function qs(selector, root) {
     return (root || document).querySelector(selector);
   }
@@ -221,6 +242,8 @@
       clearFieldError(input);
     }, true);
   }
+
+  initMaterialIconFont();
 
   var Validation = {
     clearFieldError: clearFieldError,

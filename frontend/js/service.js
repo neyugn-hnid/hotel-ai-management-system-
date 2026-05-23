@@ -2,6 +2,18 @@ let servicesData = [];
 let currentEditId = null;
 let serviceToDelete = null;
 
+const DEFAULT_SERVICE_CATEGORIES = [
+  'Thư giãn & Làm đẹp',
+  'Ẩm thực',
+  'Di chuyển',
+  'Tiện ích & Khác'
+];
+
+const DEFAULT_SERVICE_STATUSES = [
+  'Hoạt động',
+  'Tạm ngưng'
+];
+
 const SERVICES_API_URL = 'https://localhost:7082/api/Services';
 
 const queryState = {
@@ -185,28 +197,28 @@ function renderServices() {
 
     return '\
       <tr>\
-        <td style="padding-left: 24px;">\
-          <div style="display:flex; align-items:center; gap:12px;">\
+        <td class="service-cell-name">\
+          <div class="service-cell-title-wrap">\
             <div>\
-               <p style="font-weight:600; font-size: 14px;">' + service.name + '</p>\
-               <p style="font-size: 12px; color: var(--notion-gray-500);">' + (service.category || 'Khác') + '</p>\
+               <p class="service-cell-title">' + service.name + '</p>\
+               <p class="service-cell-category">' + (service.category || 'Khác') + '</p>\
             </div>\
           </div>\
         </td>\
-        <td>\
-          <p style="font-size:13px; color: var(--notion-gray-500); max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + service.description + '</p>\
+        <td class="service-cell-desc">\
+          <p class="service-cell-description">' + service.description + '</p>\
         </td>\
-        <td>\
-          <span style="font-weight: 600; font-size: 14px;">' + priceFormatted + '</span>\
+        <td class="service-cell-price">\
+          <span class="service-cell-price-value">' + priceFormatted + '</span>\
         </td>\
-        <td><span class="notion-pill" style="background:' + statusStyle.bg + '; color:' + statusStyle.color + ';">' + service.status + '</span></td>\
-        ' + (canManage ? '<td style="text-align:right; padding-right: 24px;">\
-          <div style="display: flex; justify-content: flex-end; gap: 8px;">\
-            <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center;" onclick="openServiceModal(' + service.id + ')">\
-              <span class="material-symbols-outlined" style="font-size:18px;">edit</span>\
+        <td class="service-cell-status"><span class="notion-pill" style="background:' + statusStyle.bg + '; color:' + statusStyle.color + ';">' + service.status + '</span></td>\
+        ' + (canManage ? '<td class="service-cell-actions">\
+          <div class="service-action-group">\
+            <button class="btn-notion-sec service-action-btn" onclick="openServiceModal(' + service.id + ')">\
+              <span class="material-symbols-outlined service-action-icon">edit</span>\
             </button>\
-            <button class="btn-notion-sec" style="padding: 4px; min-width: 32px; justify-content: center; color: #ef4444;" onclick="confirmDeleteService(' + service.id + ')">\
-              <span class="material-symbols-outlined" style="font-size:18px;">delete</span>\
+            <button class="btn-notion-sec service-action-btn service-action-btn--delete" onclick="confirmDeleteService(' + service.id + ')">\
+              <span class="material-symbols-outlined service-action-icon">delete</span>\
             </button>\
           </div>\
         </td>' : '') + '\
@@ -488,13 +500,27 @@ async function loadLookups() {
   if (token) headers['Authorization'] = 'Bearer ' + token;
   try {
     const res = await fetch(LOOKUPS_API, { headers });
-    if (!res.ok) return;
+    if (!res.ok) {
+      throw new Error('Không thể tải lookups');
+    }
     const data = await res.json();
-    _populateSelect('filterCategory', data.serviceCategories, 'Tất cả danh mục', '');
-    _populateSelect('filterServiceStatus', data.serviceStatuses, 'Tất cả trạng thái', '');
-    _populateSelect('svcCategory', data.serviceCategories);
-    _populateSelect('svcStatus', data.serviceStatuses);
-  } catch (e) {}
+    const categories = Array.isArray(data.serviceCategories) && data.serviceCategories.length
+      ? data.serviceCategories
+      : DEFAULT_SERVICE_CATEGORIES;
+    const statuses = Array.isArray(data.serviceStatuses) && data.serviceStatuses.length
+      ? data.serviceStatuses
+      : DEFAULT_SERVICE_STATUSES;
+
+    _populateSelect('filterCategory', categories, 'Tất cả danh mục', '');
+    _populateSelect('filterServiceStatus', statuses, 'Tất cả trạng thái', '');
+    _populateSelect('svcCategory', categories);
+    _populateSelect('svcStatus', statuses);
+  } catch (e) {
+    _populateSelect('filterCategory', DEFAULT_SERVICE_CATEGORIES, 'Tất cả danh mục', '');
+    _populateSelect('filterServiceStatus', DEFAULT_SERVICE_STATUSES, 'Tất cả trạng thái', '');
+    _populateSelect('svcCategory', DEFAULT_SERVICE_CATEGORIES);
+    _populateSelect('svcStatus', DEFAULT_SERVICE_STATUSES);
+  }
 }
 
 function _populateSelect(elId, items, defaultLabel, defaultValue) {

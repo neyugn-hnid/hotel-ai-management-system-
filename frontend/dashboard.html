@@ -115,11 +115,18 @@
             <span class="stat-label">Live Feed</span>
           </div>
           
-          <div class="guest-list">
+          <div class="guest-list" id="recentActivityList">
             
           </div>
           
-          <button class="gold-border-btn dashboard-full-btn" onclick="window.location.reload()">Tải thêm hoạt động</button>
+          <div class="admin-table-footer admin-table-footer--md dashboard-activity-footer">
+            <p class="admin-table-summary">Hiển thị <span id="recentActivityRange">0-0</span> / <span id="recentActivityTotal">0</span> hoạt động</p>
+            <div class="admin-table-actions">
+              <button id="recentActivityPrev" class="btn-luxe-sec admin-table-pager-btn">Trang trước</button>
+              <span id="recentActivityPageInfo" class="admin-table-page-info">Trang 1/1</span>
+              <button id="recentActivityNext" class="btn-luxe-sec admin-table-pager-btn">Trang sau</button>
+            </div>
+          </div>
         </div>
 
         <div class="bento-card card-row-2">

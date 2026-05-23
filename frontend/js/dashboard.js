@@ -2,6 +2,9 @@
   "use strict";
 
   const DASHBOARD_API = "https://localhost:7082/api/Dashboard/summary";
+  const RECENT_ACTIVITY_PAGE_SIZE = 6;
+  let recentActivityItems = [];
+  let recentActivityPage = 1;
 
   
   function formatCurrency(amount) {
@@ -154,13 +157,27 @@
   
   function renderRecentActivity(data) {
     if (!data || !data.recentActivities) return;
+    recentActivityItems = Array.isArray(data.recentActivities) ? data.recentActivities.slice() : [];
+    recentActivityPage = 1;
+    renderRecentActivityPage();
+  }
 
-    const container = document.querySelector(".guest-list");
+  function renderRecentActivityPage() {
+    const container = document.getElementById("recentActivityList") || document.querySelector(".guest-list");
     if (!container) return;
 
     container.innerHTML = "";
 
-    data.recentActivities.forEach(function (item) {
+    const totalItems = recentActivityItems.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / RECENT_ACTIVITY_PAGE_SIZE));
+    if (recentActivityPage > totalPages) {
+      recentActivityPage = totalPages;
+    }
+
+    const startIndex = (recentActivityPage - 1) * RECENT_ACTIVITY_PAGE_SIZE;
+    const pageItems = recentActivityItems.slice(startIndex, startIndex + RECENT_ACTIVITY_PAGE_SIZE);
+
+    pageItems.forEach(function (item) {
       const initials = item.guestInitials || "?";
       const bgColor = getGuestAvatarStyle(item.guestName);
       const tag = getStatusTag(item.status);
@@ -174,7 +191,7 @@
         ';">' +
         initials +
         "</div>" +
-        "<div>" +
+        '<div class="guest-info__copy">' +
         '<div class="guest-name">' +
         item.guestName +
         "</div>" +
@@ -185,24 +202,40 @@
         " đêm</div>" +
         "</div>" +
         "</div>" +
-        '<span class="' +
+        '<div class="guest-status"><span class="' +
         (tag.cls || "tag") +
         '"' +
         (tag.style ? ' style="' + tag.style + '"' : "") +
         ">" +
         tag.label +
-        "</span>" +
-        '<div style="text-align:right;">' +
-        '<div style="font-weight:700;font-size:14px;">' +
+        "</span></div>" +
+        '<div class="guest-amount">' +
+        '<div class="guest-amount__value">' +
         formatCompactCurrency(item.amount) +
         "</div>" +
-        '<div class="guest-meta">' +
+        '<div class="guest-amount__time">' +
         item.timeAgo +
         "</div>" +
         "</div>";
 
       container.appendChild(row);
     });
+
+    const rangeEl = document.getElementById("recentActivityRange");
+    const totalEl = document.getElementById("recentActivityTotal");
+    const pageInfoEl = document.getElementById("recentActivityPageInfo");
+    const prevBtn = document.getElementById("recentActivityPrev");
+    const nextBtn = document.getElementById("recentActivityNext");
+
+    if (rangeEl) {
+      const from = totalItems === 0 ? 0 : startIndex + 1;
+      const to = totalItems === 0 ? 0 : startIndex + pageItems.length;
+      rangeEl.textContent = from + "-" + to;
+    }
+    if (totalEl) totalEl.textContent = String(totalItems);
+    if (pageInfoEl) pageInfoEl.textContent = "Trang " + recentActivityPage + "/" + totalPages;
+    if (prevBtn) prevBtn.disabled = recentActivityPage <= 1;
+    if (nextBtn) nextBtn.disabled = recentActivityPage >= totalPages;
   }
 
   
@@ -554,8 +587,31 @@
     initCharts(data);
   }
 
+  function initRecentActivityPagination() {
+    const prevBtn = document.getElementById("recentActivityPrev");
+    const nextBtn = document.getElementById("recentActivityNext");
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", function () {
+        if (recentActivityPage <= 1) return;
+        recentActivityPage -= 1;
+        renderRecentActivityPage();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", function () {
+        const totalPages = Math.max(1, Math.ceil(recentActivityItems.length / RECENT_ACTIVITY_PAGE_SIZE));
+        if (recentActivityPage >= totalPages) return;
+        recentActivityPage += 1;
+        renderRecentActivityPage();
+      });
+    }
+  }
+
   
   document.addEventListener("DOMContentLoaded", function () {
+    initRecentActivityPagination();
     const init = function () {
       initDashboard().catch(function (err) {
 
